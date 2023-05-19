@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33712.159
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MqttServices.Core", "MqttServices.Core\MqttServices.Core.csproj", "{5C90A851-F50E-4FFF-8D68-0614E755868F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{5B72729E-E95A-4F4B-ACC4-663DA2DDD591}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleWorkerService_BrokerAndClient", "Samples\SampleWorkerService_BrokerAndClient\SampleWorkerService_BrokerAndClient.csproj", "{5C0D8D39-D325-4514-9035-36EA52DC94F1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5C90A851-F50E-4FFF-8D68-0614E755868F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C90A851-F50E-4FFF-8D68-0614E755868F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C90A851-F50E-4FFF-8D68-0614E755868F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C90A851-F50E-4FFF-8D68-0614E755868F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C0D8D39-D325-4514-9035-36EA52DC94F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C0D8D39-D325-4514-9035-36EA52DC94F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C0D8D39-D325-4514-9035-36EA52DC94F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C0D8D39-D325-4514-9035-36EA52DC94F1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5C0D8D39-D325-4514-9035-36EA52DC94F1} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0EB792C7-CF30-45FF-8D22-10701396F39F}
+	EndGlobalSection
+EndGlobal
