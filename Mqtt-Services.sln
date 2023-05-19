@@ -7,7 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MqttServices.Core", "MqttSe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{5B72729E-E95A-4F4B-ACC4-663DA2DDD591}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleWorkerService_BrokerAndClient", "Samples\SampleWorkerService_BrokerAndClient\SampleWorkerService_BrokerAndClient.csproj", "{5C0D8D39-D325-4514-9035-36EA52DC94F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleWorkerService_BrokerAndClient", "Samples\SampleWorkerService_BrokerAndClient\SampleWorkerService_BrokerAndClient.csproj", "{5C0D8D39-D325-4514-9035-36EA52DC94F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project", "Project", "{5CA71CAD-E23E-4CB0-8E01-709166B1AFC5}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
