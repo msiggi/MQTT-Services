@@ -53,12 +53,12 @@ steps:
     nuGetFeedType: 'external'
     publishFeedCredentials: 'Nuget.org'
 
-- task: NuGetCommand@2
-  displayName: "nuget push Artifactory"
-  inputs:
-    command: 'push'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
-    nuGetFeedType: 'internal'
-    publishVstsFeed: '$(AzurApiKey)'
+#- task: NuGetCommand@2
+#  displayName: "nuget push Artifactory"
+#  inputs:
+#    command: 'push'
+#    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+#    nuGetFeedType: 'internal'
+#    publishVstsFeed: '$(AzurApiKey)'
 
  
