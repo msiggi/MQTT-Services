@@ -13,8 +13,9 @@
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageId>MQTT-Services</PackageId>
 		<Title>MQTT-Services</Title>
-		<Version>1.0.2</Version>
+		<Version>1.0.4</Version>
 		<Product>MQTT-Services</Product>
+		<AssemblyName>MQTT-Services</AssemblyName>
 	</PropertyGroup>
 
 

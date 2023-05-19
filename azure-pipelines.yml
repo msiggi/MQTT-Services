@@ -39,7 +39,6 @@ steps:
   displayName: Pack
   inputs:
     command: 'pack'
-    packageName: 'MQTT-Services'
     packagesToPack: '**/MqttServices.Core.csproj'
     versioningScheme: 'off'
     includeReferencedProjects: true
