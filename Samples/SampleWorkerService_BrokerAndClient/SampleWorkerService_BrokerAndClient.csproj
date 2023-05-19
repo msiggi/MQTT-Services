@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-SampleWorkerService_BrokerAndClient-4dfa4ce3-7e46-4a1a-8ba0-b5898102f7fc</UserSecretsId>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
