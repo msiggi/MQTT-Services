@@ -11,6 +11,10 @@
 		<PackageTags>MQTT</PackageTags>
 		<Authors>Marcel Siegel</Authors>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageId>MQTT-Services</PackageId>
+		<Title>MQTT-Services</Title>
+		<Version>1.0.1</Version>
+		<Product>MQTT-Services</Product>
 	</PropertyGroup>
 
 
