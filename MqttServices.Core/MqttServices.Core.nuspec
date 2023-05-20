@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+	<metadata>
+		<id>MQTT-Services</id>
+		<version>$Version$</version>
+		<authors>$Authors$</authors>
+		<projectUrl>$PackageProjectUrl$</projectUrl>
+		<description>$Description$</description>
+		<repository url="$RepositoryUrl$" />
+	</metadata>
+</package>
