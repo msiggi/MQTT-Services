@@ -12,8 +12,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project", "Project", "{5CA71CAD-E23E-4CB0-8E01-709166B1AFC5}"
 	ProjectSection(SolutionItems) = preProject
 		azure-pipelines.yml = azure-pipelines.yml
+		MqttServices.Core\MqttServices.Core.nuspec = MqttServices.Core\MqttServices.Core.nuspec
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleWorkerService_Client", "Samples\SampleWorkerService_Client\SampleWorkerService_Client.csproj", "{8A246C58-441F-4ED0-87BB-A1114C3B9F26}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,12 +32,17 @@ Global
 		{5C0D8D39-D325-4514-9035-36EA52DC94F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C0D8D39-D325-4514-9035-36EA52DC94F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C0D8D39-D325-4514-9035-36EA52DC94F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A246C58-441F-4ED0-87BB-A1114C3B9F26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A246C58-441F-4ED0-87BB-A1114C3B9F26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A246C58-441F-4ED0-87BB-A1114C3B9F26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A246C58-441F-4ED0-87BB-A1114C3B9F26}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{5C0D8D39-D325-4514-9035-36EA52DC94F1} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
+		{8A246C58-441F-4ED0-87BB-A1114C3B9F26} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0EB792C7-CF30-45FF-8D22-10701396F39F}
