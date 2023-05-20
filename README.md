@@ -5,6 +5,12 @@ using https://github.com/dotnet/MQTTnet
 
 ## Usage
 
+install Nuget-Package https://www.nuget.org/packages/MQTT-Services
+
+```
+dotnet add package MQTT-Services --version 1.0.4
+```
+
 Add in Startup.cs/Program.cs:
 
 ```csharp
