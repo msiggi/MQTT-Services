@@ -52,5 +52,6 @@ using following configuration for Broker in appsettings.json:
 ```
 
 
+For subscribe, receive and publish messages see Sample-Project *SampleWorkerService_BrokerAndClient*
 
 
