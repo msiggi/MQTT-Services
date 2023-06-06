@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 using MqttServices.Core.Broker;
 using MqttServices.Core.Client;
 
-namespace MqttServices.Core.Common;
+//namespace MqttServices.Core.Common;
 
 public static class ServiceCollectionsExtensions
 {
