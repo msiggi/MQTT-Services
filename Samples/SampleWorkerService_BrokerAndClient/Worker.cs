@@ -11,6 +11,7 @@ namespace SampleWorkerService_BrokerAndClient
         private readonly ILogger<Worker> _logger;
         private readonly MqttBrokerService mqttBrokerService;
         private readonly MqttClientService mqttClientService;
+        private int counter = 0;
 
         public Worker(ILogger<Worker> logger, MqttBrokerService mqttBrokerService, MqttClientService mqttClientService)
         {
@@ -32,9 +33,9 @@ namespace SampleWorkerService_BrokerAndClient
             _logger.LogInformation($"Receiving {e.ApplicationMessage.Topic}");
 
             var json = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
-            string payload = JsonSerializer.Deserialize<string>(json);
+            TestPayload payload = JsonSerializer.Deserialize<TestPayload>(json);
 
-            _logger.LogInformation($"Received Payload: {payload}");
+            _logger.LogInformation($"Received Payload: {payload.Name} {payload.DateTime} {payload.Number}");
 
         }
 
@@ -42,8 +43,14 @@ namespace SampleWorkerService_BrokerAndClient
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var testPayload = $"Test-Payload {DateTimeOffset.Now}";
-                _logger.LogInformation($"Sending {testPayload}");
+                counter++;
+                TestPayload testPayload = new TestPayload
+                {
+                    Name = "test",
+                    DateTime = DateTime.Now,
+                    Number = counter
+                };
+                _logger.LogInformation($"Sending testPayload");
                 await mqttClientService.PublishMessage("test/develop", testPayload);
                 await Task.Delay(1000, stoppingToken);
             }

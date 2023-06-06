@@ -6,6 +6,7 @@ using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Json;
 
 namespace MqttServices.Core.Client;
 
@@ -66,7 +67,7 @@ public class MqttClientService : IDisposable
         {
             var applicationMessage = new MqttApplicationMessageBuilder()
                    .WithTopic(topic)
-                   .WithPayload(payload.ToString())
+                   .WithPayload(JsonSerializer.Serialize(payload))
                    .Build();
 
             var result = await mqttClient.InternalClient.PublishAsync(applicationMessage, CancellationToken.None);
