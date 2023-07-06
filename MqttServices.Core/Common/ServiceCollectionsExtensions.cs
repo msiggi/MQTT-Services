@@ -13,10 +13,24 @@ public static class ServiceCollectionsExtensions
         if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
 
         services.Configure(setupAction);
-        // services.AddSingleton<IHostedService, MqttBrokerService>();
         services.AddSingleton<MqttBrokerService>();
-        //services.AddSingleton<IHostedService>(s => s.GetService<MqttBrokerService>());
 
+        return services;
+    }
+
+    public static IServiceCollection AddMqttBrokerService(this IServiceCollection services, MqttBrokerSettings mqttBrokerSettings)
+    {
+        if (services == null) throw new ArgumentNullException(nameof(services));
+
+        services.AddOptions<MqttBrokerSettings>().Configure(options =>
+        {
+            options.EnableBroker = mqttBrokerSettings.EnableBroker;
+            options.Users = mqttBrokerSettings.Users;
+            options.DelayInMilliSeconds = mqttBrokerSettings.DelayInMilliSeconds;
+            options.Port = mqttBrokerSettings.Port;
+            options.TlsPort = mqttBrokerSettings.TlsPort;
+        });
+        services.AddSingleton<MqttBrokerService>();
 
         return services;
     }
