@@ -1,19 +1,19 @@
 using MQTTnet.Client;
 using MqttServices.Core.Broker;
 using MqttServices.Core.Client;
-using System.Text.Json;
 using System.Text;
+using System.Text.Json;
 
 namespace SampleWorkerService_BrokerAndClient
 {
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private readonly MqttBrokerService mqttBrokerService;
-        private readonly MqttClientService mqttClientService;
+        private readonly IMqttBrokerService mqttBrokerService;
+        private readonly IMqttClientService mqttClientService;
         private int counter = 0;
 
-        public Worker(ILogger<Worker> logger, MqttBrokerService mqttBrokerService, MqttClientService mqttClientService)
+        public Worker(ILogger<Worker> logger, IMqttBrokerService mqttBrokerService, IMqttClientService mqttClientService)
         {
             _logger = logger;
             this.mqttBrokerService = mqttBrokerService;
@@ -32,7 +32,7 @@ namespace SampleWorkerService_BrokerAndClient
         {
             _logger.LogInformation($"Receiving {e.ApplicationMessage.Topic}");
 
-            var json = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+            var json = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
             TestPayload payload = JsonSerializer.Deserialize<TestPayload>(json);
 
             _logger.LogInformation($"Received Payload: {payload.Name} {payload.DateTime} {payload.Number}");
