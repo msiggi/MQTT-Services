@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using MqttServices.Core.Broker;
 using MqttServices.Core.Client;
 
@@ -13,7 +12,7 @@ public static class ServiceCollectionsExtensions
         if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
 
         services.Configure(setupAction);
-        services.AddSingleton<MqttBrokerService>();
+        services.AddSingleton<IMqttBrokerService, MqttBrokerService>();
 
         return services;
     }
@@ -30,7 +29,7 @@ public static class ServiceCollectionsExtensions
             options.Port = mqttBrokerSettings.Port;
             options.TlsPort = mqttBrokerSettings.TlsPort;
         });
-        services.AddSingleton<MqttBrokerService>();
+        services.AddSingleton<IMqttBrokerService, MqttBrokerService>();
 
         return services;
     }
@@ -41,7 +40,7 @@ public static class ServiceCollectionsExtensions
         if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
 
         services.Configure(setupAction);
-        services.AddSingleton<MqttClientService>();
+        services.AddSingleton<IMqttClientService, MqttClientService>();
 
         return services;
     }
@@ -58,7 +57,7 @@ public static class ServiceCollectionsExtensions
             options.Password = mqttClientSettings.Password;
             options.ServiceName = mqttClientSettings.ServiceName;
         });
-        services.AddSingleton<MqttClientService>();
+        services.AddSingleton<IMqttClientService, MqttClientService>();
 
         return services;
     }
