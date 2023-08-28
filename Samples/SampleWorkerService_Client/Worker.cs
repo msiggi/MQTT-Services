@@ -6,7 +6,7 @@ namespace SampleWorkerService_Client
     {
         private readonly ILogger<Worker> _logger;
 
-        public Worker(ILogger<Worker> logger, MqttClientService mqttClientService)
+        public Worker(ILogger<Worker> logger, IMqttClientService mqttClientService)
         {
             _logger = logger;
         }

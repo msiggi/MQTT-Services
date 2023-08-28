@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace MqttServices.Core.Client;
 
-public class MqttClientService : IDisposable
+public class MqttClientService : IDisposable, IMqttClientService
 {
     private readonly MqttClientSettings mqttClientSettings;
     private readonly ILogger<MqttClientService> logger;

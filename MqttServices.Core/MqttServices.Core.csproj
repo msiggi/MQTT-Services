@@ -13,7 +13,7 @@
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageId>MQTT-Services</PackageId>
 		<Title>MQTT-Services</Title>
-		<Version>1.0.9</Version>
+		<Version>1.0.12</Version>
 		<Product>MQTT-Services</Product>
 		<AssemblyName>MQTT-Services</AssemblyName>
 	</PropertyGroup>
@@ -24,8 +24,8 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
-		<PackageReference Include="MQTTnet" Version="4.2.0.706" />
-		<PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.2.0.706" />
+		<PackageReference Include="MQTTnet" Version="4.2.1.781" />
+		<PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.2.1.781" />
 	</ItemGroup>
 
 </Project>
