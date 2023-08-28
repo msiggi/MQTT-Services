@@ -1,24 +1,19 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MQTTnet;
+using MQTTnet.Diagnostics;
 using MQTTnet.Protocol;
 using MQTTnet.Server;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using System.Security.Authentication;
-using MQTTnet.Diagnostics;
-using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace MqttServices.Core.Broker;
 
 
-public class MqttBrokerService :  IDisposable
+public class MqttBrokerService : IDisposable, IMqttBrokerService
 {
     /// <summary>
     /// The service name.
@@ -217,7 +212,7 @@ public class MqttBrokerService :  IDisposable
     /// <param name="args">The arguments.</param>
     private void LogMessage(InterceptingPublishEventArgs args)
     {
-        var payload = args.ApplicationMessage?.Payload == null ? null : Encoding.UTF8.GetString(args.ApplicationMessage.Payload);
+        var payload = args.ApplicationMessage?.PayloadSegment == null ? null : Encoding.UTF8.GetString(args.ApplicationMessage.PayloadSegment);
 
         this.logger.LogInformation(
             "Message: ClientId = {ClientId}, Topic = {Topic}, Payload = {Payload}, QoS = {Qos}, Retain-Flag = {RetainFlag}",
