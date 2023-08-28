@@ -13,8 +13,8 @@
 				<dependency id="Microsoft.Extensions.Configuration.Abstractions" version="7.0.0" />
 				<dependency id="Microsoft.Extensions.Hosting" version="7.0.1" />
 				<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="7.0.0" />
-				<dependency id="MQTTnet" version="4.2.0.706" />
-				<dependency id="MQTTnet.Extensions.ManagedClient" version="4.2.0.706" />
+				<dependency id="MQTTnet" version="4.2.*" />
+				<dependency id="MQTTnet.Extensions.ManagedClient" version="4.2.*" />
 			</group>
 		</dependencies>
 	</metadata>
