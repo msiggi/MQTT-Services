@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQTTnet;
 using MQTTnet.Client;
@@ -18,7 +17,7 @@ public class MqttClientService : IDisposable, IMqttClientService
 
     public event EventHandler<MqttClientConnectedEventArgs>? ClientConnected;
     public event EventHandler<MqttApplicationMessageReceivedEventArgs>? MessageReceived;
-    public bool IsConnected;
+    public bool IsConnected { get; set; }
 
     public MqttClientService(ILogger<MqttClientService> logger, IOptions<MqttClientSettings> mqttClientSettings)
     {

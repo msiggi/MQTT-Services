@@ -6,6 +6,7 @@ namespace MqttServices.Core.Client
     {
         event EventHandler<MqttClientConnectedEventArgs>? ClientConnected;
         event EventHandler<MqttApplicationMessageReceivedEventArgs>? MessageReceived;
+        bool IsConnected { get; set; }
 
         Task Connect();
         void Dispose();
