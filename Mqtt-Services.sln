@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project", "Project", "{5CA7
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleWorkerService_Client", "Samples\SampleWorkerService_Client\SampleWorkerService_Client.csproj", "{8A246C58-441F-4ED0-87BB-A1114C3B9F26}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleWebApiWithMqttBroker", "SampleWebApiWithMqttBroker\SampleWebApiWithMqttBroker.csproj", "{1106B81D-6884-4631-BFA1-58C0E3C366DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{8A246C58-441F-4ED0-87BB-A1114C3B9F26}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A246C58-441F-4ED0-87BB-A1114C3B9F26}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A246C58-441F-4ED0-87BB-A1114C3B9F26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1106B81D-6884-4631-BFA1-58C0E3C366DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1106B81D-6884-4631-BFA1-58C0E3C366DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1106B81D-6884-4631-BFA1-58C0E3C366DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1106B81D-6884-4631-BFA1-58C0E3C366DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -43,6 +49,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{5C0D8D39-D325-4514-9035-36EA52DC94F1} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
 		{8A246C58-441F-4ED0-87BB-A1114C3B9F26} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
+		{1106B81D-6884-4631-BFA1-58C0E3C366DB} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0EB792C7-CF30-45FF-8D22-10701396F39F}
