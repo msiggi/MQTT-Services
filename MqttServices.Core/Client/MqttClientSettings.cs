@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MqttServices.Core.Client;
+﻿namespace MqttServices.Core.Client;
 
 public class MqttClientSettings
 {
@@ -13,4 +7,5 @@ public class MqttClientSettings
     public int BrokerPort { get; set; }
     public string UserName { get; set; } = "";
     public string Password { get; set; } = "";
+    public bool SerializeWithCamelCase { get; set; } = false;
 }

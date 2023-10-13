@@ -64,9 +64,15 @@ public class MqttClientService : IDisposable, IMqttClientService
     {
         if (mqttClient.IsConnected)
         {
+            var serializeCamelCase = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
             var applicationMessage = new MqttApplicationMessageBuilder()
                    .WithTopic(topic)
-                   .WithPayload(JsonSerializer.Serialize(payload))
+                   .WithPayload(mqttClientSettings.SerializeWithCamelCase ? JsonSerializer.Serialize(payload, serializeCamelCase) : JsonSerializer.Serialize(payload))
                    .Build();
 
             var result = await mqttClient.InternalClient.PublishAsync(applicationMessage, CancellationToken.None);
