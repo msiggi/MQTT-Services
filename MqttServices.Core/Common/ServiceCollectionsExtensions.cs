@@ -51,6 +51,7 @@ public static class ServiceCollectionsExtensions
 
         services.AddOptions<MqttClientSettings>().Configure(options =>
         {
+            options.Enabled = mqttClientSettings.Enabled;
             options.BrokerPort = mqttClientSettings.BrokerPort;
             options.BrokerHost = mqttClientSettings.BrokerHost;
             options.UserName = mqttClientSettings.UserName;
