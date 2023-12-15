@@ -13,9 +13,10 @@
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageId>MQTT-Services</PackageId>
 		<Title>MQTT-Services</Title>
-		<Version>1.0.17</Version>
+		<Version>1.0.18</Version>
 		<Product>MQTT-Services</Product>
 		<AssemblyName>MQTT-Services</AssemblyName>
+		<PackageIcon>Logo.png</PackageIcon>
 	</PropertyGroup>
 
 
@@ -32,6 +33,8 @@
 	<ItemGroup>
 	  <None Update="Logo.png">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
 	  </None>
 	</ItemGroup>
 
