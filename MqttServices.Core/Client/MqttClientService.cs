@@ -36,7 +36,14 @@ public class MqttClientService : IDisposable, IMqttClientService
         mqttClient.ConnectingFailedAsync += MqttClient_ConnectingFailedAsync;
         mqttClient.ApplicationMessageReceivedAsync += MqttClient_ApplicationMessageReceivedAsync;
 
-        Connect().Wait();
+        if (this.mqttClientSettings.Enabled)
+        {
+            Connect().Wait();
+        }
+        else
+        {
+            logger.LogInformation("MQTT-Client is disabled per configuration");
+        }
     }
     //public async Task StartAsync(CancellationToken cancellationToken)
     //{
