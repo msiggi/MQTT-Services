@@ -14,8 +14,12 @@
 				<dependency id="Microsoft.Extensions.Hosting" version="7.0.1" />
 				<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="7.0.0" />
 				<dependency id="MQTTnet" version="4.*" />
-				<dependency id="MQTTnet.Extensions.ManagedClient" version="4.*" />
+				<dependency id="MQTTnet.Extensions.ManagedClient" version="4.3.3.952" />
 			</group>
 		</dependencies>
+		<icon>Logo.png</icon>
 	</metadata>
+	<files>
+		<file src="Logo.png" target="" />
+	</files>
 </package>
