@@ -1,10 +1,12 @@
 ﻿using MQTTnet.Client;
+using MQTTnet.Extensions.ManagedClient;
 
 namespace MqttServices.Core.Client
 {
     public interface IMqttClientService
     {
         event EventHandler<MqttClientConnectedEventArgs>? ClientConnected;
+        event EventHandler<ConnectingFailedEventArgs>? ClientConnectionFailed;
         event EventHandler<MqttApplicationMessageReceivedEventArgs>? MessageReceived;
         bool IsConnected { get; set; }
 

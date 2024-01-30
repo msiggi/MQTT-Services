@@ -16,6 +16,7 @@ public class MqttClientService : IDisposable, IMqttClientService
     private IManagedMqttClient mqttClient;
 
     public event EventHandler<MqttClientConnectedEventArgs>? ClientConnected;
+    public event EventHandler<ConnectingFailedEventArgs>? ClientConnectionFailed;
     public event EventHandler<MqttApplicationMessageReceivedEventArgs>? MessageReceived;
     public bool IsConnected { get; set; }
 
@@ -98,6 +99,7 @@ public class MqttClientService : IDisposable, IMqttClientService
     {
         IsConnected = false;
         logger.LogError(arg.Exception, arg.Exception.Message);
+        ClientConnectionFailed?.Invoke(this, arg);
         return Task.CompletedTask;
     }
 
