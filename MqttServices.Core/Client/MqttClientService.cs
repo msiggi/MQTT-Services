@@ -28,7 +28,7 @@ public class MqttClientService : IDisposable, IMqttClientService
 
         if (string.IsNullOrEmpty(this.mqttClientSettings.BrokerHost))
         {
-            this.logger.LogWarning("Invalid Broker-Settings (no Host configured)");
+            this.logger?.LogWarning("Invalid Broker-Settings (no Host configured)");
             return;
         }
 
@@ -43,7 +43,7 @@ public class MqttClientService : IDisposable, IMqttClientService
         }
         else
         {
-            logger.LogInformation("MQTT-Client is disabled per configuration");
+            logger?.LogInformation("MQTT-Client is disabled per configuration");
         }
     }
     //public async Task StartAsync(CancellationToken cancellationToken)
@@ -98,7 +98,7 @@ public class MqttClientService : IDisposable, IMqttClientService
     private Task MqttClient_ConnectingFailedAsync(ConnectingFailedEventArgs arg)
     {
         IsConnected = false;
-        logger.LogError(arg.Exception, arg.Exception.Message);
+        logger?.LogError(arg.Exception, arg.Exception.Message);
         ClientConnectionFailed?.Invoke(this, arg);
         return Task.CompletedTask;
     }
@@ -106,7 +106,7 @@ public class MqttClientService : IDisposable, IMqttClientService
     private Task MqttClient_ConnectedAsync(MqttClientConnectedEventArgs arg)
     {
         IsConnected = true;
-        logger.LogInformation($"MQTT Connection successful!");
+        logger?.LogInformation($"MQTT Connection successful!");
         ClientConnected?.Invoke(this, arg);
 
         return Task.CompletedTask;

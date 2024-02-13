@@ -44,16 +44,6 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
         StartBroker().Wait();
     }
 
-    //public async Task StartAsync(CancellationToken cancellationToken)
-    //{
-    //    await StartBroker();
-    //}
-
-    //public async Task StopAsync(CancellationToken cancellationToken)
-    //{
-    //    await mqttServer.StopAsync();
-    //}
-
     public async Task StartBroker()
     {
         if (mqttBrokerSettings.EnableBroker)
@@ -63,9 +53,9 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
                 throw new Exception("The configuration is invalid");
             }
 
-            logger.LogInformation("Starting MqttBrokerService");
+            logger?.LogInformation("Starting MqttBrokerService");
             await StartMqttServer();
-            logger.LogInformation("MqttBrokerService started");
+            logger?.LogInformation("MqttBrokerService started");
         }
     }
 
@@ -91,11 +81,11 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
         try
         {
             await mqttServer.StartAsync();
-            logger.LogInformation("MQTT Broker started!");
+            logger?.LogInformation("MQTT Broker started!");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error starting MQTT-Server");
+            logger?.LogError(ex, "Error starting MQTT-Server");
         }
     }
 
@@ -136,7 +126,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
         }
         catch (Exception ex)
         {
-            this.logger.LogError("An error occurred: {Exception}.", ex);
+            logger?.LogError("An error occurred: {Exception}.", ex);
             return Task.FromException(ex);
         }
     }
@@ -155,7 +145,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
         }
         catch (Exception ex)
         {
-            this.logger.LogError("An error occurred: {Exception}.", ex);
+            logger?.LogError("An error occurred: {Exception}.", ex);
             return Task.FromException(ex);
         }
     }
@@ -174,7 +164,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
         }
         catch (Exception ex)
         {
-            this.logger.LogError("An error occurred: {Exception}.", ex);
+            logger?.LogError("An error occurred: {Exception}.", ex);
             return Task.FromException(ex);
         }
     }
@@ -187,7 +177,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
         var totalMemory = GC.GetTotalMemory(false);
         var memoryInfo = GC.GetGCMemoryInfo();
         var divider = BytesDivider;
-        logger.LogInformation(
+        logger?.LogInformation(
              "Heartbeat for service {ServiceName}: Total {Total}, heap size: {HeapSize}, memory load: {MemoryLoad}.", "",
              $"{(totalMemory / divider):N3}", $"{(memoryInfo.HeapSizeBytes / divider):N3}", $"{(memoryInfo.MemoryLoadBytes / divider):N3}");
     }
@@ -198,7 +188,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
     /// <param name="successful">A <see cref="bool"/> value indicating whether the subscription was successful or not.</param> 
     private void LogMessage(InterceptingSubscriptionEventArgs args, bool successful)
     {
-        this.logger.LogInformation(
+        logger?.LogInformation(
             successful
                 ? "New subscription: ClientId = {ClientId}, TopicFilter = {TopicFilter}"
                 : "Subscription failed for clientId = {ClientId}, TopicFilter = {TopicFilter}",
@@ -214,7 +204,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
     {
         var payload = args.ApplicationMessage?.PayloadSegment == null ? null : Encoding.UTF8.GetString(args.ApplicationMessage.PayloadSegment);
 
-        this.logger.LogInformation(
+        logger?.LogInformation(
             "Message: ClientId = {ClientId}, Topic = {Topic}, Payload = {Payload}, QoS = {Qos}, Retain-Flag = {RetainFlag}",
             args.ClientId,
             args.ApplicationMessage?.Topic,
@@ -232,7 +222,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
     {
         if (showPassword)
         {
-            this.logger.LogInformation(
+            logger?.LogInformation(
                 "New connection: ClientId = {ClientId}, Endpoint = {Endpoint}, Username = {UserName}, Password = {Password}, CleanSession = {CleanSession}",
                 args.ClientId,
                 args.Endpoint,
@@ -242,7 +232,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
         }
         else
         {
-            this.logger.LogInformation(
+            logger?.LogInformation(
                 "New connection: ClientId = {ClientId}, Endpoint = {Endpoint}, Username = {UserName}, CleanSession = {CleanSession}",
                 args.ClientId,
                 args.Endpoint,
