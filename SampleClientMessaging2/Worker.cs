@@ -17,7 +17,7 @@ public class Worker : IHostedService
     private void MessagingManager_RequestReceived(object? sender, Payload e)
     {
         logger.LogInformation($"RequestReceived with Name {e.Name} received, sending Answer...!");
-        messagingManager.SendMessageResponse(new Payload { Name = "Resonse!" });
+        messagingManager.SendMessageResponse(new Payload { Name = "This is my Response!" });
     }
 
     public Task StartAsync(CancellationToken cancellationToken)

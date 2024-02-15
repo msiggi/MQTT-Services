@@ -21,10 +21,20 @@ public class Worker : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await messagingManager.SendMessageRequest(new Payload
+        var payload = new Payload
         {
-            Name = "Test from Agent1"
-        });
+            Name = "Test from Agent1 with Request-Payload"
+        };
+        var payload2 = new Payload
+        {
+            Name = "Second Test"
+        };
+        await messagingManager.SendMessageRequest(payload);
+
+        // or without payload, just to trigger the answer:
+        await messagingManager.SendMessageRequest(payload, "test");
+        Thread.Sleep(1000);
+        await messagingManager.SendMessageRequest(payload2, "test");
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using MqttServices.Core.Client;
 using System.Text;
+using System.Text.Json;
 
 namespace SampleCommon
 {
@@ -9,6 +10,8 @@ namespace SampleCommon
     {
         private readonly ILogger<MessagingManager> logger;
         private readonly IMqttClientService mqttClientService;
+        private const string subscribeRequestTopic = "subscribeRequest";
+        private Dictionary<string, dynamic> subscriptions = new Dictionary<string, dynamic>();
         private const string baseTopic = "baseTopic";
         private string requestTopic = $"{baseTopic}_request";
         private string responseTopic = $"{baseTopic}_response";
@@ -23,8 +26,71 @@ namespace SampleCommon
             this.mqttClientService.MessageReceived += MqttClientService_MessageReceived;
         }
 
-        private void MqttClientService_MessageReceived(object? sender, MQTTnet.Client.MqttApplicationMessageReceivedEventArgs e)
+        private async void MqttClientService_MessageReceived(object? sender, MQTTnet.Client.MqttApplicationMessageReceivedEventArgs e)
         {
+            if (e.ApplicationMessage.Topic == subscribeRequestTopic)
+            {
+                try
+                {
+                    var subscribeTopic = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+                    await mqttClientService.Subscribe(subscribeTopic);
+                }
+                catch (Exception ex)
+                {
+                    logger?.LogWarning(ex, $"Parsing subscribeRequestTopic not successful!");
+                }
+            }
+
+            foreach (var subscription in subscriptions)
+            {
+                if (e.ApplicationMessage.Topic == GetRequestTopic(subscription.Key))
+                {
+                    try
+                    {
+                        var json = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+
+                        var method = typeof(JsonSerializer)
+                        .GetMethod(nameof(JsonSerializer.Deserialize), new Type[] { typeof(string) });
+                        object parsedMessage = method.MakeGenericMethod(subscription.Value.GetType())
+                        .Invoke(json);
+
+                        //Type T = subscription.Value.GetType();
+                        //var payload = System.Text.Json.JsonSerializer.Deserialize<T>()
+
+
+                        //Type genericClass = typeof(val);
+                        ////Type genericClass = typeof(Generic<>);
+                        ////// MakeGenericType is badly named
+                        //Type constructedClass = genericClass.MakeGenericType(typeof(subscription.));
+
+                        //var tpe = subscription.GetType().GetGenericArguments();
+
+
+                        // MAQ Sample
+                        //IpcMessageConfig messageConfig = GetMessageConfig(tagDefinition);
+                        //Type dataType = GetTypeFromName(messageConfig);
+                        //if (dataType == null)
+                        //{
+                        //    appLogger.Error($"Could not parse received message. Did not found the configured datatype {messageConfig.MessageDatatypeName}");
+                        //    return "";
+                        //}
+
+                        //object parsedMessage = typeof(MaqIpcData)
+                        //        .GetMethod(nameof(MaqIpcData.GetReceivedValue), new Type[] { typeof(byte[]) })
+                        //        .MakeGenericMethod(dataType)
+                        //        .Invoke(this, new object[] { messageData });
+
+                        //return parsedMessage;
+
+
+                    }
+                    catch (Exception ex)
+                    {
+                        logger?.LogWarning(ex, $"Parsing MQTT-Message for {e.ApplicationMessage.Topic} not successful!");
+                    }
+                }
+            }
+
             if (e.ApplicationMessage.Topic == requestTopic)
             {
                 Payload payload = null;
@@ -63,6 +129,7 @@ namespace SampleCommon
 
         private async void MqttClientService_ClientConnected(object? sender, MQTTnet.Client.MqttClientConnectedEventArgs e)
         {
+            await mqttClientService.Subscribe(subscribeRequestTopic);
             await mqttClientService.Subscribe(requestTopic);
             await mqttClientService.Subscribe(responseTopic);
         }
@@ -80,10 +147,48 @@ namespace SampleCommon
                 await SendMessageRequest(payload);
             }
         }
+        public async Task SendMessageRequest()
+        {
+            await SendMessageRequest(new Payload());
+        }
+
 
         public async Task SendMessageResponse(Payload payload)
         {
             await mqttClientService.PublishMessage(responseTopic, payload);
+        }
+
+        public async Task SendMessageRequest<T>(T payload, string exchangeName)
+        {
+            string reqTopic = GetRequestTopic(exchangeName);
+            await mqttClientService.PublishMessage(subscribeRequestTopic, reqTopic);
+            await mqttClientService.PublishMessage(reqTopic, payload);
+
+            if (!subscriptions.ContainsKey(exchangeName))
+            {
+                subscriptions.Add(exchangeName, payload);
+            }
+        }
+
+        private string GetRequestTopic(string exchangeName)
+        {
+            return string.Concat(exchangeName, "_request");
+        }
+        private string GetResponseTopic(string exchangeName)
+        {
+            return string.Concat(exchangeName, "_response");
+        }
+        private static bool IsValidJson(string strInput)
+        {
+            try
+            {
+                JsonDocument.Parse(strInput);
+                return true;
+            }
+            catch (JsonException)
+            {
+                return false;
+            }
         }
     }
     public interface IMessagingManager
@@ -91,6 +196,8 @@ namespace SampleCommon
         event EventHandler<Payload> RequestReceived;
         event EventHandler<Payload> ResponseReceived;
         Task SendMessageRequest(Payload payload);
+        Task SendMessageRequest();
+        Task SendMessageRequest<T>(T payload, string exchangeName);
         Task SendMessageResponse(Payload payload);
 
     }
