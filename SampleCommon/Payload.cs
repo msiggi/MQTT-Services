@@ -1,9 +1,8 @@
-﻿namespace SampleCommon
+﻿namespace SampleCommon;
+
+public class Payload
 {
-    public class Payload
-    {
-        string Name { get; set; }
-        string Description { get; set; }
-        double Value { get; set; }
-    }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public double Value { get; set; }
 }
