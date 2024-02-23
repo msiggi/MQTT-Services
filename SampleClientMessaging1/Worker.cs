@@ -16,16 +16,16 @@ public class Worker : IHostedService
 
     private void MessagingManager_ResponseReceived(object? sender, Payload e)
     {
-        logger.LogInformation($"ResponseReceived with Name {e.Name} received!");
+
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var payload = new Payload
+        var payload = new Person
         {
             Name = "Test from Agent1 with Request-Payload"
         };
-        var payload2 = new Payload
+        var payload2 = new Person
         {
             Name = "Second Test"
         };
@@ -41,4 +41,10 @@ public class Worker : IHostedService
     {
         return Task.CompletedTask;
     }
+}
+
+internal class Person
+{
+    public string Name { get; set; }
+
 }

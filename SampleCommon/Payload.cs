@@ -2,7 +2,13 @@
 
 public class Payload
 {
-    public string? Name { get; set; }
-    public string? Description { get; set; }
-    public double? Value { get; set; }
+    public string? ExchangeName { get; set; }
+    public PayloadType PayloadType { get; set; }
+    public object Value { get; set; }
+}
+
+public enum PayloadType
+{
+    Request = 0,
+    Resonse = 1
 }

@@ -47,13 +47,29 @@ namespace SampleCommon
                 {
                     try
                     {
-                        var json = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+                        var jsonString = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
 
-                        var method = typeof(JsonSerializer)
-                        .GetMethod(nameof(JsonSerializer.Deserialize), new Type[] { typeof(string) });
-                        object parsedMessage = method.MakeGenericMethod(subscription.Value.GetType())
-                        .Invoke(json);
+                        var options = new JsonSerializerOptions();
+                        options.PropertyNameCaseInsensitive = true;
 
+                        Type genericType = subscription.Value.GetType();
+
+                        if (genericType != null)
+                        {
+                            var deserializeMethod = typeof(JsonSerializer)
+                                .GetMethod(nameof(JsonSerializer.Deserialize), new[] { typeof(string), typeof(Type), typeof(JsonSerializerOptions) });
+
+                            object obj = deserializeMethod.Invoke(null, new object[] { jsonString, genericType, options });
+
+                            if (obj is not null)
+                            {
+                                RequestReceived?.Invoke(this, obj);
+                            }
+                        }
+                        else
+                        {
+                            logger.LogError("Invalid subscription type");
+                        }
                         //Type T = subscription.Value.GetType();
                         //var payload = System.Text.Json.JsonSerializer.Deserialize<T>()
 
@@ -195,6 +211,8 @@ namespace SampleCommon
     {
         event EventHandler<Payload> RequestReceived;
         event EventHandler<Payload> ResponseReceived;
+
+
         Task SendMessageRequest(Payload payload);
         Task SendMessageRequest();
         Task SendMessageRequest<T>(T payload, string exchangeName);
