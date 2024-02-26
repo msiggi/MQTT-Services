@@ -32,8 +32,45 @@ namespace SampleCommon
             {
                 try
                 {
-                    var subscribeTopic = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
-                    await mqttClientService.Subscribe(subscribeTopic);
+                    //var subscribeTopic = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+                    //await mqttClientService.Subscribe(subscribeTopic);
+
+                    var jsonString = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+                    Payload payload = JsonSerializer.Deserialize<Payload>(jsonString);
+
+
+                    //var jsonString = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+
+                    var options = new JsonSerializerOptions();
+                    options.PropertyNameCaseInsensitive = true;
+
+                    Type genericType = Type.GetType(payload.ValueType);// subscription.Value.GetType();
+
+                    if (genericType != null)
+                    {
+                        var deserializeMethod = typeof(JsonSerializer)
+                            .GetMethod(nameof(JsonSerializer.Deserialize), new[] { typeof(string), typeof(Type), typeof(JsonSerializerOptions) });
+
+                        object obj = deserializeMethod.Invoke(null, new object[] { payload.Value.ToString(), genericType, options });
+
+                        if (obj is not null)
+                        {
+                            RequestReceived?.Invoke(this, new Payload
+                            {
+                                ExchangeName = payload.ExchangeName,
+                                PayloadType = PayloadType.Request,
+                                ValueType = payload.ValueType,
+                                Value = obj
+                            });
+                        }
+                    }
+                    else
+                    {
+                        logger.LogError("Invalid subscription type");
+                    }
+
+
+
                 }
                 catch (Exception ex)
                 {
@@ -63,42 +100,18 @@ namespace SampleCommon
 
                             if (obj is not null)
                             {
-                                RequestReceived?.Invoke(this, obj);
+                                RequestReceived?.Invoke(this, new Payload
+                                {
+                                    ExchangeName = subscription.Key,
+                                    PayloadType = PayloadType.Request,
+                                    Value = obj
+                                });
                             }
                         }
                         else
                         {
                             logger.LogError("Invalid subscription type");
                         }
-                        //Type T = subscription.Value.GetType();
-                        //var payload = System.Text.Json.JsonSerializer.Deserialize<T>()
-
-
-                        //Type genericClass = typeof(val);
-                        ////Type genericClass = typeof(Generic<>);
-                        ////// MakeGenericType is badly named
-                        //Type constructedClass = genericClass.MakeGenericType(typeof(subscription.));
-
-                        //var tpe = subscription.GetType().GetGenericArguments();
-
-
-                        // MAQ Sample
-                        //IpcMessageConfig messageConfig = GetMessageConfig(tagDefinition);
-                        //Type dataType = GetTypeFromName(messageConfig);
-                        //if (dataType == null)
-                        //{
-                        //    appLogger.Error($"Could not parse received message. Did not found the configured datatype {messageConfig.MessageDatatypeName}");
-                        //    return "";
-                        //}
-
-                        //object parsedMessage = typeof(MaqIpcData)
-                        //        .GetMethod(nameof(MaqIpcData.GetReceivedValue), new Type[] { typeof(byte[]) })
-                        //        .MakeGenericMethod(dataType)
-                        //        .Invoke(this, new object[] { messageData });
-
-                        //return parsedMessage;
-
-
                     }
                     catch (Exception ex)
                     {
@@ -176,13 +189,26 @@ namespace SampleCommon
 
         public async Task SendMessageRequest<T>(T payload, string exchangeName)
         {
-            string reqTopic = GetRequestTopic(exchangeName);
-            await mqttClientService.PublishMessage(subscribeRequestTopic, reqTopic);
-            await mqttClientService.PublishMessage(reqTopic, payload);
-
-            if (!subscriptions.ContainsKey(exchangeName))
+            if (mqttClientService.IsConnected)
             {
-                subscriptions.Add(exchangeName, payload);
+                //string reqTopic = GetRequestTopic(exchangeName);
+                //await mqttClientService.PublishMessage(subscribeRequestTopic, reqTopic);
+                //await mqttClientService.PublishMessage(reqTopic, payload);
+                await mqttClientService.PublishMessage(subscribeRequestTopic, new Payload
+                {
+                    ExchangeName = exchangeName,
+                    PayloadType = PayloadType.Request,
+                    Value = payload,
+                    ValueType = typeof(T).FullName
+                });
+                //   await mqttClientService.PublishMessage(GetRequestTopic(exchangeName), payload);
+
+
+            }
+            else
+            {
+                Thread.Sleep(500);
+                await SendMessageRequest<T>(payload, exchangeName);
             }
         }
 

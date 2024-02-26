@@ -21,20 +21,24 @@ public class Worker : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var payload = new Person
+        var payloadPerson = new Person
         {
             Name = "Test from Agent1 with Request-Payload"
         };
-        var payload2 = new Person
+        var payloadPerson2 = new Person
         {
             Name = "Second Test"
         };
-        await messagingManager.SendMessageRequest(payload);
+
+        Thread.Sleep(2000);
+
+        await messagingManager.SendMessageRequest<Person>(payloadPerson, "extest");
+        //await messagingManager.SendMessageRequest<Person>(payloadPerson2, "extest");
 
         // or without payload, just to trigger the answer:
-        await messagingManager.SendMessageRequest(payload, "test");
-        Thread.Sleep(1000);
-        await messagingManager.SendMessageRequest(payload2, "test");
+        //await messagingManager.SendMessageRequest(payload, "test");
+        //Thread.Sleep(1000);
+        //await messagingManager.SendMessageRequest(payload2, "test");
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
@@ -43,8 +47,3 @@ public class Worker : IHostedService
     }
 }
 
-internal class Person
-{
-    public string Name { get; set; }
-
-}

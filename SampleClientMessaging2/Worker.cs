@@ -16,8 +16,15 @@ public class Worker : IHostedService
 
     private void MessagingManager_RequestReceived(object? sender, Payload e)
     {
-        logger.LogInformation($"RequestReceived with Name {e.Name} received, sending Answer...!");
-        messagingManager.SendMessageResponse(new Payload { Name = "This is my Response!" });
+        var person = (Person)e.Value;
+        logger.LogInformation($"RequestReceived with ExchangeName {e.ExchangeName} received, sending Answer...!");
+
+        messagingManager.SendMessageResponse(
+            new Payload
+            {
+                ExchangeName = e.ExchangeName
+
+            });
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
