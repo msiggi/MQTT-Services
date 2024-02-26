@@ -78,47 +78,47 @@ namespace SampleCommon
                 }
             }
 
-            foreach (var subscription in subscriptions)
-            {
-                if (e.ApplicationMessage.Topic == GetRequestTopic(subscription.Key))
-                {
-                    try
-                    {
-                        var jsonString = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+            //foreach (var subscription in subscriptions)
+            //{
+            //    if (e.ApplicationMessage.Topic == GetRequestTopic(subscription.Key))
+            //    {
+            //        try
+            //        {
+            //            var jsonString = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
 
-                        var options = new JsonSerializerOptions();
-                        options.PropertyNameCaseInsensitive = true;
+            //            var options = new JsonSerializerOptions();
+            //            options.PropertyNameCaseInsensitive = true;
 
-                        Type genericType = subscription.Value.GetType();
+            //            Type genericType = subscription.Value.GetType();
 
-                        if (genericType != null)
-                        {
-                            var deserializeMethod = typeof(JsonSerializer)
-                                .GetMethod(nameof(JsonSerializer.Deserialize), new[] { typeof(string), typeof(Type), typeof(JsonSerializerOptions) });
+            //            if (genericType != null)
+            //            {
+            //                var deserializeMethod = typeof(JsonSerializer)
+            //                    .GetMethod(nameof(JsonSerializer.Deserialize), new[] { typeof(string), typeof(Type), typeof(JsonSerializerOptions) });
 
-                            object obj = deserializeMethod.Invoke(null, new object[] { jsonString, genericType, options });
+            //                object obj = deserializeMethod.Invoke(null, new object[] { jsonString, genericType, options });
 
-                            if (obj is not null)
-                            {
-                                RequestReceived?.Invoke(this, new Payload
-                                {
-                                    ExchangeName = subscription.Key,
-                                    PayloadType = PayloadType.Request,
-                                    Value = obj
-                                });
-                            }
-                        }
-                        else
-                        {
-                            logger.LogError("Invalid subscription type");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        logger?.LogWarning(ex, $"Parsing MQTT-Message for {e.ApplicationMessage.Topic} not successful!");
-                    }
-                }
-            }
+            //                if (obj is not null)
+            //                {
+            //                    RequestReceived?.Invoke(this, new Payload
+            //                    {
+            //                        ExchangeName = subscription.Key,
+            //                        PayloadType = PayloadType.Request,
+            //                        Value = obj
+            //                    });
+            //                }
+            //            }
+            //            else
+            //            {
+            //                logger.LogError("Invalid subscription type");
+            //            }
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            logger?.LogWarning(ex, $"Parsing MQTT-Message for {e.ApplicationMessage.Topic} not successful!");
+            //        }
+            //    }
+            //}
 
             if (e.ApplicationMessage.Topic == requestTopic)
             {
@@ -266,6 +266,7 @@ namespace SampleCommon
         Task SendMessageRequest(Payload payload);
         Task SendMessageRequest();
         Task SendMessageRequest<T>(T payload, string exchangeName);
+        Task SendMessageResponse<T>(T payload, string exchangeName);
         Task SendMessageResponse(Payload payload);
 
     }

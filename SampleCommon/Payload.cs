@@ -22,5 +22,5 @@ public class PersonDataResponse
 {
     public int PersonId { get; set; }
     public string Name { get; set; }
-    public DateTime Birtday { get; set; }
+    public DateTime Birthday { get; set; }
 }

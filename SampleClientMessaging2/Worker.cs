@@ -27,7 +27,7 @@ public class Worker : IHostedService
             {
                 PersonId = personId,
                 Name = "Max Mustermann",
-                Birtday = new DateTime(1999, 4, 1)
+                Birthday = new DateTime(1999, 4, 1)
             };
 
             messagingManager.SendMessageResponse<PersonDataResponse>(personResponse, e.ExchangeName);
