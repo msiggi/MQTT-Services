@@ -16,7 +16,23 @@ public class Worker : IHostedService
 
     private void MessagingManager_RequestReceived(object? sender, Payload e)
     {
-        var person = (Person)e.Value;
+        if (e.ExchangeName == "persontestrequest")
+        {
+            var person = (PersonDataRequest)e.Value;
+            var personId = person.PersonId;
+            // get Person per Id
+            // .................
+
+            PersonDataResponse personResponse = new PersonDataResponse
+            {
+                PersonId = personId,
+                Name = "Max Mustermann",
+                Birtday = new DateTime(1999, 4, 1)
+            };
+
+            messagingManager.SendMessageResponse<PersonDataResponse>(personResponse, e.ExchangeName);
+        }
+
         logger.LogInformation($"RequestReceived with ExchangeName {e.ExchangeName} received, sending Answer...!");
 
         messagingManager.SendMessageResponse(

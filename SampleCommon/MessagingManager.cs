@@ -211,6 +211,30 @@ namespace SampleCommon
                 await SendMessageRequest<T>(payload, exchangeName);
             }
         }
+        public async Task SendMessageResponse<T>(T payload, string exchangeName)
+        {
+            if (mqttClientService.IsConnected)
+            {
+                //string reqTopic = GetRequestTopic(exchangeName);
+                //await mqttClientService.PublishMessage(subscribeRequestTopic, reqTopic);
+                //await mqttClientService.PublishMessage(reqTopic, payload);
+                await mqttClientService.PublishMessage(subscribeRequestTopic, new Payload
+                {
+                    ExchangeName = exchangeName,
+                    PayloadType = PayloadType.Response,
+                    Value = payload,
+                    ValueType = typeof(T).FullName
+                });
+                //   await mqttClientService.PublishMessage(GetRequestTopic(exchangeName), payload);
+
+
+            }
+            else
+            {
+                Thread.Sleep(500);
+                await SendMessageRequest<T>(payload, exchangeName);
+            }
+        }
 
         private string GetRequestTopic(string exchangeName)
         {

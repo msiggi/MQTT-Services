@@ -11,18 +11,16 @@ public class Payload
 public enum PayloadType
 {
     Request = 0,
-    Resonse = 1
+    Response = 1
 }
-public class RequestPersonData
+public class PersonDataRequest
 {
-    public string Name { get; set; }
-
+    public int PersonId { get; set; }
 }
 
-public class ResponsePersonData
+public class PersonDataResponse
 {
+    public int PersonId { get; set; }
     public string Name { get; set; }
     public DateTime Birtday { get; set; }
-    public string Name { get; set; }
-
 }
