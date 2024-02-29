@@ -1,6 +1,6 @@
 using MqttServices.Core.Client;
+using MqttServices.Core.Services;
 using SampleClientMessaging1;
-using SampleCommon;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddHostedService<Worker>();

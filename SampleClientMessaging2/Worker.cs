@@ -1,3 +1,5 @@
+using MqttServices.Core.Common;
+using MqttServices.Core.Services;
 using SampleCommon;
 
 namespace SampleClientMessaging2;
@@ -16,12 +18,17 @@ public class Worker : IHostedService
 
     private void MessagingManager_RequestReceived(object? sender, Payload e)
     {
-        if (e.ExchangeName == "persontestrequest")
+        if (e.ExchangeName == Configs.personExchangeName)
         {
             var person = (PersonDataRequest)e.Value;
+            logger.LogInformation($"Request Received, Person {person.PersonId} requested, sending Answer...!");
+
             var personId = person.PersonId;
-            // get Person per Id
+
+            // *****************************************
+            // get complete Person per Id from elsewhere
             // .................
+            // *****************************************
 
             PersonDataResponse personResponse = new PersonDataResponse
             {
@@ -33,14 +40,6 @@ public class Worker : IHostedService
             messagingManager.SendMessageResponse<PersonDataResponse>(personResponse, e.ExchangeName);
         }
 
-        logger.LogInformation($"RequestReceived with ExchangeName {e.ExchangeName} received, sending Answer...!");
-
-        messagingManager.SendMessageResponse(
-            new Payload
-            {
-                ExchangeName = e.ExchangeName
-
-            });
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
