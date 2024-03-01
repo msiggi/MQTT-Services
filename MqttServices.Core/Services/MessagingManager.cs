@@ -11,10 +11,10 @@ public class MessagingManager : IMessagingManager
     private readonly ILogger<MessagingManager> logger;
     private readonly IMqttClientService mqttClientService;
     private const string subscribeRequestTopic = "subscribeRequest";
+    private const string resonseTopicSuffix = "__respnse";
+
     private Dictionary<string, dynamic> subscriptions = new Dictionary<string, dynamic>();
-    private const string baseTopic = "baseTopic";
-    private string requestTopic = $"{baseTopic}_request";
-    private string responseTopic = $"{baseTopic}_response";
+
     public event EventHandler<Payload> RequestReceived;
     public event EventHandler<Payload> ResponseReceived;
 
@@ -39,6 +39,15 @@ public class MessagingManager : IMessagingManager
             if (payload is not null)
             {
                 RequestReceived?.Invoke(this, payload);
+            }
+        }
+        if (e.ApplicationMessage.Topic.Contains(resonseTopicSuffix))
+        {
+            Payload payload = DeserializePayloadObject(e.ApplicationMessage.PayloadSegment);
+
+            if (payload is not null)
+            {
+                ResponseReceived?.Invoke(this, payload);
             }
         }
     }
@@ -77,14 +86,15 @@ public class MessagingManager : IMessagingManager
     private async void MqttClientService_ClientConnected(object? sender, MQTTnet.Client.MqttClientConnectedEventArgs e)
     {
         await mqttClientService.Subscribe(subscribeRequestTopic);
-        await mqttClientService.Subscribe(requestTopic);
-        await mqttClientService.Subscribe(responseTopic);
     }
 
     public async Task SendMessageRequest<T>(T payload, string exchangeName)
     {
         if (mqttClientService.IsConnected)
         {
+            // subscribe for Response:
+            string topic = GetResponseTopic(exchangeName);
+            await mqttClientService.Subscribe(topic);
             await mqttClientService.PublishMessage(subscribeRequestTopic, new Payload(exchangeName, payload));
         }
         else
@@ -97,7 +107,8 @@ public class MessagingManager : IMessagingManager
     {
         if (mqttClientService.IsConnected)
         {
-            await mqttClientService.PublishMessage(subscribeRequestTopic, new Payload(exchangeName, payload));
+            string topic = GetResponseTopic(exchangeName);
+            await mqttClientService.PublishMessage(topic, new Payload(exchangeName, payload));
         }
         else
         {
@@ -112,7 +123,7 @@ public class MessagingManager : IMessagingManager
     }
     private string GetResponseTopic(string exchangeName)
     {
-        return string.Concat(exchangeName, "_response");
+        return string.Concat(exchangeName, resonseTopicSuffix);
     }
     private static bool IsValidJson(string strInput)
     {
