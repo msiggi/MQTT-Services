@@ -18,7 +18,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project", "Project", "{5CA7
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleWorkerService_Client", "Samples\SampleWorkerService_Client\SampleWorkerService_Client.csproj", "{8A246C58-441F-4ED0-87BB-A1114C3B9F26}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleWebApiWithMqttBroker", "SampleWebApiWithMqttBroker\SampleWebApiWithMqttBroker.csproj", "{1106B81D-6884-4631-BFA1-58C0E3C366DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleWebApiWithMqttBroker", "SampleWebApiWithMqttBroker\SampleWebApiWithMqttBroker.csproj", "{1106B81D-6884-4631-BFA1-58C0E3C366DB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleCommon", "SampleCommon\SampleCommon.csproj", "{91246AD3-551D-4A15-95C4-E298F8679FFD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleClientMessaging1", "SampleClientMessaging1\SampleClientMessaging1.csproj", "{391EACF0-2C69-47C5-9D20-039557313F7C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleClientMessaging2", "SampleClientMessaging2\SampleClientMessaging2.csproj", "{5BB30A00-0B60-4D81-A157-FFD1FCD5DCD4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MqttServices.CoreTests", "MqttServices.CoreTests\MqttServices.CoreTests.csproj", "{7A6A9569-AEBE-4786-AD6D-B27956ED02B5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +50,22 @@ Global
 		{1106B81D-6884-4631-BFA1-58C0E3C366DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1106B81D-6884-4631-BFA1-58C0E3C366DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1106B81D-6884-4631-BFA1-58C0E3C366DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91246AD3-551D-4A15-95C4-E298F8679FFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91246AD3-551D-4A15-95C4-E298F8679FFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91246AD3-551D-4A15-95C4-E298F8679FFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91246AD3-551D-4A15-95C4-E298F8679FFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{391EACF0-2C69-47C5-9D20-039557313F7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{391EACF0-2C69-47C5-9D20-039557313F7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{391EACF0-2C69-47C5-9D20-039557313F7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{391EACF0-2C69-47C5-9D20-039557313F7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BB30A00-0B60-4D81-A157-FFD1FCD5DCD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BB30A00-0B60-4D81-A157-FFD1FCD5DCD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BB30A00-0B60-4D81-A157-FFD1FCD5DCD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BB30A00-0B60-4D81-A157-FFD1FCD5DCD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A6A9569-AEBE-4786-AD6D-B27956ED02B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A6A9569-AEBE-4786-AD6D-B27956ED02B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A6A9569-AEBE-4786-AD6D-B27956ED02B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A6A9569-AEBE-4786-AD6D-B27956ED02B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,6 +74,9 @@ Global
 		{5C0D8D39-D325-4514-9035-36EA52DC94F1} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
 		{8A246C58-441F-4ED0-87BB-A1114C3B9F26} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
 		{1106B81D-6884-4631-BFA1-58C0E3C366DB} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
+		{91246AD3-551D-4A15-95C4-E298F8679FFD} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
+		{391EACF0-2C69-47C5-9D20-039557313F7C} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
+		{5BB30A00-0B60-4D81-A157-FFD1FCD5DCD4} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0EB792C7-CF30-45FF-8D22-10701396F39F}

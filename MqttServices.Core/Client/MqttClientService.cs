@@ -83,7 +83,19 @@ public class MqttClientService : IDisposable, IMqttClientService
                    .WithPayload(mqttClientSettings.SerializeWithCamelCase ? JsonSerializer.Serialize(payload, serializeCamelCase) : JsonSerializer.Serialize(payload))
                    .Build();
 
-            var result = await mqttClient.InternalClient.PublishAsync(applicationMessage, CancellationToken.None);
+            await mqttClient.InternalClient.PublishAsync(applicationMessage, CancellationToken.None);
+        }
+    }
+    public async Task PublishMessage(string topic, string payload)
+    {
+        if (mqttClient.IsConnected)
+        {
+            var applicationMessage = new MqttApplicationMessageBuilder()
+                   .WithTopic(topic)
+                   .WithPayload(payload)
+                   .Build();
+
+            await mqttClient.InternalClient.PublishAsync(applicationMessage, CancellationToken.None);
         }
     }
 
