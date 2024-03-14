@@ -12,10 +12,10 @@ variables:
 
 steps:
 - task: UseDotNet@2
-  displayName: 'Use .NET Core 7 sdk'
+  displayName: 'Use .NET Core 8 sdk'
   inputs:
     packageType: 'sdk'
-    version: '7.0.x'
+    version: '8.0.x'
     includePreviewVersions: false
 
 - task: DotNetCoreCLI@2
