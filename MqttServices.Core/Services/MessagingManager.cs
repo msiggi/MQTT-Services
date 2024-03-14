@@ -10,7 +10,7 @@ public class MessagingManager : IMessagingManager
 {
     private readonly ILogger<MessagingManager> logger;
     private readonly IMqttClientService mqttClientService;
-    private const string subscribeRequestTopic = "subscribeRequest";
+    private const string subscribeRequestTopic = "subscribe__Request";
     private const string resonseTopicSuffix = "__respnse";
 
     private Dictionary<string, dynamic> subscriptions = new Dictionary<string, dynamic>();
