@@ -4,12 +4,12 @@ using SampleCommon;
 
 namespace SampleClientMessaging1;
 
-public class Worker : IHostedService
+public class RequestWorker : IHostedService
 {
-    private readonly ILogger<Worker> logger;
+    private readonly ILogger<RequestWorker> logger;
     private readonly IMessagingManager messagingManager;
 
-    public Worker(ILogger<Worker> logger, IMessagingManager messagingManager)
+    public RequestWorker(ILogger<RequestWorker> logger, IMessagingManager messagingManager)
     {
         this.logger = logger;
         this.messagingManager = messagingManager;
@@ -21,7 +21,7 @@ public class Worker : IHostedService
         if (e.ExchangeName == Configs.personExchangeName)
         {
             PersonDataResponse personDataResponse = (PersonDataResponse)e.Value;
-            logger.LogInformation($"Response Received with Person {personDataResponse.Name}!");
+            logger.LogInformation($"**** Response Received with Person {personDataResponse.PersonData.Name}!");
         }
     }
 
@@ -29,11 +29,19 @@ public class Worker : IHostedService
     {
         Thread.Sleep(2000);
 
-        var payloadPerson = new PersonDataRequest
+        var payloadPersonRequest = new PersonDataRequest
         {
             PersonId = 4711
         };
-        await messagingManager.SendMessageRequest<PersonDataRequest>(payloadPerson, Configs.personExchangeName);
+        await messagingManager.SendMessageRequest<PersonDataRequest>(payloadPersonRequest, Configs.personExchangeName);
+
+        var payloadPerson = new PersonData
+        {
+            Name = "Jimi Hendrix",
+            Birthday = new DateTime(1942, 11, 27)
+        };
+
+        await messagingManager.SendMessage<PersonData>(payloadPerson, "guitarplayers");
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

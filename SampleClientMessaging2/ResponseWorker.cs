@@ -4,16 +4,26 @@ using SampleCommon;
 
 namespace SampleClientMessaging2;
 
-public class Worker : IHostedService
+public class ResponseWorker : IHostedService
 {
-    private readonly ILogger<Worker> logger;
+    private readonly ILogger<ResponseWorker> logger;
     private readonly IMessagingManager messagingManager;
 
-    public Worker(ILogger<Worker> logger, IMessagingManager messagingManager)
+    public ResponseWorker(ILogger<ResponseWorker> logger, IMessagingManager messagingManager)
     {
         this.logger = logger;
         this.messagingManager = messagingManager;
         this.messagingManager.RequestReceived += MessagingManager_RequestReceived;
+        this.messagingManager.MessageReceived += MessagingManager_MessageReceived;
+    }
+
+    private void MessagingManager_MessageReceived(object? sender, Payload e)
+    {
+        if (e.ExchangeName == "guitarplayers")
+        {
+            PersonData person = (PersonData)e.Value;
+            logger.LogInformation($"**** Message Received, Person {person.Name}!");
+        }
     }
 
     private void MessagingManager_RequestReceived(object? sender, Payload e)
@@ -21,7 +31,7 @@ public class Worker : IHostedService
         if (e.ExchangeName == Configs.personExchangeName)
         {
             var person = (PersonDataRequest)e.Value;
-            logger.LogInformation($"Request Received, Person {person.PersonId} requested, sending Answer...!");
+            logger.LogInformation($"**** Request Received, Person {person.PersonId} requested, sending Answer...!");
 
             var personId = person.PersonId;
 
@@ -32,9 +42,12 @@ public class Worker : IHostedService
 
             PersonDataResponse personResponse = new PersonDataResponse
             {
-                PersonId = personId,
-                Name = "Max Mustermann",
-                Birthday = new DateTime(1999, 4, 1)
+                PersonData = new PersonData
+                {
+                    PersonId = personId,
+                    Name = "Max Mustermann",
+                    Birthday = new DateTime(1999, 4, 1)
+                }
             };
 
             messagingManager.SendMessageResponse<PersonDataResponse>(personResponse, e.ExchangeName);

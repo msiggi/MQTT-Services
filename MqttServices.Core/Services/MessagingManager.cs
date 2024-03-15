@@ -11,12 +11,14 @@ public class MessagingManager : IMessagingManager
     private readonly ILogger<MessagingManager> logger;
     private readonly IMqttClientService mqttClientService;
     private const string subscribeRequestTopic = "subscribe__Request";
+    private const string subscribeMessageTopic = "subscribe__Message";
     private const string resonseTopicSuffix = "__respnse";
 
     private Dictionary<string, dynamic> subscriptions = new Dictionary<string, dynamic>();
 
     public event EventHandler<Payload> RequestReceived;
     public event EventHandler<Payload> ResponseReceived;
+    public event EventHandler<Payload> MessageReceived;
 
     public MessagingManager(ILogger<MessagingManager> logger, IMqttClientService mqttClientService)
     {
@@ -40,6 +42,7 @@ public class MessagingManager : IMessagingManager
             {
                 RequestReceived?.Invoke(this, payload);
             }
+            return;
         }
         if (e.ApplicationMessage.Topic.Contains(resonseTopicSuffix))
         {
@@ -49,7 +52,20 @@ public class MessagingManager : IMessagingManager
             {
                 ResponseReceived?.Invoke(this, payload);
             }
+            return;
         }
+
+        if (e.ApplicationMessage.Topic == subscribeMessageTopic)
+        {
+            Payload payloadMessageReceived = DeserializePayloadObject(e.ApplicationMessage.PayloadSegment);
+
+            if (payloadMessageReceived is not null)
+            {
+                MessageReceived?.Invoke(this, payloadMessageReceived);
+            }
+        }
+
+
     }
     public Payload DeserializePayloadObject(ArraySegment<byte> bytes)
     {
@@ -86,6 +102,7 @@ public class MessagingManager : IMessagingManager
     private async void MqttClientService_ClientConnected(object? sender, MQTTnet.Client.MqttClientConnectedEventArgs e)
     {
         await mqttClientService.Subscribe(subscribeRequestTopic);
+        await mqttClientService.Subscribe(subscribeMessageTopic);
     }
 
     public async Task SendMessageRequest<T>(T payload, string exchangeName)
@@ -114,6 +131,18 @@ public class MessagingManager : IMessagingManager
         {
             Thread.Sleep(500);
             await SendMessageRequest(payload, exchangeName);
+        }
+    }
+    public async Task SendMessage<T>(T payload, string exchangeName)
+    {
+        if (mqttClientService.IsConnected)
+        {
+            await mqttClientService.PublishMessage(subscribeMessageTopic, new Payload(exchangeName, payload));
+        }
+        else
+        {
+            Thread.Sleep(500);
+            await SendMessage(payload, exchangeName);
         }
     }
 
