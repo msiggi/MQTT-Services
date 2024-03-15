@@ -42,6 +42,7 @@ public class MessagingManager : IMessagingManager
             {
                 RequestReceived?.Invoke(this, payload);
             }
+
             return;
         }
         if (e.ApplicationMessage.Topic.Contains(resonseTopicSuffix))
@@ -74,23 +75,30 @@ public class MessagingManager : IMessagingManager
             var jsonString = Encoding.UTF8.GetString(bytes);
             Payload payload = JsonSerializer.Deserialize<Payload>(jsonString);
 
-            var options = new JsonSerializerOptions();
-            options.PropertyNameCaseInsensitive = true;
-
-            Type genericType = Type.GetType(payload.ValueType);
-
-            if (genericType != null)
+            if (payload.Value is not null)
             {
-                var deserializeMethod = typeof(JsonSerializer)
-                    .GetMethod(nameof(JsonSerializer.Deserialize), new[] { typeof(string), typeof(Type), typeof(JsonSerializerOptions) });
+                var options = new JsonSerializerOptions();
+                options.PropertyNameCaseInsensitive = true;
 
-                object obj = deserializeMethod.Invoke(null, new object[] { payload.Value.ToString(), genericType, options });
-                if (obj is not null)
+                Type genericType = Type.GetType(payload.ValueType);
+
+                if (genericType != null)
                 {
-                    Payload retPayload = new Payload(payload.ExchangeName, obj);
-                    retPayload.ValueType = payload.ValueType;
-                    return retPayload;
+                    var deserializeMethod = typeof(JsonSerializer)
+                        .GetMethod(nameof(JsonSerializer.Deserialize), new[] { typeof(string), typeof(Type), typeof(JsonSerializerOptions) });
+
+                    object obj = deserializeMethod.Invoke(null, new object[] { payload.Value.ToString(), genericType, options });
+                    if (obj is not null)
+                    {
+                        Payload retPayload = new Payload(payload.ExchangeName, obj);
+                        retPayload.ValueType = payload.ValueType;
+                        return retPayload;
+                    }
                 }
+            }
+            else
+            {
+                return payload;
             }
         }
         catch (Exception ex)
@@ -120,6 +128,21 @@ public class MessagingManager : IMessagingManager
             await SendMessageRequest(payload, exchangeName);
         }
     }
+    public async Task SendMessageRequest(string exchangeName)
+    {
+        if (mqttClientService.IsConnected)
+        {
+            // subscribe for Response:
+            string topic = GetResponseTopic(exchangeName);
+            await mqttClientService.Subscribe(topic);
+            await mqttClientService.PublishMessage(subscribeRequestTopic, new Payload(exchangeName, null));
+        }
+        else
+        {
+            Thread.Sleep(500);
+            await SendMessageRequest(exchangeName);
+        }
+    }
     public async Task SendMessageResponse<T>(T payload, string exchangeName)
     {
         if (mqttClientService.IsConnected)
@@ -133,6 +156,7 @@ public class MessagingManager : IMessagingManager
             await SendMessageRequest(payload, exchangeName);
         }
     }
+
     public async Task SendMessage<T>(T payload, string exchangeName)
     {
         if (mqttClientService.IsConnected)

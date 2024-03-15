@@ -23,18 +23,17 @@ public class RequestWorker : IHostedService
             PersonDataResponse personDataResponse = (PersonDataResponse)e.Value;
             logger.LogInformation($"**** Response Received with Person {personDataResponse.PersonData.Name}!");
         }
+        if (e.ExchangeName == Configs.cityExchangeName)
+        {
+            logger.LogInformation($"**** Response Received with City {((AddressData)e.Value).CityName}!");
+        }
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         Thread.Sleep(2000);
 
-        var payloadPersonRequest = new PersonDataRequest
-        {
-            PersonId = 4711
-        };
-        await messagingManager.SendMessageRequest<PersonDataRequest>(payloadPersonRequest, Configs.personExchangeName);
-
+        // Test Simple Messaging
         var payloadPerson = new PersonData
         {
             Name = "Jimi Hendrix",
@@ -42,6 +41,23 @@ public class RequestWorker : IHostedService
         };
 
         await messagingManager.SendMessage<PersonData>(payloadPerson, "guitarplayers");
+
+        // Test Request-Response 1
+        var payloadPersonRequest = new PersonDataRequest
+        {
+            PersonId = 4711
+        };
+        await messagingManager.SendMessageRequest<PersonDataRequest>(payloadPersonRequest, Configs.personExchangeName);
+
+        // Test Request-Response 2
+        var payloadAddressRequest = new AddressDataRequest
+        {
+            CityId = 815
+        };
+        await messagingManager.SendMessageRequest<AddressDataRequest>(payloadAddressRequest, Configs.cityExchangeName);
+
+        // Test Request-Response 3 - without Request-Payload, just as a trigger
+        await messagingManager.SendMessageRequest(Configs.triggerExchangeName);
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

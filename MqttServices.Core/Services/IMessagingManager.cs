@@ -10,5 +10,6 @@ public interface IMessagingManager
 
     Task SendMessage<T>(T payload, string exchangeName);
     Task SendMessageRequest<T>(T payload, string exchangeName);
+    Task SendMessageRequest(string exchangeName);
     Task SendMessageResponse<T>(T payload, string exchangeName);
 }

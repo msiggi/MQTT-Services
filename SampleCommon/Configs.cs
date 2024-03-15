@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SampleCommon
+﻿namespace SampleCommon
 {
     public static class Configs
     {
         public static string personExchangeName = "personEx";
+        public static string cityExchangeName = "cityEx";
+        public static string triggerExchangeName = "trigger";
     }
 }

@@ -52,6 +52,33 @@ public class ResponseWorker : IHostedService
 
             messagingManager.SendMessageResponse<PersonDataResponse>(personResponse, e.ExchangeName);
         }
+        if (e.ExchangeName == Configs.cityExchangeName)
+        {
+            var city = (AddressDataRequest)e.Value;
+            logger.LogInformation($"**** Request Received, City {city.CityId} requested, sending Answer...!");
+
+            var cityId = city.CityId;
+
+            // *****************************************
+            // get complete Address per Id from elsewhere
+            // .................
+            // *****************************************
+
+            AddressData address = new AddressData
+            {
+                CityId = cityId,
+                CityName = "Dresden",
+                Street = "Washingtonstraﬂe",
+                Number = 16
+            };
+
+            messagingManager.SendMessageResponse<AddressData>(address, e.ExchangeName);
+        }
+        if (e.ExchangeName == Configs.triggerExchangeName)
+        {
+            logger.LogInformation($"**** Trigger-Request without Payload Received!");
+            // Do something with this!
+        }
 
     }
 

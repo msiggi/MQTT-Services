@@ -10,6 +10,6 @@ public class Payload
     {
         ExchangeName = exchangeName;
         Value = value;
-        ValueType = value.GetType().AssemblyQualifiedName;
+        ValueType = value?.GetType().AssemblyQualifiedName;
     }
 }
