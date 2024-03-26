@@ -3,7 +3,7 @@ Helper-Services for easier implementing MQTT-Broker and Clients
 
 using https://github.com/dotnet/MQTTnet
 
-## Usage
+## General Usage
 
 install Nuget-Package https://www.nuget.org/packages/MQTT-Services
 
@@ -54,4 +54,32 @@ using following configuration for Broker in appsettings.json:
 
 For subscribe, receive and publish messages see Sample-Project *SampleWorkerService_BrokerAndClient*
 
+## Use generic Messaging Service
+### Features
+- simple generic message send
+- generic request/response pattern
 
+Register Service in Startup.cs/Program.cs:
+```csharp
+services.AddSingleton<IMessagingManager, MessagingManager>();
+```
+
+Request Message using exchange string to identify the response:
+```csharp
+await messagingManager.SendMessageRequest<PersonDataRequest>(payloadPersonRequest, "personExchange");
+
+```
+
+check for response in ResponseReceived-Event:
+```csharp
+messagingManager.ResponseReceived += (sender, args) =>
+{
+	if (args.Exchange == "personExchange")
+	{
+		var response = args.Response as PersonDataResponse;
+		Console.WriteLine($"Received Response: {response?.Name}");
+	}
+};
+```
+
+Checkout full example in Sample-Project *SampleClientMessaging1* (Sender) and *SampleClientMessaging2* (Receiver and Responder)
