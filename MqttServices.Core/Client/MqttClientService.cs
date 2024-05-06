@@ -118,7 +118,7 @@ public class MqttClientService : IDisposable, IMqttClientService
     private Task MqttClient_ConnectedAsync(MqttClientConnectedEventArgs arg)
     {
         IsConnected = true;
-        logger?.LogInformation($"MQTT Connection successful!");
+        logger?.LogInformation($"MQTT Connection to {mqttClientSettings.BrokerHost}:{mqttClientSettings.BrokerPort} successful!");
         ClientConnected?.Invoke(this, arg);
 
         return Task.CompletedTask;
