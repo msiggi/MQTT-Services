@@ -79,10 +79,15 @@ public class MqttClientService : IDisposable, IMqttClientService
                 ReferenceHandler = ReferenceHandler.Preserve,
                 WriteIndented = true
             };
+            var serializeNormal = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve,
+                WriteIndented = true
+            };
 
             var applicationMessage = new MqttApplicationMessageBuilder()
                    .WithTopic(topic)
-                   .WithPayload(mqttClientSettings.SerializeWithCamelCase ? JsonSerializer.Serialize(payload, serializeCamelCase) : JsonSerializer.Serialize(payload))
+                   .WithPayload(mqttClientSettings.SerializeWithCamelCase ? JsonSerializer.Serialize(payload, serializeCamelCase) : JsonSerializer.Serialize(payload, serializeNormal))
                    .Build();
 
             await mqttClient.InternalClient.PublishAsync(applicationMessage, CancellationToken.None);
