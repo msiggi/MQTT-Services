@@ -6,6 +6,7 @@ using MQTTnet.Extensions.ManagedClient;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MqttServices.Core.Client;
 
@@ -75,6 +76,7 @@ public class MqttClientService : IDisposable, IMqttClientService
             var serializeCamelCase = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                ReferenceHandler = ReferenceHandler.Preserve,
                 WriteIndented = true
             };
 
