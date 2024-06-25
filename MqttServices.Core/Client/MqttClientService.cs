@@ -76,12 +76,12 @@ public class MqttClientService : IDisposable, IMqttClientService
             var serializeCamelCase = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                //ReferenceHandler = ReferenceHandler.Preserve,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
                 WriteIndented = true
             };
             var serializeNormal = new JsonSerializerOptions
             {
-                //ReferenceHandler = ReferenceHandler.Preserve,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
                 WriteIndented = true
             };
 
