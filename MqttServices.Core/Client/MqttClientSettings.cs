@@ -9,4 +9,5 @@ public class MqttClientSettings
     public string UserName { get; set; } = "";
     public string Password { get; set; } = "";
     public bool SerializeWithCamelCase { get; set; } = false;
+    public bool IgnoreCycles { get; set; } = true;
 }

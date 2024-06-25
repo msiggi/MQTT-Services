@@ -47,15 +47,6 @@ public class MqttClientService : IDisposable, IMqttClientService
             logger?.LogInformation("MQTT-Client is disabled per configuration");
         }
     }
-    //public async Task StartAsync(CancellationToken cancellationToken)
-    //{
-    //    await Connect();
-    //}
-
-    //public async Task StopAsync(CancellationToken cancellationToken)
-    //{
-    //    await mqttClient.StopAsync();
-    //}
 
     private async Task MqttClient_ApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs arg)
     {
@@ -73,21 +64,20 @@ public class MqttClientService : IDisposable, IMqttClientService
     {
         if (mqttClient.IsConnected)
         {
-            var serializeCamelCase = new JsonSerializerOptions
+            var serializeOptions = new JsonSerializerOptions
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                WriteIndented = true
-            };
-            var serializeNormal = new JsonSerializerOptions
-            {
-                ReferenceHandler = ReferenceHandler.IgnoreCycles,
                 WriteIndented = true
             };
 
+            if (mqttClientSettings.SerializeWithCamelCase)
+                serializeOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+
+            if (mqttClientSettings.IgnoreCycles)
+                serializeOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+
             var applicationMessage = new MqttApplicationMessageBuilder()
                    .WithTopic(topic)
-                   .WithPayload(mqttClientSettings.SerializeWithCamelCase ? JsonSerializer.Serialize(payload, serializeCamelCase) : JsonSerializer.Serialize(payload, serializeNormal))
+                   .WithPayload(JsonSerializer.Serialize(payload, serializeOptions))
                    .Build();
 
             await mqttClient.InternalClient.PublishAsync(applicationMessage, CancellationToken.None);
