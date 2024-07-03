@@ -129,10 +129,9 @@ public class MqttClientService : IDisposable, IMqttClientService
                     .WithTcpServer($"{settings.BrokerHost}", settings.BrokerPort)
                     .WithTlsOptions(o =>
                     {
-                        o.UseTls(true).WithCertificateValidationHandler(_ => true);
                         // The used public broker sometimes has invalid certificates. This sample accepts all
                         // certificates. This should not be used in live environments.
-                        //o.cert CertificateValidationHandler = _ => true;
+                        o.UseTls(true).WithCertificateValidationHandler(_ => true);
 
                         // The default value is determined by the OS. Set manually to force version.
                         o.WithSslProtocols(SslProtocols.Tls12);
