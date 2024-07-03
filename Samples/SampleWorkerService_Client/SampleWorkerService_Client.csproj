@@ -6,7 +6,7 @@
     <UserSecretsId>dotnet-SampleWorkerService_Client-3be38f64-88e8-4ab5-af08-2745042c664d</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MQTT-Services" Version="1.0.20" />
+    <PackageReference Include="MQTT-Services" Version="1.0.24" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
   </ItemGroup>
 </Project>

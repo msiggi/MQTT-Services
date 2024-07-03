@@ -4,7 +4,6 @@ using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -128,15 +127,15 @@ public class MqttClientService : IDisposable, IMqttClientService
                 new MqttClientOptionsBuilder()
                     .WithClientId(settings.ServiceName + Guid.NewGuid().ToString())
                     .WithTcpServer($"{settings.BrokerHost}", settings.BrokerPort)
-                    .WithTls(o =>
+                    .WithTlsOptions(o =>
                     {
-                        o.UseTls = true;
+                        o.UseTls(true).WithCertificateValidationHandler(_ => true);
                         // The used public broker sometimes has invalid certificates. This sample accepts all
                         // certificates. This should not be used in live environments.
-                        o.CertificateValidationHandler = _ => true;
+                        //o.cert CertificateValidationHandler = _ => true;
 
                         // The default value is determined by the OS. Set manually to force version.
-                        o.SslProtocol = SslProtocols.Tls12;
+                        o.WithSslProtocols(SslProtocols.Tls12);
                     })
                     .WithCredentials(settings.UserName, settings.Password)
                     .WithCleanSession()
@@ -145,31 +144,36 @@ public class MqttClientService : IDisposable, IMqttClientService
             .Build();
     }
 
-    private ManagedMqttClientOptions TlsMqttClientOptions(string url, string caFile)
-    {
-        return new ManagedMqttClientOptionsBuilder()
-            .WithClientOptions(
-                new MqttClientOptionsBuilder()
-                    .WithClientId("EMQX_" + Guid.NewGuid().ToString())
-                    .WithTcpServer(url)
-                    //.WithCredentials("user", "pass")
-                    .WithCleanSession()
-                    .WithTls(
-                        new MqttClientOptionsBuilderTlsParameters()
-                        {
-                            UseTls = true,
-                            SslProtocol = System.Security.Authentication.SslProtocols.Tls12,
-                            Certificates = new List<X509Certificate>()
-                            {
-                                // Download from https://www.emqx.com/en/mqtt/public-mqtt5-broker
-                                X509Certificate.CreateFromCertFile(caFile)
-                            }
-                        }
-                    )
-                    .Build()
-            )
-            .Build();
-    }
+    //private ManagedMqttClientOptions TlsMqttClientOptions(string url, string caFile)
+    //{
+    //    return new ManagedMqttClientOptionsBuilder()
+    //        .WithClientOptions(
+    //            new MqttClientOptionsBuilder()
+    //                .WithClientId("EMQX_" + Guid.NewGuid().ToString())
+    //                .WithTcpServer(url)
+    //                //.WithCredentials("user", "pass")
+    //                .WithCleanSession()
+    //                .WithTlsOptions(opt=> 
+    //                    opt.UseTls(true).WithSslProtocols(SslProtocols.Tls12).WithClientCertificates(new List<X509Certificate2>()
+    //                        {
+    //                            // Download from https://www.emqx.com/en/mqtt/public-mqtt5-broker
+    //                            X509Certificate2.CreateFromCertFile(caFile)
+    //                        }))
+    //                    new MqttClientOptionsBuilderTlsParameters()
+    //                    {
+    //                        UseTls = true,
+    //                        SslProtocol = System.Security.Authentication.SslProtocols.Tls12,
+    //                        Certificates = new List<X509Certificate>()
+    //                        {
+    //                            // Download from https://www.emqx.com/en/mqtt/public-mqtt5-broker
+    //                            X509Certificate.CreateFromCertFile(caFile)
+    //                        }
+    //                    }
+    //                );
+    //                .Build()
+    //        )
+    //        .Build();
+    //}
 
     public void Dispose()
     {

@@ -38,27 +38,27 @@ public class RequestWorker : IHostedService
         {
             Name = "Jimi Hendrix",
             Birthday = new DateTime(1942, 11, 27),
-            //OwnedCars = new List<OwnedCar> { new OwnedCar { Model = "Porsche" } }
+            OwnedCars = new List<OwnedCar> { new OwnedCar { Model = "Porsche" } }
         };
 
         await messagingManager.SendMessage<PersonData>(payloadPerson, "guitarplayers");
 
         // Test Request-Response 1
-        //var payloadPersonRequest = new PersonDataRequest
-        //{
-        //    PersonId = 4711
-        //};
-        //await messagingManager.SendMessageRequest<PersonDataRequest>(payloadPersonRequest, Configs.personExchangeName);
+        var payloadPersonRequest = new PersonDataRequest
+        {
+            PersonId = 4711
+        };
+        await messagingManager.SendMessageRequest<PersonDataRequest>(payloadPersonRequest, Configs.personExchangeName);
 
-        //// Test Request-Response 2
-        //var payloadAddressRequest = new AddressDataRequest
-        //{
-        //    CityId = 815
-        //};
-        //await messagingManager.SendMessageRequest<AddressDataRequest>(payloadAddressRequest, Configs.cityExchangeName);
+        // Test Request-Response 2
+        var payloadAddressRequest = new AddressDataRequest
+        {
+            CityId = 815
+        };
+        await messagingManager.SendMessageRequest<AddressDataRequest>(payloadAddressRequest, Configs.cityExchangeName);
 
-        //// Test Request-Response 3 - without Request-Payload, just as a trigger
-        //await messagingManager.SendMessageRequest(Configs.triggerExchangeName);
+        // Test Request-Response 3 - without Request-Payload, just as a trigger
+        await messagingManager.SendMessageRequest(Configs.triggerExchangeName);
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
