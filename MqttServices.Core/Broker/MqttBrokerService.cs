@@ -64,7 +64,9 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
     /// </summary>
     private async Task StartMqttServer()
     {
-        var certificate = CreateSelfSignedCertificate("1.3.6.1.5.5.7.3.1");
+        X509Certificate2 certificate = CreateSelfSignedCertificate("1.3.6.1.5.5.7.3.1");
+
+        //X509Certificate2 certificateFromFile = new X509Certificate2("certificate.pfx", "password");
 
         var optionsBuilder = new MqttServerOptionsBuilder()
             .WithEncryptedEndpoint()
