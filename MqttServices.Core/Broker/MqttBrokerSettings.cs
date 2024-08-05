@@ -25,6 +25,8 @@ public class MqttBrokerSettings
     /// </summary>
     public int TlsPort { get; set; } = 8883;
 
+    public string TlsVersion { get; set; } = "1.2";
+
     /// <summary>
     /// Checks whether the configuration is valid or not.
     /// </summary>

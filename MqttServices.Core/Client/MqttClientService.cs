@@ -21,6 +21,21 @@ public class MqttClientService : IDisposable, IMqttClientService
     public event EventHandler<MqttApplicationMessageReceivedEventArgs>? MessageReceived;
     public bool IsConnected { get; set; }
 
+    private SslProtocols TlsVersion
+    {
+        get
+        {
+            return this.mqttClientSettings.TlsVersion switch
+            {
+                "1.0" => SslProtocols.Tls,
+                "1.1" => SslProtocols.Tls11,
+                "1.2" => SslProtocols.Tls12,
+                "1.3" => SslProtocols.Tls13,
+                _ => SslProtocols.Tls12
+            };
+        }
+    }
+
     public MqttClientService(ILogger<MqttClientService> logger, IOptions<MqttClientSettings> mqttClientSettings)
     {
         IsConnected = false;
@@ -136,7 +151,7 @@ public class MqttClientService : IDisposable, IMqttClientService
                         o.CertificateValidationHandler = _ => true;
 
                         // The default value is determined by the OS. Set manually to force version.
-                        o.SslProtocol = SslProtocols.Tls12;
+                        o.SslProtocol = TlsVersion;
                     })
                     .WithCredentials(settings.UserName, settings.Password)
                     .WithCleanSession()
@@ -158,7 +173,7 @@ public class MqttClientService : IDisposable, IMqttClientService
                         new MqttClientOptionsBuilderTlsParameters()
                         {
                             UseTls = true,
-                            SslProtocol = System.Security.Authentication.SslProtocols.Tls12,
+                            SslProtocol = TlsVersion,
                             Certificates = new List<X509Certificate>()
                             {
                                 // Download from https://www.emqx.com/en/mqtt/public-mqtt5-broker

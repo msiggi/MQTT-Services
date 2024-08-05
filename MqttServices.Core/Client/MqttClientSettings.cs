@@ -10,4 +10,6 @@ public class MqttClientSettings
     public string Password { get; set; } = "";
     public bool SerializeWithCamelCase { get; set; } = false;
     public bool IgnoreCycles { get; set; } = true;
+    public string TlsVersion { get; set; } = "1.2";
+
 }

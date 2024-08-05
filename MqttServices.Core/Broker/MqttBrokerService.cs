@@ -44,6 +44,21 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
         StartBroker().Wait();
     }
 
+    private SslProtocols TlsVersion
+    {
+        get
+        {
+            return this.mqttBrokerSettings.TlsVersion switch
+            {
+                "1.0" => SslProtocols.Tls,
+                "1.1" => SslProtocols.Tls11,
+                "1.2" => SslProtocols.Tls12,
+                "1.3" => SslProtocols.Tls13,
+                _ => SslProtocols.Tls12
+            };
+        }
+    }
+
     public async Task StartBroker()
     {
         if (mqttBrokerSettings.EnableBroker)
@@ -71,7 +86,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
             .WithEncryptedEndpointPort(this.mqttBrokerSettings.TlsPort)
             .WithEncryptionCertificate(certificate)
             .WithRemoteCertificateValidationCallback((obj, cert, chain, ssl) => { return true; })
-            .WithEncryptionSslProtocol(SslProtocols.Tls12)
+            .WithEncryptionSslProtocol(TlsVersion)
             .WithoutDefaultEndpoint();
 
         mqttServer = new MqttFactory(new ConsoleLogger()).CreateMqttServer(optionsBuilder.Build());
