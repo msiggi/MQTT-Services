@@ -82,12 +82,19 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
         var certificate = CreateSelfSignedCertificate("1.3.6.1.5.5.7.3.1");
 
         var optionsBuilder = new MqttServerOptionsBuilder()
+            //.WithDefaultEndpoint()
+            //.WithDefaultEndpointPort(this.mqttBrokerSettings.Port)
             .WithEncryptedEndpoint()
             .WithEncryptedEndpointPort(this.mqttBrokerSettings.TlsPort)
             .WithEncryptionCertificate(certificate)
             .WithRemoteCertificateValidationCallback((obj, cert, chain, ssl) => { return true; })
-            .WithEncryptionSslProtocol(TlsVersion)
-            .WithoutDefaultEndpoint();
+            .WithEncryptionSslProtocol(TlsVersion);
+
+        if (this.mqttBrokerSettings.Port.HasValue)
+        {
+            optionsBuilder.WithDefaultEndpoint()
+                .WithDefaultEndpointPort(this.mqttBrokerSettings.Port.Value);
+        }
 
         mqttServer = new MqttFactory(new ConsoleLogger()).CreateMqttServer(optionsBuilder.Build());
         mqttServer.ValidatingConnectionAsync += this.ValidateConnectionAsync;

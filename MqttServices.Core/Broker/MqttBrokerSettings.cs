@@ -8,7 +8,7 @@ public class MqttBrokerSettings
     /// <summary>
     ///     Gets or sets the port.
     /// </summary>
-    public int Port { get; set; } = 1883;
+    public int? Port { get; set; }
 
     /// <summary>
     ///     Gets or sets the list of valid users.

@@ -11,5 +11,5 @@ public class MqttClientSettings
     public bool SerializeWithCamelCase { get; set; } = false;
     public bool IgnoreCycles { get; set; } = true;
     public string TlsVersion { get; set; } = "1.2";
-
+    public bool EncryptWithTls { get; set; } = true;
 }
