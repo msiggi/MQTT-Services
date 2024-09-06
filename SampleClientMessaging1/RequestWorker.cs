@@ -1,5 +1,6 @@
 using MqttServices.Core.Common;
 using MqttServices.Core.Services;
+using SampleClientMessaging1.Services;
 using SampleCommon;
 
 namespace SampleClientMessaging1;
@@ -9,7 +10,7 @@ public class RequestWorker : IHostedService
     private readonly ILogger<RequestWorker> logger;
     private readonly IMessagingManager messagingManager;
 
-    public RequestWorker(ILogger<RequestWorker> logger, IMessagingManager messagingManager)
+    public RequestWorker(ILogger<RequestWorker> logger, IMessagingManager messagingManager, ApplicationService1 applicationService1, ApplicationService2 applicationService2)
     {
         this.logger = logger;
         this.messagingManager = messagingManager;

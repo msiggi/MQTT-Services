@@ -109,6 +109,7 @@ public class MessagingManager : IMessagingManager
     }
     private async void MqttClientService_ClientConnected(object? sender, MQTTnet.Client.MqttClientConnectedEventArgs e)
     {
+        logger.LogInformation("MqttClientService MQTT-Client connected!");
         await mqttClientService.Subscribe(subscribeRequestTopic);
         await mqttClientService.Subscribe(subscribeMessageTopic);
     }
