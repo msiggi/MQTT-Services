@@ -71,8 +71,11 @@ public class MqttClientService : IDisposable, IMqttClientService
 
     public async Task Connect()
     {
-        var mqttClientOptions = TcpMqttClientOptions(this.mqttClientSettings);
-        await mqttClient.StartAsync(mqttClientOptions);
+        if (!mqttClient.IsConnected)
+        {
+            var mqttClientOptions = TcpMqttClientOptions(this.mqttClientSettings);
+            await mqttClient.StartAsync(mqttClientOptions);
+        }
     }
 
     public async Task PublishMessage(string topic, object payload)
