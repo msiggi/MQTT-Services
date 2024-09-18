@@ -118,6 +118,7 @@ public class MqttClientService : IDisposable, IMqttClientService
     {
         if (mqttClient.IsConnected)
         {
+            logger.LogInformation($"Subscribing to {topic}");
             await mqttClient.InternalClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(topic).Build());
         }
     }
