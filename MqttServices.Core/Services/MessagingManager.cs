@@ -65,8 +65,6 @@ public class MessagingManager : IMessagingManager
                 MessageReceived?.Invoke(this, payloadMessageReceived);
             }
         }
-
-
     }
     public Payload DeserializePayloadObject(ArraySegment<byte> bytes)
     {
