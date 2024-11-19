@@ -1,6 +1,6 @@
 ﻿namespace MqttServices.Core.Common;
 
-public static partial class Exchanges
+public static partial class ExchangeNames
 {
 
     #region generic

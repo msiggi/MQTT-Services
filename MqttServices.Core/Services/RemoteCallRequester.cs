@@ -35,22 +35,22 @@ public class RemoteCallRequester<T> : IRemoteCallRequester<T> where T : class
         {
             return;
         }
-        if (e.ExchangeName == GetExchangeName(Exchanges.GenericGetAll))
+        if (e.ExchangeName == GetExchangeName(ExchangeNames.GenericGetAll))
         {
             logger.LogInformation($"Received all items of type {typeof(T).Name}");
             AllItemsResponseReceived?.Invoke(this, e.Value as List<T>);
         }
-        if (e.ExchangeName == GetExchangeName(Exchanges.GenericGetOne))
+        if (e.ExchangeName == GetExchangeName(ExchangeNames.GenericGetOne))
         {
             logger.LogInformation($"Received one item of type {typeof(T).Name}");
             OneItemResponseReceived?.Invoke(this, e.Value as T);
         }
-        if (e.ExchangeName == GetExchangeName(Exchanges.GenericUpsert))
+        if (e.ExchangeName == GetExchangeName(ExchangeNames.GenericUpsert))
         {
             logger.LogInformation($"Received upserted item of type {typeof(T).Name}");
             UpsertItemResponseReceived?.Invoke(this, e.Value as T);
         }
-        if (e.ExchangeName == GetExchangeName(Exchanges.GenericDelete))
+        if (e.ExchangeName == GetExchangeName(ExchangeNames.GenericDelete))
         {
             logger.LogInformation($"Received delete response of type {typeof(T).Name}");
             DeleteItemResponseReceived?.Invoke(this, (bool)e.Value);
@@ -65,26 +65,26 @@ public class RemoteCallRequester<T> : IRemoteCallRequester<T> where T : class
     public async Task RequestAllItems(string filter = null, string includeExpression = null)
     {
         RequestFilter requestFilter = new RequestFilter(filter, includeExpression);
-        await messagingManager.SendMessageRequest(requestFilter, GetExchangeName(Exchanges.GenericGetAll));
+        await messagingManager.SendMessageRequest(requestFilter, GetExchangeName(ExchangeNames.GenericGetAll));
     }
     public async Task RequestOneItem(int id)
     {
-        await messagingManager.SendMessageRequest(id, GetExchangeName(Exchanges.GenericGetOne));
+        await messagingManager.SendMessageRequest(id, GetExchangeName(ExchangeNames.GenericGetOne));
     }
     public async Task RequestItemUpsert(T item)
     {
-        await messagingManager.SendMessageRequest(item, GetExchangeName(Exchanges.GenericUpsert));
+        await messagingManager.SendMessageRequest(item, GetExchangeName(ExchangeNames.GenericUpsert));
     }
     public async Task SendItems(List<T> items)
     {
-        await messagingManager.SendMessageRequest(items, GetExchangeName(Exchanges.GenericItemList));
+        await messagingManager.SendMessageRequest(items, GetExchangeName(ExchangeNames.GenericItemList));
     }
     public async Task SendItem(T item)
     {
-        await messagingManager.SendMessageRequest(item, GetExchangeName(Exchanges.GenericItem));    
+        await messagingManager.SendMessageRequest(item, GetExchangeName(ExchangeNames.GenericItem));    
     }
     public async Task RequestDeleteItem(T item)
     {
-        await messagingManager.SendMessageRequest(item, GetExchangeName(Exchanges.GenericGetOne));
+        await messagingManager.SendMessageRequest(item, GetExchangeName(ExchangeNames.GenericGetOne));
     }
 }

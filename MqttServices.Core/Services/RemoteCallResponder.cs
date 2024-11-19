@@ -26,32 +26,32 @@ public class RemoteCallResponder<T> : IRemoteCallResponder<T> where T : class
     }
     private void MessagingManager_RequestReceived(object? sender, Payload e)
     {
-        if (e.ExchangeName == GetExchangeName(Exchanges.GenericGetAll))
+        if (e.ExchangeName == GetExchangeName(ExchangeNames.GenericGetAll))
         {
             logger.LogInformation($"Received request for all items of type {typeof(T).Name}");
             GetAllItemsRequestReceived?.Invoke(this, (RequestFilter)e.Value);
         }
-        if (e.ExchangeName == GetExchangeName(Exchanges.GenericGetOne))
+        if (e.ExchangeName == GetExchangeName(ExchangeNames.GenericGetOne))
         {
             logger.LogInformation($"Received request for one item of type {typeof(T).Name}");
             GetOneItemRequestReceived?.Invoke(this, (int)e.Value);
         }
-        if (e.ExchangeName == GetExchangeName(Exchanges.GenericUpsert))
+        if (e.ExchangeName == GetExchangeName(ExchangeNames.GenericUpsert))
         {
             logger.LogInformation($"Received request for upsert item of type {typeof(T).Name}");
             UpsertItemRequestReceived?.Invoke(this, e.Value as T);
         }
-        if (e.ExchangeName == GetExchangeName(Exchanges.GenericDelete))
+        if (e.ExchangeName == GetExchangeName(ExchangeNames.GenericDelete))
         {
             logger.LogInformation($"Received request for delete item of type {typeof(T).Name}");
             DeleteItemRequestReceived?.Invoke(this, e.Value as T);
         }
-        if (e.ExchangeName == GetExchangeName(Exchanges.GenericItemList))
+        if (e.ExchangeName == GetExchangeName(ExchangeNames.GenericItemList))
         {
             logger.LogInformation($"Received List of {(e.Value as List<T>).Count} Items of type {typeof(T).Name}");
             ItemsReceived?.Invoke(this, e.Value as List<T>);
         }
-        if (e.ExchangeName == GetExchangeName(Exchanges.GenericItem))
+        if (e.ExchangeName == GetExchangeName(ExchangeNames.GenericItem))
         {
             logger.LogInformation($"Received Item if type {typeof(T).Name}");
             ItemReceived?.Invoke(this, e.Value as T);
@@ -61,22 +61,22 @@ public class RemoteCallResponder<T> : IRemoteCallResponder<T> where T : class
     public async Task SendAllItems(List<T> items)
     {
         logger.LogInformation($"Sending {items.Count} items of type {typeof(T).Name}");
-        await messagingManager.SendMessageResponse(items, GetExchangeName(Exchanges.GenericGetAll));
+        await messagingManager.SendMessageResponse(items, GetExchangeName(ExchangeNames.GenericGetAll));
     }
     public async Task SendOneItem(T item)
     {
         logger.LogInformation($"Sending one item of type {typeof(T).Name}");
-        await messagingManager.SendMessageResponse(item, GetExchangeName(Exchanges.GenericGetOne));
+        await messagingManager.SendMessageResponse(item, GetExchangeName(ExchangeNames.GenericGetOne));
     }
     public async Task SendUpsertedItem(T item)
     {
         logger.LogInformation($"Sending upserted item of type {typeof(T).Name}");
-        await messagingManager.SendMessageResponse(item, GetExchangeName(Exchanges.GenericUpsert));
+        await messagingManager.SendMessageResponse(item, GetExchangeName(ExchangeNames.GenericUpsert));
     }
     public async Task SendDeletedResponse(bool result)
     {
         logger.LogInformation($"Sending deleted response of type {typeof(T).Name}");
-        await messagingManager.SendMessageResponse(result, GetExchangeName(Exchanges.GenericDelete));
+        await messagingManager.SendMessageResponse(result, GetExchangeName(ExchangeNames.GenericDelete));
     }
     private string GetExchangeName(string methodSpecificTopic)
     {
