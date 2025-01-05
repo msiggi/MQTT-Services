@@ -283,10 +283,15 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
 
             using (var certificate = certRequest.CreateSelfSigned(DateTimeOffset.Now.AddMinutes(-10), DateTimeOffset.Now.AddMinutes(10)))
             {
-                var pfxCertificate = new X509Certificate2(
+                var pfxCertificate = X509CertificateLoader.LoadPkcs12(
                     certificate.Export(X509ContentType.Pfx),
                     (string)null!,
                     X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.Exportable);
+
+                //var pfxCertificate = new X509Certificate2(
+                //    certificate.Export(X509ContentType.Pfx),
+                //    (string)null!,
+                //    X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.Exportable);
 
                 return pfxCertificate;
             }
