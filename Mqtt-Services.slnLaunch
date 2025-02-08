@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Broker & Client",
+    "Projects": [
+      {
+        "Path": "Samples\\SampleWorkerService_Client\\SampleWorkerService_Client.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "SampleWebApiWithMqttBroker\\SampleWebApiWithMqttBroker.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
