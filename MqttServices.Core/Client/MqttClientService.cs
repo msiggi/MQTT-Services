@@ -82,35 +82,49 @@ public class MqttClientService : IDisposable, IMqttClientService
     {
         if (mqttClient.IsConnected)
         {
-            var serializeOptions = new JsonSerializerOptions
+            try
             {
-                WriteIndented = true
-            };
+                var serializeOptions = new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                };
 
-            if (mqttClientSettings.SerializeWithCamelCase)
-                serializeOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                if (mqttClientSettings.SerializeWithCamelCase)
+                    serializeOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 
-            if (mqttClientSettings.IgnoreCycles)
-                serializeOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                if (mqttClientSettings.IgnoreCycles)
+                    serializeOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 
-            var applicationMessage = new MqttApplicationMessageBuilder()
-                   .WithTopic(topic)
-                   .WithPayload(JsonSerializer.Serialize(payload, serializeOptions))
-                   .Build();
+                var applicationMessage = new MqttApplicationMessageBuilder()
+                       .WithTopic(topic)
+                       .WithPayload(JsonSerializer.Serialize(payload, serializeOptions))
+                       .Build();
 
-            await mqttClient.InternalClient.PublishAsync(applicationMessage, CancellationToken.None);
+                await mqttClient.InternalClient.PublishAsync(applicationMessage, CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error PublishMessage");
+            }
         }
     }
     public async Task PublishMessage(string topic, string payload)
     {
-        if (mqttClient.IsConnected)
+        try
         {
-            var applicationMessage = new MqttApplicationMessageBuilder()
-                   .WithTopic(topic)
-                   .WithPayload(payload)
-                   .Build();
+            if (mqttClient.IsConnected)
+            {
+                var applicationMessage = new MqttApplicationMessageBuilder()
+                       .WithTopic(topic)
+                       .WithPayload(payload)
+                       .Build();
 
-            await mqttClient.InternalClient.PublishAsync(applicationMessage, CancellationToken.None);
+                await mqttClient.InternalClient.PublishAsync(applicationMessage, CancellationToken.None);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error PublishMessage");
         }
     }
 
