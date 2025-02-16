@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQTTnet;
-using MQTTnet.Client;
-using MQTTnet.Extensions.ManagedClient;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
@@ -14,10 +12,10 @@ public class MqttClientService : IDisposable, IMqttClientService
 {
     private readonly MqttClientSettings mqttClientSettings;
     private readonly ILogger<MqttClientService> logger;
-    private IManagedMqttClient mqttClient;
+    private IMqttClient mqttClient;
 
     public event EventHandler<MqttClientConnectedEventArgs>? ClientConnected;
-    public event EventHandler<ConnectingFailedEventArgs>? ClientConnectionFailed;
+    //public event EventHandler<ConnectingFailedEventArgs>? ClientConnectionFailed;
     public event EventHandler<MqttApplicationMessageReceivedEventArgs>? MessageReceived;
     public bool IsConnected { get; set; }
 
@@ -48,9 +46,9 @@ public class MqttClientService : IDisposable, IMqttClientService
             return;
         }
 
-        mqttClient = new MqttFactory().CreateManagedMqttClient();
+        mqttClient = new MqttClientFactory().CreateMqttClient();
         mqttClient.ConnectedAsync += MqttClient_ConnectedAsync;
-        mqttClient.ConnectingFailedAsync += MqttClient_ConnectingFailedAsync;
+       // mqttClient.ConnectingFailedAsync += MqttClient_ConnectingFailedAsync;
         mqttClient.ApplicationMessageReceivedAsync += MqttClient_ApplicationMessageReceivedAsync;
 
         if (this.mqttClientSettings.Enabled)
