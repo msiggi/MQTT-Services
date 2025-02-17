@@ -10,6 +10,7 @@ public interface IMqttClientService
     bool IsConnected { get; set; }
 
     Task Connect();
+    Task Disconnect();
     void Dispose();
     Task PublishMessage(string topic, object payload);
     Task PublishMessage(string topic, string payload);

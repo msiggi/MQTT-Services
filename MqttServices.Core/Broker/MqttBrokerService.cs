@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using MQTTnet;
 using MQTTnet.Diagnostics;
+using MQTTnet.Diagnostics.Logger;
 using MQTTnet.Protocol;
 using MQTTnet.Server;
 using System.Net;
@@ -96,7 +97,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
                 .WithDefaultEndpointPort(this.mqttBrokerSettings.Port.Value);
         }
 
-        mqttServer = new MqttFactory(new ConsoleLogger()).CreateMqttServer(optionsBuilder.Build());
+        mqttServer = new MqttServerFactory(new ConsoleLogger()).CreateMqttServer(optionsBuilder.Build());
         mqttServer.ValidatingConnectionAsync += this.ValidateConnectionAsync;
         mqttServer.InterceptingSubscriptionAsync += this.InterceptSubscriptionAsync;
         mqttServer.InterceptingPublishAsync += this.InterceptApplicationMessagePublishAsync;
@@ -224,7 +225,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
     /// <param name="args">The arguments.</param>
     private void LogMessage(InterceptingPublishEventArgs args)
     {
-        var payload = args.ApplicationMessage?.PayloadSegment == null ? null : Encoding.UTF8.GetString(args.ApplicationMessage.PayloadSegment);
+        var payload = args.ApplicationMessage?.Payload == null ? null : Encoding.UTF8.GetString(args.ApplicationMessage.Payload);
 
         logger?.LogInformation(
             "Message: ClientId = {ClientId}, Topic = {Topic}, Payload = {Payload}, QoS = {Qos}, Retain-Flag = {RetainFlag}",

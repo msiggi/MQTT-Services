@@ -1,4 +1,4 @@
-using MQTTnet.Client;
+using MQTTnet;
 using MqttServices.Core.Broker;
 using MqttServices.Core.Client;
 using System.Text;
@@ -32,7 +32,7 @@ namespace SampleWorkerService_BrokerAndClient
         {
             _logger.LogInformation($"Receiving {e.ApplicationMessage.Topic}");
 
-            var json = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+            var json = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
             TestPayload payload = JsonSerializer.Deserialize<TestPayload>(json);
 
             _logger.LogInformation($"Received Payload: {payload.Name} {payload.DateTime} {payload.Number}");

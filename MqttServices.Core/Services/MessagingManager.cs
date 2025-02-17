@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using MqttServices.Core.Client;
 using MqttServices.Core.Common;
+using System.Buffers;
 using System.Text;
 using System.Text.Json;
 
@@ -32,11 +33,11 @@ public class MessagingManager : IMessagingManager
         }
     }
 
-    private async void MqttClientService_MessageReceived(object? sender, MQTTnet.Client.MqttApplicationMessageReceivedEventArgs e)
+    private async void MqttClientService_MessageReceived(object? sender, MQTTnet.MqttApplicationMessageReceivedEventArgs e)
     {
         if (e.ApplicationMessage.Topic == subscribeRequestTopic)
         {
-            Payload payload = DeserializePayloadObject(e.ApplicationMessage.PayloadSegment);
+            Payload payload = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
 
             if (payload is not null)
             {
@@ -47,7 +48,7 @@ public class MessagingManager : IMessagingManager
         }
         if (e.ApplicationMessage.Topic.Contains(resonseTopicSuffix))
         {
-            Payload payload = DeserializePayloadObject(e.ApplicationMessage.PayloadSegment);
+            Payload payload = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
 
             if (payload is not null)
             {
@@ -58,7 +59,7 @@ public class MessagingManager : IMessagingManager
 
         if (e.ApplicationMessage.Topic == subscribeMessageTopic)
         {
-            Payload payloadMessageReceived = DeserializePayloadObject(e.ApplicationMessage.PayloadSegment);
+            Payload payloadMessageReceived = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
 
             if (payloadMessageReceived is not null)
             {
@@ -66,7 +67,7 @@ public class MessagingManager : IMessagingManager
             }
         }
     }
-    public Payload DeserializePayloadObject(ArraySegment<byte> bytes)
+    public Payload DeserializePayloadObject(byte[] bytes)
     {
         try
         {
@@ -105,7 +106,7 @@ public class MessagingManager : IMessagingManager
         }
         return null;
     }
-    private async void MqttClientService_ClientConnected(object? sender, MQTTnet.Client.MqttClientConnectedEventArgs e)
+    private async void MqttClientService_ClientConnected(object? sender, MQTTnet.MqttClientConnectedEventArgs e)
     {
         logger.LogInformation("MqttClientService MQTT-Client connected!");
         await mqttClientService.Subscribe(subscribeRequestTopic);
