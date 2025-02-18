@@ -32,8 +32,6 @@ public class RequestWorker : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        Thread.Sleep(2000);
-
         // Test Simple Messaging
         var payloadPerson = new PersonData
         {
@@ -42,7 +40,9 @@ public class RequestWorker : IHostedService
             //OwnedCars = new List<OwnedCar> { new OwnedCar { Model = "Porsche" } }
         };
 
-        await messagingManager.SendMessage<PersonData>(payloadPerson, "guitarplayers");
+        await Task.Delay(3000, cancellationToken);
+        await messagingManager.SendMessageRequest<PersonData>(payloadPerson, "guitarplayers");
+        logger.LogInformation("**** Message sent!");
 
         // Test Request-Response 1
         //var payloadPersonRequest = new PersonDataRequest

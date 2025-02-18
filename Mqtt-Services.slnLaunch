@@ -3,11 +3,37 @@
     "Name": "Broker & Client",
     "Projects": [
       {
-        "Path": "Samples\\SampleWorkerService_Client\\SampleWorkerService_Client.csproj",
+        "Path": "SampleRemoteRequester\\SampleRemoteRequester.csproj",
         "Action": "Start"
       },
       {
-        "Path": "SampleWebApiWithMqttBroker\\SampleWebApiWithMqttBroker.csproj",
+        "Path": "SampleRemoteResponder\\SampleRemoteResponder.csproj",
+        "Action": "Start"
+      }
+    ]
+  },
+  {
+    "Name": "Request & Response",
+    "Projects": [
+      {
+        "Path": "SampleRemoteRequester\\SampleRemoteRequester.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "SampleRemoteResponder\\SampleRemoteResponder.csproj",
+        "Action": "Start"
+      }
+    ]
+  },
+  {
+    "Name": "Two Sample Clients",
+    "Projects": [
+      {
+        "Path": "SampleClientMessaging1\\SampleClientMessaging1.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "SampleClientMessaging2\\SampleClientMessaging2.csproj",
         "Action": "Start"
       }
     ]
