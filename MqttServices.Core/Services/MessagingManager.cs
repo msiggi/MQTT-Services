@@ -30,6 +30,7 @@ public class MessagingManager : IMessagingManager
             this.mqttClientService = mqttClientService;
             this.mqttClientService.ClientConnected += MqttClientService_ClientConnected;
             this.mqttClientService.MessageReceived += MqttClientService_MessageReceived;
+            this.mqttClientService.Connect();
         }
     }
 

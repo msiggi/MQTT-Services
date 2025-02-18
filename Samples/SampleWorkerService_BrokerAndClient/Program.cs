@@ -2,6 +2,7 @@ using SampleWorkerService_BrokerAndClient;
 using MqttServices.Core.Common;
 using MqttServices.Core.Broker;
 using MqttServices.Core.Client;
+using MqttServices.Core.Services;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
@@ -11,6 +12,7 @@ IHost host = Host.CreateDefaultBuilder(args)
 
         // for MQTT-Client
         services.AddMqttClientService(opts => context.Configuration.GetSection(nameof(MqttClientSettings)).Bind(opts));
+
         services.AddHostedService<Worker>();
     })
     .Build();

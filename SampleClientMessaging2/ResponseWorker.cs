@@ -1,6 +1,7 @@
 using MqttServices.Core.Common;
 using MqttServices.Core.Services;
 using SampleCommon;
+using System.Numerics;
 
 namespace SampleClientMessaging2;
 
@@ -21,36 +22,21 @@ public class ResponseWorker : IHostedService
     {
         if (e.ExchangeName == "guitarplayers")
         {
-            PersonData person = (PersonData)e.Value;
-            logger.LogInformation($"**** Message Received, Person {person.Name}!");
+            GuitarPlayer player = (GuitarPlayer)e.Value;
+            logger.LogInformation($"**** Message Received with GuitarPlayer {player.Name}!");
+
         }
     }
 
     private void MessagingManager_RequestReceived(object? sender, Payload e)
     {
-        if (e.ExchangeName == Configs.personExchangeName)
+        if (e.ExchangeName == Configs.GuitarPlayersExchangeName)
         {
-            var person = (PersonDataRequest)e.Value;
-            logger.LogInformation($"**** Request Received, Person {person.PersonId} requested, sending Answer...!");
+            var player = (GuitarPlayer)e.Value;
+            logger.LogInformation($"**** Message Received with GuitarPlayer {player.Name}, add Guitar and send it back!");
 
-            var personId = person.PersonId;
-
-            // *****************************************
-            // get complete Person per Id from elsewhere
-            // .................
-            // *****************************************
-
-            PersonDataResponse personResponse = new PersonDataResponse
-            {
-                PersonData = new PersonData
-                {
-                    PersonId = personId,
-                    Name = "Max Mustermann",
-                    Birthday = new DateTime(1999, 4, 1)
-                }
-            };
-
-            messagingManager.SendMessageResponse<PersonDataResponse>(personResponse, e.ExchangeName);
+            player.OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "White" } };
+            messagingManager.SendMessageResponse<GuitarPlayer>(player, e.ExchangeName);
         }
         if (e.ExchangeName == Configs.cityExchangeName)
         {
@@ -84,6 +70,7 @@ public class ResponseWorker : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
+        Console.Title = "Responder";
         return Task.CompletedTask;
     }
 
