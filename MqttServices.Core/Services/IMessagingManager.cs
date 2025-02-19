@@ -9,7 +9,8 @@ public interface IMessagingManager
     event EventHandler<Payload> ResponseReceived;
 
     Task SendMessage<T>(T payload, string exchangeName);
-    Task SendMessageRequest<T>(T payload, string exchangeName);
+    Task<Guid> SendMessageRequest<T>(T payload, string exchangeName);
+    
     /// <summary>
     /// Sends a message using default exchange name, which will be derived from the type of the payload
     /// </summary>
@@ -17,6 +18,7 @@ public interface IMessagingManager
     /// <param name="payload"></param>
     /// <returns></returns>
     Task SendMessage<T>(T payload);
+    
     /// <summary>
     /// Sends a message request using default exchange name, which will be derived from the type of the payload,
     /// expecting answer in ResponseReceived-Event
@@ -24,22 +26,20 @@ public interface IMessagingManager
     /// <typeparam name="T"></typeparam>
     /// <param name="payload"></param>
     /// <returns></returns>
-    Task SendMessageRequest<T>(T payload);
-    /// <summary>
-    /// Sends a message request using default exchange name, which will be derived from the type of the payload,
-    /// expecting answer in ResponseReceived-Event, which returned also the guid, which can be used to assign the response to the request
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="payload"></param>
-    /// <param name="guid"></param>
-    /// <returns></returns>
-    Task SendIdentifiedMessageRequest<T>(T payload, Guid guid);
+    Task<Guid> SendMessageRequest<T>(T payload);
+
+
+    Task<Guid> SendMessageRequest<T>(T payload, RequestType requestType);
+    Task<Guid> SendMessageRequest(string exchangeName, RequestType requestType);
+
+
     /// <summary>
     /// Sends a message request, just to trigger something on the other side without expecting an answer
     /// </summary>
     /// <param name="exchangeName"></param>
     /// <returns></returns>
     Task SendMessageRequest(string exchangeName);
+    
     /// <summary>
     /// Sends a respond message to a request
     /// </summary>
@@ -48,4 +48,5 @@ public interface IMessagingManager
     /// <param name="exchangeName"></param>
     /// <returns></returns>
     Task SendMessageResponse<T>(T payload, string exchangeName);
+    Task SendMessageResponse(Payload payload);
 }

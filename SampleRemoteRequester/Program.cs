@@ -7,7 +7,7 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddHostedService<Worker>();
 builder.Services.AddMqttClientService(opts => builder.Configuration.GetSection(nameof(MqttClientSettings)).Bind(opts));
 
-builder.Services.AddRemoteCallRequester<GuitarPlayer>("topicPrefix");
+//builder.Services.AddRemoteCallRequester<GuitarPlayer>("topicPrefix");
 
 var host = builder.Build();
 host.Run();

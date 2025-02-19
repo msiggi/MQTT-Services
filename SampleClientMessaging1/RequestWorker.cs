@@ -74,7 +74,7 @@ public class RequestWorker : IHostedService
             Console.WriteLine("1. Send Simple Message");
             Console.WriteLine("2. Send Trigger Message");
             Console.WriteLine("3. Send Message Request");
-            Console.WriteLine("4. Send Identified Message Request");
+            Console.WriteLine("4. Send Message Request for all GuitarPlayers");
             Console.WriteLine("5. Exit");
 
             var input = Console.ReadLine();
@@ -83,15 +83,19 @@ public class RequestWorker : IHostedService
             {
                 case "1":
                     await SendSimpleMessage(guitarPlayer1, guitarPlayer2);
+                    await StartDemo();
                     break;
                 case "2":
                     await SendTriggerMessage();
+                    await StartDemo();
                     break;
                 case "3":
                     await SendMessageRequest(guitarPlayer1, guitarPlayer2);
+                    await StartDemo();
                     break;
                 case "4":
-                    await SendIdentifiedMessageRequest(guitarPlayer1);
+                    await SendMessageRequestForAll();
+                    await StartDemo();
                     break;
                 case "5":
                     return;
@@ -138,17 +142,15 @@ public class RequestWorker : IHostedService
         await messagingManager.SendMessageRequest(guitarPlayer2);
         Console.WriteLine($"**** Message sent ({guitarPlayer2.Name})!");
     }
-
-    private async Task SendIdentifiedMessageRequest(GuitarPlayer guitarPlayer1)
+    private async Task SendMessageRequestForAll()
     {
         Console.WriteLine();
         Console.WriteLine();
         Console.ForegroundColor = ConsoleColor.Green;
-        Guid guid = Guid.NewGuid();
-        Console.WriteLine($"Simple SendMessage with data awaiting Response using guid {guid}");
+        Console.WriteLine("Send Request Get all GuitarPlayers");
         Console.ResetColor();
-        await messagingManager.SendIdentifiedMessageRequest(guitarPlayer1, guid);
-        Console.WriteLine($"**** Message sent ({guitarPlayer1.Name})!");
+        await messagingManager.SendMessageRequest(Configs.guitarPlayersExchangeName, RequestType.GetAll);
+        Console.WriteLine($"**** {RequestType.GetAll} Request sent!");
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

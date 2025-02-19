@@ -32,15 +32,32 @@ public class ResponseWorker : IHostedService
         }
     }
 
-    private void MessagingManager_RequestReceived(object? sender, Payload e)
+    private async void MessagingManager_RequestReceived(object? sender, Payload e)
     {
         if (e.ExchangeName == Configs.guitarPlayersExchangeName)
         {
-            var player = (GuitarPlayer)e.Value;
-            Console.WriteLine($"**** Message Received with GuitarPlayer {player.Name}, add Guitar and send it back!");
+            if (e.RequestType == RequestType.GetAll)
+            {
+                Console.WriteLine($"**** Request Received for all GuitarPlayers, send them back!");
+                var players = new List<GuitarPlayer>
+                {
+                    new GuitarPlayer { Name = "Jimi Hendrix", OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "Sunburst" } } },
+                    new GuitarPlayer { Name = "Eric Clapton", OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "Black" } } },
+                    new GuitarPlayer { Name = "Jimmy Page", OwnedGuitars = new List<Guitar> { new Guitar { Model = "Les Paul", Brand = "Gibson", Color = "Sunburst" } } },
+                    new GuitarPlayer { Name = "David Gilmour", OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "Black" } } }
+                };
+                e.Value = players;
+            }
 
-            player.OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "White" } };
-            messagingManager.SendMessageResponse<GuitarPlayer>(player, e.ExchangeName);
+            if (e.RequestType == RequestType.Generic)
+            {
+                var player = (GuitarPlayer)e.Value;
+                Console.WriteLine($"**** Message Received with GuitarPlayer {player.Name}, add Guitar and send it back!");
+
+                player.OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "White" } };
+                e.Value = player;
+            }
+            await messagingManager.SendMessageResponse(e);
         }
 
         if (e.ExchangeName == Configs.triggerExchangeName)
@@ -56,17 +73,10 @@ public class ResponseWorker : IHostedService
 
             player.OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "Sunburst" } };
 
-            if (e.MessageId == Guid.Empty)
-            {
-                messagingManager.SendMessageResponse<GuitarPlayer>(player, e.ExchangeName);
-            }
-            else
-            {
-                Payload payload = new Payload(e.ExchangeName, player, e.MessageId);
-                messagingManager.SendMessageResponse<Payload>(payload, e.ExchangeName);
-            }
-        }
+            e.Value = player;
+            await messagingManager.SendMessageResponse(e);
 
+        }
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
