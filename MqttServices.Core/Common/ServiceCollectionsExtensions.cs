@@ -34,15 +34,26 @@ public static class ServiceCollectionsExtensions
 
         return services;
     }
-
-    public static IServiceCollection AddMqttClientService(this IServiceCollection services, Action<MqttClientSettings> setupAction)
+    /// <summary>
+    /// Adds the MqttClientService to the service collection.
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="setupAction"></param>
+    /// <param name="exchangeTopicPrefix">An unique string to distinguish the remote calls to other applications. It must be euqal for all applications which
+    /// must call to each other</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    public static IServiceCollection AddMqttClientService(this IServiceCollection services, Action<MqttClientSettings> setupAction, string exchangeTopicPrefix = "mqttservices")
     {
         if (services == null) throw new ArgumentNullException(nameof(services));
         if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
 
         services.Configure(setupAction);
         services.AddSingleton<IMqttClientService, MqttClientService>();
-
+        services.AddSingleton<IMessagingManager>(provider =>
+        {
+            return (IMessagingManager)ActivatorUtilities.CreateInstance(provider, typeof(MessagingManager), exchangeTopicPrefix);
+        });
         return services;
     }
     /// <summary>

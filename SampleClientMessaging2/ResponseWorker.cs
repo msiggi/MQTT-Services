@@ -20,50 +20,51 @@ public class ResponseWorker : IHostedService
 
     private void MessagingManager_MessageReceived(object? sender, Payload e)
     {
-        if (e.ExchangeName == "guitarplayers")
+        if (e.ExchangeName == Configs.guitarPlayersSendExchangeName)
         {
             GuitarPlayer player = (GuitarPlayer)e.Value;
-            logger.LogInformation($"**** Message Received with GuitarPlayer {player.Name}!");
-
+            Console.WriteLine($"**** Message Received with GuitarPlayer {player.Name}!");
+        }
+        if (e.ExchangeName == typeof(GuitarPlayer).Name)
+        {
+            GuitarPlayer player = (GuitarPlayer)e.Value;
+            Console.WriteLine($"**** Message Received with GuitarPlayer {player.Name} (using Default Exchange Name)!");
         }
     }
 
     private void MessagingManager_RequestReceived(object? sender, Payload e)
     {
-        if (e.ExchangeName == Configs.GuitarPlayersExchangeName)
+        if (e.ExchangeName == Configs.guitarPlayersExchangeName)
         {
             var player = (GuitarPlayer)e.Value;
-            logger.LogInformation($"**** Message Received with GuitarPlayer {player.Name}, add Guitar and send it back!");
+            Console.WriteLine($"**** Message Received with GuitarPlayer {player.Name}, add Guitar and send it back!");
 
             player.OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "White" } };
             messagingManager.SendMessageResponse<GuitarPlayer>(player, e.ExchangeName);
         }
-        if (e.ExchangeName == Configs.cityExchangeName)
-        {
-            var city = (AddressDataRequest)e.Value;
-            logger.LogInformation($"**** Request Received, City {city.CityId} requested, sending Answer...!");
 
-            var cityId = city.CityId;
-
-            // *****************************************
-            // get complete Address per Id from elsewhere
-            // .................
-            // *****************************************
-
-            AddressData address = new AddressData
-            {
-                CityId = cityId,
-                CityName = "Dresden",
-                Street = "Washingtonstraﬂe",
-                Number = 16
-            };
-
-            messagingManager.SendMessageResponse<AddressData>(address, e.ExchangeName);
-        }
         if (e.ExchangeName == Configs.triggerExchangeName)
         {
-            logger.LogInformation($"**** Trigger-Request without Payload Received!");
+            Console.WriteLine($"**** Trigger-Request without Payload Received!");
             // Do something with this!
+        }
+
+        if (e.ExchangeName == typeof(GuitarPlayer).Name)
+        {
+            var player = (GuitarPlayer)e.Value;
+            Console.WriteLine($"**** Message Received with GuitarPlayer {player.Name}, add Guitar and send it back!");
+
+            player.OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "Sunburst" } };
+
+            if (e.MessageId == Guid.Empty)
+            {
+                messagingManager.SendMessageResponse<GuitarPlayer>(player, e.ExchangeName);
+            }
+            else
+            {
+                Payload payload = new Payload(e.ExchangeName, player, e.MessageId);
+                messagingManager.SendMessageResponse<Payload>(payload, e.ExchangeName);
+            }
         }
 
     }

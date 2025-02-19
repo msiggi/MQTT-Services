@@ -4,8 +4,8 @@ using SampleClientMessaging2;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddSingleton<IMessagingManager, MessagingManager>();
-builder.Services.AddMqttClientService(opts => builder.Configuration.GetSection(nameof(MqttClientSettings)).Bind(opts));
+//builder.Services.AddSingleton<IMessagingManager, MessagingManager>();
+builder.Services.AddMqttClientService(opts => builder.Configuration.GetSection(nameof(MqttClientSettings)).Bind(opts), "testapp");
 
 builder.Services.AddHostedService<ResponseWorker>();
 

@@ -19,38 +19,27 @@ public class RequestWorker : IHostedService
 
     private void MessagingManager_ResponseReceived(object? sender, Payload e)
     {
-        if (e.ExchangeName == Configs.GuitarPlayersExchangeName)
+        if (e.ExchangeName == Configs.guitarPlayersExchangeName)
         {
             GuitarPlayer player = (GuitarPlayer)e.Value;
-            logger.LogInformation($"**** Response Received with GuitarPlayer {player.Name} owned a {player.OwnedGuitars.FirstOrDefault().Color} {player.OwnedGuitars.FirstOrDefault().Brand} {player.OwnedGuitars.FirstOrDefault().Model}!");
+            Console.WriteLine($"**** Response Received with GuitarPlayer {player.Name} owned a {player.OwnedGuitars.FirstOrDefault().Color} {player.OwnedGuitars.FirstOrDefault().Brand} {player.OwnedGuitars.FirstOrDefault().Model}!");
         }
-        if (e.ExchangeName == Configs.cityExchangeName)
+        if (e.ExchangeName == typeof(GuitarPlayer).Name)
         {
-            logger.LogInformation($"**** Response Received with City {((AddressData)e.Value).CityName}!");
+            GuitarPlayer player = (GuitarPlayer)e.Value;
+            Console.WriteLine($"**** Response Received with GuitarPlayer {player.Name} owned a {player.OwnedGuitars.FirstOrDefault().Color} {player.OwnedGuitars.FirstOrDefault().Brand} {player.OwnedGuitars.FirstOrDefault().Model} (using Default Exchange Name)!");
+            if (e.MessageId != Guid.Empty)
+            {
+                Console.WriteLine($"MessageId: {e.MessageId}. Use it, to assign Response to Request");
+            }
         }
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         _ = StartDemo();
-
-        // Test Request-Response 1
-        //var payloadPersonRequest = new PersonDataRequest
-        //{
-        //    PersonId = 4711
-        //};
-        //await messagingManager.SendMessageRequest<PersonDataRequest>(payloadPersonRequest, Configs.personExchangeName);
-
-        //// Test Request-Response 2
-        //var payloadAddressRequest = new AddressDataRequest
-        //{
-        //    CityId = 815
-        //};
-        //await messagingManager.SendMessageRequest<AddressDataRequest>(payloadAddressRequest, Configs.cityExchangeName);
-
-        //// Test Request-Response 3 - without Request-Payload, just as a trigger
-        //await messagingManager.SendMessageRequest(Configs.triggerExchangeName);
     }
+
     public async Task StartDemo()
     {
         await Task.Delay(1000);
@@ -67,31 +56,99 @@ public class RequestWorker : IHostedService
         Console.ResetColor();
         Console.WriteLine();
 
-        var guitarPlayer = new GuitarPlayer
+        var guitarPlayer1 = new GuitarPlayer
         {
             Name = "Jimi Hendrix",
             BirthDate = new DateTime(1942, 11, 27)
         };
 
-        Console.WriteLine("Press any key to send a simple message without expecting answer");
-        Console.ReadKey();
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write("Simple SendMessage (without Response)");
-        Console.ResetColor();
-        await messagingManager.SendMessage<GuitarPlayer>(guitarPlayer, "guitarplayers");
-        logger.LogInformation($"**** Message sent ({guitarPlayer.Name})!");
+        var guitarPlayer2 = new GuitarPlayer
+        {
+            Name = "Eric Clapton",
+            BirthDate = new DateTime(1945, 3, 30)
+        };
 
+        while (true)
+        {
+            Console.WriteLine("Select an option:");
+            Console.WriteLine("1. Send Simple Message");
+            Console.WriteLine("2. Send Trigger Message");
+            Console.WriteLine("3. Send Message Request");
+            Console.WriteLine("4. Send Identified Message Request");
+            Console.WriteLine("5. Exit");
+
+            var input = Console.ReadLine();
+
+            switch (input)
+            {
+                case "1":
+                    await SendSimpleMessage(guitarPlayer1, guitarPlayer2);
+                    break;
+                case "2":
+                    await SendTriggerMessage();
+                    break;
+                case "3":
+                    await SendMessageRequest(guitarPlayer1, guitarPlayer2);
+                    break;
+                case "4":
+                    await SendIdentifiedMessageRequest(guitarPlayer1);
+                    break;
+                case "5":
+                    return;
+                default:
+                    Console.WriteLine("Invalid option. Please try again.");
+                    break;
+            }
+        }
+    }
+
+    private async Task SendSimpleMessage(GuitarPlayer guitarPlayer1, GuitarPlayer guitarPlayer2)
+    {
         Console.WriteLine();
         Console.WriteLine();
-        Console.WriteLine("Press any key to send a message-Request expecting answer");
-        Console.ReadKey();
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write("Simple SendMessage (without Response)");
+        Console.WriteLine("Simple SendMessage with data (without Response, testing default and specific exchange name))");
         Console.ResetColor();
-        await messagingManager.SendMessageRequest<GuitarPlayer>(guitarPlayer, Configs.GuitarPlayersExchangeName);
-        logger.LogInformation($"**** Message sent ({guitarPlayer.Name})!");
+        await messagingManager.SendMessage<GuitarPlayer>(guitarPlayer1, Configs.guitarPlayersSendExchangeName);
+        Console.WriteLine($"**** Message sent ({guitarPlayer1.Name})!");
+        await messagingManager.SendMessage(guitarPlayer2);
+        Console.WriteLine($"**** Message sent ({guitarPlayer2.Name})!");
+    }
 
+    private async Task SendTriggerMessage()
+    {
+        Console.WriteLine();
+        Console.WriteLine();
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Simple SendMessage without data (without Response, to trigger something)");
+        Console.ResetColor();
+        await messagingManager.SendMessageRequest(Configs.triggerExchangeName);
+        Console.WriteLine($"**** Trigger-Message sent!");
+    }
 
+    private async Task SendMessageRequest(GuitarPlayer guitarPlayer1, GuitarPlayer guitarPlayer2)
+    {
+        Console.WriteLine();
+        Console.WriteLine();
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Simple SendMessage with data awaiting Response");
+        Console.ResetColor();
+        await messagingManager.SendMessageRequest<GuitarPlayer>(guitarPlayer1, Configs.guitarPlayersExchangeName);
+        Console.WriteLine($"**** Message sent ({guitarPlayer1.Name})!");
+        await messagingManager.SendMessageRequest(guitarPlayer2);
+        Console.WriteLine($"**** Message sent ({guitarPlayer2.Name})!");
+    }
+
+    private async Task SendIdentifiedMessageRequest(GuitarPlayer guitarPlayer1)
+    {
+        Console.WriteLine();
+        Console.WriteLine();
+        Console.ForegroundColor = ConsoleColor.Green;
+        Guid guid = Guid.NewGuid();
+        Console.WriteLine($"Simple SendMessage with data awaiting Response using guid {guid}");
+        Console.ResetColor();
+        await messagingManager.SendIdentifiedMessageRequest(guitarPlayer1, guid);
+        Console.WriteLine($"**** Message sent ({guitarPlayer1.Name})!");
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

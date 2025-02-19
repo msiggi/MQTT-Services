@@ -37,7 +37,21 @@ namespace MqttServices.Core.Services.Tests
             Assert.IsTrue(((Person)transferedPayload.Value).Name == person.Name);
         }
 
-    internal class Person
+        [TestMethod()]
+        public void DeserializePayloadObject_ContainsGuid()
+        {
+            Guid guid = Guid.NewGuid();
+            Person person = new Person { Name = "Max", Birthday = DateTime.Now.AddYears(-40) };
+            Payload payload = new Payload("testexchange", person, guid);
+
+            var serializedPayload = JsonSerializer.Serialize(payload);
+            Payload transferedPayload = messagingManager.DeserializePayloadObject(Encoding.ASCII.GetBytes(serializedPayload));
+
+            Assert.IsTrue(transferedPayload is not null);
+            Assert.IsTrue(transferedPayload.MessageId == guid);
+        }
+
+        internal class Person
     {
         public string Name { get; set; }
         public DateTime Birthday { get; set; }
