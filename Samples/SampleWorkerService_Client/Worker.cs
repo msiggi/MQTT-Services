@@ -1,3 +1,4 @@
+using MQTTnet.Client;
 using MqttServices.Core.Client;
 
 namespace SampleWorkerService_Client
@@ -11,9 +12,19 @@ namespace SampleWorkerService_Client
         {
             _logger = logger;
             this.mqttClientService = mqttClientService;
+            this.mqttClientService.ClientConnected += MqttClientService_ClientConnected;
+            this.mqttClientService.MessageReceived += MqttClientService_MessageReceived;
         }
 
+        private void MqttClientService_MessageReceived(object? sender, MqttApplicationMessageReceivedEventArgs e)
+        {
+            
+        }
 
+        private void MqttClientService_ClientConnected(object? sender, MqttClientConnectedEventArgs e)
+        {
+            mqttClientService.Subscribe("testtopic");
+        }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

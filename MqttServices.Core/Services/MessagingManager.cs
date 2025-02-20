@@ -94,10 +94,39 @@ public class MessagingManager : IMessagingManager
             var jsonString = Encoding.UTF8.GetString(bytes);
             Payload payload = JsonSerializer.Deserialize<Payload>(jsonString);
 
-            if (payload.Value is not null && payload.ValueType is not null)
+            if (payload.Value is not null)
             {
                 var options = new JsonSerializerOptions();
                 options.PropertyNameCaseInsensitive = true;
+
+
+                //// Versuche, das Value-Feld direkt zu deserialisieren
+                //object deserializedValue = JsonSerializer.Deserialize(payload.Value.ToString(), typeof(object), options);
+                //// Überprüfe den Typ des deserialisierten Werts
+                //if (deserializedValue is IEnumerable<object>)
+                //{
+                //    // Wenn es eine Liste von Objekten ist, deserialisiere jedes Element einzeln
+                //    var list = new List<object>();
+                //    foreach (var item in (IEnumerable<object>)deserializedValue)
+                //    {
+                //        list.Add(JsonSerializer.Deserialize(item.ToString(), typeof(object), options));
+                //    }
+
+                //    Payload retPayload = new Payload(payload.ExchangeName, list);
+                //    retPayload.ValueType = payload.ValueType;
+                //    retPayload.MessageId = payload.MessageId;
+                //    retPayload.RequestType = payload.RequestType;
+                //    return retPayload;
+                //}
+                //else
+                //{
+                //    // Wenn es ein einzelnes Objekt ist, verwende es direkt
+                //    Payload retPayload = new Payload(payload.ExchangeName, deserializedValue);
+                //    retPayload.ValueType = payload.ValueType;
+                //    retPayload.MessageId = payload.MessageId;
+                //    retPayload.RequestType = payload.RequestType;
+                //    return retPayload;
+                //}
 
 
                 Type genericType = Type.GetType(payload.ValueType);
