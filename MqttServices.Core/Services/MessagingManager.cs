@@ -94,10 +94,11 @@ public class MessagingManager : IMessagingManager
             var jsonString = Encoding.UTF8.GetString(bytes);
             Payload payload = JsonSerializer.Deserialize<Payload>(jsonString);
 
-            if (payload.Value is not null)
+            if (payload.Value is not null && payload.ValueType is not null)
             {
                 var options = new JsonSerializerOptions();
                 options.PropertyNameCaseInsensitive = true;
+
 
                 Type genericType = Type.GetType(payload.ValueType);
 

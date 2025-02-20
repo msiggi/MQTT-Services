@@ -90,7 +90,7 @@ public class MqttClientService : IDisposable, IMqttClientService
                         .WithClientId(mqttClientSettings.ServiceName + Guid.NewGuid().ToString())
                   .Build();
 
-                using var timeout = new CancellationTokenSource(3000);
+                using var timeout = new CancellationTokenSource(mqttClientOptions.Timeout);
                 MqttClientConnectResult result = await mqttClient.ConnectAsync(mqttClientOptions, timeout.Token);
                 if (result.ResultCode == MqttClientConnectResultCode.Success)
                 {
