@@ -1,29 +1,11 @@
 [
   {
     "Name": "Broker & Client",
-    "Projects": [
-      {
-        "Path": "SampleRemoteRequester\\SampleRemoteRequester.csproj",
-        "Action": "Start"
-      },
-      {
-        "Path": "SampleRemoteResponder\\SampleRemoteResponder.csproj",
-        "Action": "Start"
-      }
-    ]
+    "Projects": []
   },
   {
     "Name": "Request & Response",
-    "Projects": [
-      {
-        "Path": "SampleRemoteRequester\\SampleRemoteRequester.csproj",
-        "Action": "Start"
-      },
-      {
-        "Path": "SampleRemoteResponder\\SampleRemoteResponder.csproj",
-        "Action": "Start"
-      }
-    ]
+    "Projects": []
   },
   {
     "Name": "Two Sample Clients",
