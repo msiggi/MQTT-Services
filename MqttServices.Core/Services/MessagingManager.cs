@@ -140,7 +140,7 @@ public class MessagingManager : IMessagingManager
                     if (obj is not null)
                     {
                         Payload retPayload = new Payload(payload.ExchangeName, obj);
-                        retPayload.ValueType = payload.ValueType;
+                        //retPayload.ValueType = payload.ValueType;
                         retPayload.MessageId = payload.MessageId;
                         retPayload.RequestType = payload.RequestType;
                         return retPayload;
@@ -216,7 +216,7 @@ public class MessagingManager : IMessagingManager
         else
         {
             Thread.Sleep(500);
-            await SendMessageRequest(payload);
+            await SendMessageRequest(payload, requestType);
         }
         return guid;
     }
@@ -234,7 +234,7 @@ public class MessagingManager : IMessagingManager
         else
         {
             Thread.Sleep(500);
-            await SendMessageRequest(exchangeName);
+            await SendMessageRequest(exchangeName, requestType);
         }
         return guid;
     }
@@ -259,22 +259,7 @@ public class MessagingManager : IMessagingManager
             await SendMessageRequest(exchangeName);
         }
     }
-    public async Task SendIdentifiedMessageRequest<T>(T payload, Guid guid)
-    {
-        if (mqttClientService.IsConnected && payload is not null)
-        {
-            // subscribe for Response:
-            string exchangeName = payload.GetType().Name;
-            string topic = GetResponseTopic(exchangeName);
-            await mqttClientService.Subscribe(topic);
-            await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, payload, guid));
-        }
-        else
-        {
-            Thread.Sleep(500);
-            await SendMessageRequest(payload);
-        }
-    }
+    
 
 
     public async Task SendMessageResponse<T>(T payload, string exchangeName)

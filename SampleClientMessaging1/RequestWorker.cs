@@ -19,6 +19,16 @@ public class RequestWorker : IHostedService
 
     private void MessagingManager_ResponseReceived(object? sender, Payload e)
     {
+        if (e.RequestType == RequestType.GetAll && e.ExchangeName == Configs.guitarPlayersMultipleExchangeName)
+        {
+            var players = (List<GuitarPlayer>)e.Value;
+            Console.WriteLine($"**** Response Received with {players.Count} GuitarPlayers!");
+            foreach (var player in players)
+            {
+                Console.WriteLine($"**** Response Received with GuitarPlayer {player.Name} owned a {player.OwnedGuitars.FirstOrDefault().Color} {player.OwnedGuitars.FirstOrDefault().Brand} {player.OwnedGuitars.FirstOrDefault().Model}!");
+            }
+            return;
+        }
         if (e.ExchangeName == Configs.guitarPlayersExchangeName)
         {
             GuitarPlayer player = (GuitarPlayer)e.Value;
@@ -149,7 +159,7 @@ public class RequestWorker : IHostedService
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Send Request Get all GuitarPlayers");
         Console.ResetColor();
-        await messagingManager.SendMessageRequest(Configs.guitarPlayersExchangeName, RequestType.GetAll);
+        await messagingManager.SendMessageRequest(Configs.guitarPlayersMultipleExchangeName, RequestType.GetAll);
         Console.WriteLine($"**** {RequestType.GetAll} Request sent!");
     }
 
