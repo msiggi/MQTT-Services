@@ -22,6 +22,13 @@ public class MessagingManager : IMessagingManager
     public string SubscribeRequestTopicDefaultExchange { get => string.Concat(exchangeTopicPrefix, "subscribe__DefaultMessage"); }
 
     public event EventHandler<Payload> RequestReceived;
+    public event EventHandler<Payload> RequestOneReceived;
+    public event EventHandler<Payload> RequestAllReceived;
+    public event EventHandler<Payload> RequestUpsertReceived;
+    public event EventHandler<Payload> RequestUpdateReceived;
+    public event EventHandler<Payload> RequestInsertReceived;
+    public event EventHandler<Payload> ResponseDeleteReceived;
+
     public event EventHandler<Payload> ResponseReceived;
     public event EventHandler<Payload> MessageReceived;
 
@@ -40,17 +47,51 @@ public class MessagingManager : IMessagingManager
 
     private void MqttClientService_MessageReceived(object? sender, MQTTnet.MqttApplicationMessageReceivedEventArgs e)
     {
-        if (e.ApplicationMessage.Topic == SubscribeRequestTopic)
+        if (e.ApplicationMessage.Topic == SubscribeRequestTopic || e.ApplicationMessage.Topic == SubscribeMessageTopicDefaultExchange)
         {
             Payload payload = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
 
             if (payload is not null)
             {
-                RequestReceived?.Invoke(this, payload);
+                switch (payload.RequestType)
+                {
+                    case RequestType.Generic:
+                        RequestReceived?.Invoke(this, payload);
+                        break;
+                    case RequestType.GetOne:
+                        RequestOneReceived?.Invoke(this, payload);
+                        break;
+                    case RequestType.GetAll:
+                        RequestAllReceived?.Invoke(this, payload);
+                        break;
+                    case RequestType.Upsert:
+                        RequestUpsertReceived?.Invoke(this, payload);
+                        break;
+                    case RequestType.Update:
+                        RequestUpdateReceived?.Invoke(this, payload);
+                        break;
+                    case RequestType.Insert:
+                        RequestInsertReceived?.Invoke(this, payload);
+                        break;
+                    case RequestType.Delete:
+                        ResponseDeleteReceived?.Invoke(this, payload);
+                        break;
+                    default:
+                        break;
+                }
             }
 
             return;
         }
+        //if (e.ApplicationMessage.Topic == SubscribeRequestTopicDefaultExchange)
+        //{
+        //    Payload payload = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
+        //    if (payload is not null)
+        //    {
+        //        RequestReceived?.Invoke(this, payload);
+        //    }
+        //}
+
         if (e.ApplicationMessage.Topic.Contains(resonseTopicSuffix))
         {
             Payload payload = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
@@ -78,14 +119,6 @@ public class MessagingManager : IMessagingManager
                 MessageReceived?.Invoke(this, payloadMessageReceived);
             }
         }
-        if (e.ApplicationMessage.Topic == SubscribeRequestTopicDefaultExchange)
-        {
-            Payload payload = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
-            if (payload is not null)
-            {
-                RequestReceived?.Invoke(this, payload);
-            }
-        }
     }
     public Payload DeserializePayloadObject(byte[] bytes)
     {
@@ -98,36 +131,6 @@ public class MessagingManager : IMessagingManager
             {
                 var options = new JsonSerializerOptions();
                 options.PropertyNameCaseInsensitive = true;
-
-
-                //// Versuche, das Value-Feld direkt zu deserialisieren
-                //object deserializedValue = JsonSerializer.Deserialize(payload.Value.ToString(), typeof(object), options);
-                //// Überprüfe den Typ des deserialisierten Werts
-                //if (deserializedValue is IEnumerable<object>)
-                //{
-                //    // Wenn es eine Liste von Objekten ist, deserialisiere jedes Element einzeln
-                //    var list = new List<object>();
-                //    foreach (var item in (IEnumerable<object>)deserializedValue)
-                //    {
-                //        list.Add(JsonSerializer.Deserialize(item.ToString(), typeof(object), options));
-                //    }
-
-                //    Payload retPayload = new Payload(payload.ExchangeName, list);
-                //    retPayload.ValueType = payload.ValueType;
-                //    retPayload.MessageId = payload.MessageId;
-                //    retPayload.RequestType = payload.RequestType;
-                //    return retPayload;
-                //}
-                //else
-                //{
-                //    // Wenn es ein einzelnes Objekt ist, verwende es direkt
-                //    Payload retPayload = new Payload(payload.ExchangeName, deserializedValue);
-                //    retPayload.ValueType = payload.ValueType;
-                //    retPayload.MessageId = payload.MessageId;
-                //    retPayload.RequestType = payload.RequestType;
-                //    return retPayload;
-                //}
-
 
                 Type genericType = Type.GetType(payload.ValueType);
 
@@ -259,7 +262,7 @@ public class MessagingManager : IMessagingManager
             await SendMessageRequest(exchangeName);
         }
     }
-    
+
 
 
     public async Task SendMessageResponse<T>(T payload, string exchangeName)

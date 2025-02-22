@@ -15,7 +15,25 @@ public class ResponseWorker : IHostedService
         this.logger = logger;
         this.messagingManager = messagingManager;
         this.messagingManager.RequestReceived += MessagingManager_RequestReceived;
+        this.messagingManager.RequestAllReceived += MessagingManager_RequestAllReceived;
         this.messagingManager.MessageReceived += MessagingManager_MessageReceived;
+    }
+
+    private async void MessagingManager_RequestAllReceived(object? sender, Payload e)
+    {
+        if (e.ExchangeName == Configs.guitarPlayersExchangeName)
+        {
+            Console.WriteLine($"**** Request Received for all GuitarPlayers, send them back!");
+            var players = new List<GuitarPlayer>
+                {
+                    new GuitarPlayer { Name = "Jimi Hendrix", OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "Sunburst" } } },
+                    new GuitarPlayer { Name = "Eric Clapton", OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "Black" } } },
+                    new GuitarPlayer { Name = "Jimmy Page", OwnedGuitars = new List<Guitar> { new Guitar { Model = "Les Paul", Brand = "Gibson", Color = "Sunburst" } } },
+                    new GuitarPlayer { Name = "David Gilmour", OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "Black" } } }
+                };
+            e.SetValue(players);
+            await messagingManager.SendMessageResponse(e);
+        }
     }
 
     private void MessagingManager_MessageReceived(object? sender, Payload e)
@@ -36,26 +54,13 @@ public class ResponseWorker : IHostedService
     {
         if (e.ExchangeName == Configs.guitarPlayersExchangeName)
         {
-            if (e.RequestType == RequestType.GetAll)
-            {
-                Console.WriteLine($"**** Request Received for all GuitarPlayers, send them back!");
-                var players = new List<GuitarPlayer>
-                {
-                    new GuitarPlayer { Name = "Jimi Hendrix", OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "Sunburst" } } },
-                    new GuitarPlayer { Name = "Eric Clapton", OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "Black" } } },
-                    new GuitarPlayer { Name = "Jimmy Page", OwnedGuitars = new List<Guitar> { new Guitar { Model = "Les Paul", Brand = "Gibson", Color = "Sunburst" } } },
-                    new GuitarPlayer { Name = "David Gilmour", OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "Black" } } }
-                };
-                e.Value = players;
-            }
-
             if (e.RequestType == RequestType.Generic)
             {
                 var player = (GuitarPlayer)e.Value;
                 Console.WriteLine($"**** Message Received with GuitarPlayer {player.Name}, add Guitar and send it back!");
 
                 player.OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "White" } };
-                e.Value = player;
+                e.SetValue(player);
             }
             await messagingManager.SendMessageResponse(e);
         }
@@ -72,10 +77,9 @@ public class ResponseWorker : IHostedService
             Console.WriteLine($"**** Message Received with GuitarPlayer {player.Name}, add Guitar and send it back!");
 
             player.OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "Sunburst" } };
+            e.SetValue(player);
 
-            e.Value = player;
             await messagingManager.SendMessageResponse(e);
-
         }
     }
 
