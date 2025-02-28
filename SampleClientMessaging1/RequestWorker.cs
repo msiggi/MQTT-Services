@@ -2,6 +2,7 @@ using MqttServices.Core.Common;
 using MqttServices.Core.Services;
 using SampleClientMessaging1.Services;
 using SampleCommon;
+using System.Threading.Tasks;
 
 namespace SampleClientMessaging1;
 
@@ -15,6 +16,12 @@ public class RequestWorker : IHostedService
         this.logger = logger;
         this.messagingManager = messagingManager;
         this.messagingManager.ResponseReceived += MessagingManager_ResponseReceived;
+        this.messagingManager.MqttConnected += MessagingManager_MqttConnected;
+    }
+
+    private async Task MessagingManager_MqttConnected(object? sender, EventArgs e)
+    {
+        await StartDemo();
     }
 
     private void MessagingManager_ResponseReceived(object? sender, Payload e)

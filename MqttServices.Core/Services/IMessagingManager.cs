@@ -12,10 +12,11 @@ public interface IMessagingManager
     event EventHandler<Payload> RequestUpdateReceived;
     event EventHandler<Payload> RequestInsertReceived;
     event EventHandler<Payload> ResponseReceived;
+    event EventHandler MqttConnected;
 
     Task SendMessage<T>(T payload, string exchangeName);
     Task<Guid> SendMessageRequest<T>(T payload, string exchangeName);
-    
+
     /// <summary>
     /// Sends a message using default exchange name, which will be derived from the type of the payload
     /// </summary>
@@ -23,7 +24,7 @@ public interface IMessagingManager
     /// <param name="payload"></param>
     /// <returns></returns>
     Task SendMessage<T>(T payload);
-    
+
     /// <summary>
     /// Sends a message request using default exchange name, which will be derived from the type of the payload,
     /// expecting answer in ResponseReceived-Event
@@ -44,7 +45,7 @@ public interface IMessagingManager
     /// <param name="exchangeName"></param>
     /// <returns></returns>
     Task SendMessageRequest(string exchangeName);
-    
+
     /// <summary>
     /// Sends a respond message to a request
     /// </summary>

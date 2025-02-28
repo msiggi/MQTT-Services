@@ -31,6 +31,7 @@ public class MessagingManager : IMessagingManager
 
     public event EventHandler<Payload> ResponseReceived;
     public event EventHandler<Payload> MessageReceived;
+    public event EventHandler MqttConnected;
 
     public MessagingManager(ILogger<MessagingManager> logger, IMqttClientService mqttClientService, string exchangeTopicPrefix = "")
     {
@@ -164,6 +165,7 @@ public class MessagingManager : IMessagingManager
     private async void MqttClientService_ClientConnected(object? sender, MQTTnet.MqttClientConnectedEventArgs e)
     {
         logger.LogInformation("MqttClientService MQTT-Client connected!");
+        MqttConnected?.Invoke(this, EventArgs.Empty);
         await mqttClientService.Subscribe(SubscribeRequestTopic);
         await mqttClientService.Subscribe(SubscribeMessageTopic);
         await mqttClientService.Subscribe(SubscribeMessageTopicDefaultExchange);
