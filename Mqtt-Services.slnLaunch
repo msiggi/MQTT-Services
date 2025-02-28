@@ -15,5 +15,22 @@
         "Action": "Start"
       }
     ]
+  },
+  {
+    "Name": "Broker and Clients",
+    "Projects": [
+      {
+        "Path": "SampleWebApiWithMqttBroker\\SampleWebApiWithMqttBroker.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "SampleClientMessaging1\\SampleClientMessaging1.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "SampleClientMessaging2\\SampleClientMessaging2.csproj",
+        "Action": "Start"
+      }
+    ]
   }
 ]

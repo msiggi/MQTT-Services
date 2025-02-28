@@ -16,7 +16,6 @@ public class MqttClientService : IDisposable, IMqttClientService
     private IMqttClient mqttClient;
 
     public event EventHandler<MqttClientConnectedEventArgs>? ClientConnected;
-    //public event EventHandler<ConnectingFailedEventArgs>? ClientConnectionFailed;
     public event EventHandler<MqttApplicationMessageReceivedEventArgs>? MessageReceived;
     public bool IsConnected { get; set; }
 
@@ -50,17 +49,17 @@ public class MqttClientService : IDisposable, IMqttClientService
         mqttClientFactory = new MqttClientFactory();
         mqttClient = mqttClientFactory.CreateMqttClient();
         mqttClient.ConnectedAsync += MqttClient_ConnectedAsync;
-        // mqttClient.ConnectingFailedAsync += MqttClient_ConnectingFailedAsync;
+        mqttClient.DisconnectedAsync += MqttClient_DisconnectedAsync;
         mqttClient.ApplicationMessageReceivedAsync += MqttClient_ApplicationMessageReceivedAsync;
+    }
 
-        //if (this.mqttClientSettings.Enabled)
-        //{
-        //    Connect().Wait();
-        //}
-        //else
-        //{
-        //    logger?.LogInformation("MQTT-Client is disabled per configuration");
-        //}
+    private async Task MqttClient_DisconnectedAsync(MqttClientDisconnectedEventArgs args)
+    {
+        IsConnected = false;
+        logger?.LogWarning($"MQTT-Client disconnected from {mqttClientSettings.BrokerHost}:{mqttClientSettings.BrokerPort}");
+        await Task.Delay(2000);
+        logger?.LogInformation("Reconnecting...");
+        await Connect();
     }
 
     private async Task MqttClient_ApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs arg)
