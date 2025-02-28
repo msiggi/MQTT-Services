@@ -224,7 +224,6 @@ public class MessagingManager : IMessagingManager, IDisposable
         }
         return guid;
     }
-
     public async Task<Guid> SendMessageRequest(string exchangeName, RequestType requestType)
     {
         Guid guid = Guid.NewGuid();
@@ -263,9 +262,6 @@ public class MessagingManager : IMessagingManager, IDisposable
             await SendMessageRequest(exchangeName);
         }
     }
-
-
-
     public async Task SendMessageResponse<T>(T payload, string exchangeName)
     {
         if (mqttClientService.IsConnected)
@@ -300,7 +296,6 @@ public class MessagingManager : IMessagingManager, IDisposable
             await SendMessageResponse(payload);
         }
     }
-
     public async Task SendMessage<T>(T payload, string exchangeName)
     {
         if (mqttClientService.IsConnected)
