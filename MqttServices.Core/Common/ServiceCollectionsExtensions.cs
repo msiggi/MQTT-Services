@@ -50,12 +50,31 @@ public static class ServiceCollectionsExtensions
 
         services.Configure(setupAction);
         services.AddSingleton<IMqttClientService, MqttClientService>();
+        //services.AddSingleton<IMessagingManager>(provider =>
+        //{
+        //    return (IMessagingManager)ActivatorUtilities.CreateInstance(provider, typeof(MessagingManager), exchangeTopicPrefix);
+        //});
+        return services;
+    }
+
+    public static IServiceCollection AddMqttMessagingService(this IServiceCollection services, Action<MqttClientSettings> setupAction, string exchangeTopicPrefix = "mqttservices")
+    {
+        if (services == null) throw new ArgumentNullException(nameof(services));
+        if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
+
+        services.Configure(setupAction);
+        services.AddSingleton<IMqttClientService>(provider =>
+        {
+            return (IMqttClientService)ActivatorUtilities.CreateInstance(provider, typeof(MqttClientService));
+        });
+     //   services.AddSingleton<IMessagingManager, MessagingManager>();
         services.AddSingleton<IMessagingManager>(provider =>
         {
             return (IMessagingManager)ActivatorUtilities.CreateInstance(provider, typeof(MessagingManager), exchangeTopicPrefix);
         });
         return services;
     }
+
     ///// <summary>
     ///// Adds both, the RemoteCallRequester and RemoteCallResponder services to the service collection.
     ///// </summary>

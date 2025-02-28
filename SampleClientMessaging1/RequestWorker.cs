@@ -16,12 +16,6 @@ public class RequestWorker : IHostedService
         this.logger = logger;
         this.messagingManager = messagingManager;
         this.messagingManager.ResponseReceived += MessagingManager_ResponseReceived;
-        this.messagingManager.MqttConnected += MessagingManager_MqttConnected;
-    }
-
-    private async Task MessagingManager_MqttConnected(object? sender, EventArgs e)
-    {
-        await StartDemo();
     }
 
     private void MessagingManager_ResponseReceived(object? sender, Payload e)
@@ -54,7 +48,7 @@ public class RequestWorker : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _ = StartDemo();
+        await StartDemo();
     }
 
     public async Task StartDemo()

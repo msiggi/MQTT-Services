@@ -12,7 +12,6 @@ public interface IMessagingManager
     event EventHandler<Payload> RequestUpdateReceived;
     event EventHandler<Payload> RequestInsertReceived;
     event EventHandler<Payload> ResponseReceived;
-    event EventHandler MqttConnected;
 
     Task SendMessage<T>(T payload, string exchangeName);
     Task<Guid> SendMessageRequest<T>(T payload, string exchangeName);

@@ -7,11 +7,12 @@ using System.Text.Json;
 
 namespace MqttServices.Core.Services;
 
-public class MessagingManager : IMessagingManager
+public class MessagingManager : IMessagingManager, IDisposable
 {
     private readonly ILogger<MessagingManager> logger;
     private readonly string exchangeTopicPrefix;
     private readonly IMqttClientService mqttClientService;
+    private bool disposed = false;
 
     private const string resonseTopicSuffix = "__Respnse";
     private Dictionary<string, dynamic> subscriptions = new Dictionary<string, dynamic>();
@@ -31,9 +32,8 @@ public class MessagingManager : IMessagingManager
 
     public event EventHandler<Payload> ResponseReceived;
     public event EventHandler<Payload> MessageReceived;
-    public event EventHandler MqttConnected;
 
-    public MessagingManager(ILogger<MessagingManager> logger, IMqttClientService mqttClientService, string exchangeTopicPrefix = "")
+    public MessagingManager(ILogger<MessagingManager> logger, IMqttClientService mqttClientService, string exchangeTopicPrefix = "") 
     {
         this.logger = logger;
         this.exchangeTopicPrefix = string.Concat(exchangeTopicPrefix, "_");
@@ -165,7 +165,6 @@ public class MessagingManager : IMessagingManager
     private async void MqttClientService_ClientConnected(object? sender, MQTTnet.MqttClientConnectedEventArgs e)
     {
         logger.LogInformation("MqttClientService MQTT-Client connected!");
-        MqttConnected?.Invoke(this, EventArgs.Empty);
         await mqttClientService.Subscribe(SubscribeRequestTopic);
         await mqttClientService.Subscribe(SubscribeMessageTopic);
         await mqttClientService.Subscribe(SubscribeMessageTopicDefaultExchange);
@@ -333,4 +332,23 @@ public class MessagingManager : IMessagingManager
         return string.Concat(exchangeTopicPrefix, exchangeName, resonseTopicSuffix);
     }
 
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposed)
+        {
+            if (disposing)
+            {
+                mqttClientService?.Disconnect();
+                mqttClientService?.Dispose();
+                this.mqttClientService.ClientConnected -= MqttClientService_ClientConnected;
+                this.mqttClientService.MessageReceived -= MqttClientService_MessageReceived;
+            }
+            disposed = true;
+        }
+    }
 }
