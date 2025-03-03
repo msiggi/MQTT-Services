@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using MQTTnet;
 using MQTTnet.Diagnostics;
+using MQTTnet.Diagnostics.Logger;
 using MQTTnet.Protocol;
 using MQTTnet.Server;
 using System.Net;
@@ -79,8 +80,9 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
     /// </summary>
     private async Task StartMqttServer()
     {
-        var certificate = CreateSelfSignedCertificate("1.3.6.1.5.5.7.3.1");
-
+        var certificate = CreateSelfSignedCertificate("localhost", "1.3.6.1.5.5.7.3.1");
+        // Kopieren Sie das Zertifikat in den Maschinen-Speicher
+        
         var optionsBuilder = new MqttServerOptionsBuilder()
             //.WithDefaultEndpoint()
             //.WithDefaultEndpointPort(this.mqttBrokerSettings.Port)
@@ -96,7 +98,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
                 .WithDefaultEndpointPort(this.mqttBrokerSettings.Port.Value);
         }
 
-        mqttServer = new MqttFactory(new ConsoleLogger()).CreateMqttServer(optionsBuilder.Build());
+        mqttServer = new MqttServerFactory(new ConsoleLogger()).CreateMqttServer(optionsBuilder.Build());
         mqttServer.ValidatingConnectionAsync += this.ValidateConnectionAsync;
         mqttServer.InterceptingSubscriptionAsync += this.InterceptSubscriptionAsync;
         mqttServer.InterceptingPublishAsync += this.InterceptApplicationMessagePublishAsync;
@@ -224,7 +226,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
     /// <param name="args">The arguments.</param>
     private void LogMessage(InterceptingPublishEventArgs args)
     {
-        var payload = args.ApplicationMessage?.PayloadSegment == null ? null : Encoding.UTF8.GetString(args.ApplicationMessage.PayloadSegment);
+        var payload = args.ApplicationMessage?.Payload == null ? null : Encoding.UTF8.GetString(args.ApplicationMessage.Payload);
 
         logger?.LogInformation(
             "Message: ClientId = {ClientId}, Topic = {Topic}, Payload = {Payload}, QoS = {Qos}, Retain-Flag = {RetainFlag}",
@@ -263,7 +265,120 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
         }
     }
 
-    static X509Certificate2 CreateSelfSignedCertificate(string oid)
+    //static X509Certificate2 CreateSelfSignedCertificate(string oid)
+    //{
+    //    var sanBuilder = new SubjectAlternativeNameBuilder();
+    //    sanBuilder.AddIpAddress(IPAddress.Loopback);
+    //    sanBuilder.AddIpAddress(IPAddress.IPv6Loopback);
+    //    sanBuilder.AddDnsName("localhost");
+
+    //    using (var rsa = RSA.Create())
+    //    {
+    //        var certRequest = new CertificateRequest("CN=localhost", rsa, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
+
+    //        certRequest.CertificateExtensions.Add(
+    //            new X509KeyUsageExtension(X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature, false));
+
+    //        certRequest.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension(new OidCollection { new(oid) }, false));
+
+    //        certRequest.CertificateExtensions.Add(sanBuilder.Build());
+
+    //        using (var certificate = certRequest.CreateSelfSigned(DateTimeOffset.Now.AddMinutes(-10), DateTimeOffset.Now.AddMinutes(10)))
+    //        {
+    //            var pfxCertificate = new X509Certificate2(
+    //                certificate.Export(X509ContentType.Pfx),
+    //                (string)null!,
+    //                X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.Exportable);
+
+    //            return pfxCertificate;
+    //        }
+    //    }
+    //}
+    //public static X509Certificate2 CreateSelfSignedCertificate(string subjectName, string oid)
+    //{
+    //    var sanBuilder = new SubjectAlternativeNameBuilder();
+    //    sanBuilder.AddIpAddress(IPAddress.Loopback);
+    //    sanBuilder.AddIpAddress(IPAddress.IPv6Loopback);
+    //    sanBuilder.AddDnsName("localhost");
+
+    //    using (var rsa = RSA.Create(2048))
+    //    {
+    //        var certRequest = new CertificateRequest(
+    //            $"CN={subjectName}",
+    //            rsa,
+    //            HashAlgorithmName.SHA256,
+    //            RSASignaturePadding.Pkcs1);
+
+    //        certRequest.CertificateExtensions.Add(
+    //            new X509KeyUsageExtension(
+    //                X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature,
+    //                false));
+
+    //        certRequest.CertificateExtensions.Add(
+    //            new X509EnhancedKeyUsageExtension(
+    //                new OidCollection { new Oid(oid) },
+    //                false));
+
+    //        certRequest.CertificateExtensions.Add(sanBuilder.Build());
+
+    //        var certificate = certRequest.CreateSelfSigned(
+    //            DateTimeOffset.Now.AddDays(-1),
+    //            DateTimeOffset.Now.AddYears(1));
+
+    //        // Export the certificate to a PFX file
+    //        var pfxBytes = certificate.Export(X509ContentType.Pfx);
+    //        var pfxFilePath = "selfsigned.pfx";
+    //        System.IO.File.WriteAllBytes(pfxFilePath, pfxBytes);
+
+    //        // Load the certificate from the PFX file
+    //        return X509Certificate2.CreateFromPfxFile(pfxFilePath);
+    //    }
+    //}
+  
+    public static X509Certificate2 CreateSelfSignedCertificate__(string subjectName, string oid)
+    {
+        var sanBuilder = new SubjectAlternativeNameBuilder();
+        sanBuilder.AddIpAddress(IPAddress.Loopback);
+        sanBuilder.AddIpAddress(IPAddress.IPv6Loopback);
+        sanBuilder.AddDnsName("localhost");
+
+        using (var rsa = RSA.Create(2048))
+        {
+            var certRequest = new CertificateRequest(
+                $"CN={subjectName}",
+                rsa,
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1);
+
+            certRequest.CertificateExtensions.Add(
+                new X509KeyUsageExtension(
+                    X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.KeyAgreement,
+                    false));
+
+            certRequest.CertificateExtensions.Add(
+                new X509EnhancedKeyUsageExtension(
+                    new OidCollection { new Oid(oid) },
+                    false));
+
+            certRequest.CertificateExtensions.Add(sanBuilder.Build());
+
+            var certificate = certRequest.CreateSelfSigned(
+                DateTimeOffset.Now.AddDays(-1),
+                DateTimeOffset.Now.AddYears(1));
+
+            // Überprüfen, ob das Zertifikat bereits einen privaten Schlüssel hat
+            if (!certificate.HasPrivateKey)
+            {
+                return certificate.CopyWithPrivateKey(rsa);
+            }
+            else
+            {
+                return certificate;
+            }
+        }
+    }
+
+    static X509Certificate2 CreateSelfSignedCertificate(string subject,string oid)
     {
         var sanBuilder = new SubjectAlternativeNameBuilder();
         sanBuilder.AddIpAddress(IPAddress.Loopback);
@@ -272,7 +387,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
 
         using (var rsa = RSA.Create())
         {
-            var certRequest = new CertificateRequest("CN=localhost", rsa, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
+            var certRequest = new CertificateRequest($"CN={subject}", rsa, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
 
             certRequest.CertificateExtensions.Add(
                 new X509KeyUsageExtension(X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature, false));
@@ -283,20 +398,16 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
 
             using (var certificate = certRequest.CreateSelfSigned(DateTimeOffset.Now.AddMinutes(-10), DateTimeOffset.Now.AddMinutes(10)))
             {
-                var pfxCertificate = X509CertificateLoader.LoadPkcs12(
+                var pfxCertificate = new X509Certificate2(
                     certificate.Export(X509ContentType.Pfx),
                     (string)null!,
-                    X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.Exportable);
-
-                //var pfxCertificate = new X509Certificate2(
-                //    certificate.Export(X509ContentType.Pfx),
-                //    (string)null!,
-                //    X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.Exportable);
+                    X509KeyStorageFlags.UserKeySet | X509KeyStorageFlags.Exportable);
 
                 return pfxCertificate;
             }
         }
     }
+
 
     void IDisposable.Dispose()
     {

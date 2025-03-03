@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQTTnet;
-using MQTTnet.Client;
-using MQTTnet.Extensions.ManagedClient;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
@@ -14,10 +12,10 @@ public class MqttClientService : IDisposable, IMqttClientService
 {
     private readonly MqttClientSettings mqttClientSettings;
     private readonly ILogger<MqttClientService> logger;
-    private IManagedMqttClient mqttClient;
+    private MqttClientFactory mqttClientFactory;
+    private IMqttClient mqttClient;
 
     public event EventHandler<MqttClientConnectedEventArgs>? ClientConnected;
-    public event EventHandler<ConnectingFailedEventArgs>? ClientConnectionFailed;
     public event EventHandler<MqttApplicationMessageReceivedEventArgs>? MessageReceived;
     public bool IsConnected { get; set; }
 
@@ -48,19 +46,20 @@ public class MqttClientService : IDisposable, IMqttClientService
             return;
         }
 
-        mqttClient = new MqttFactory().CreateManagedMqttClient();
+        mqttClientFactory = new MqttClientFactory();
+        mqttClient = mqttClientFactory.CreateMqttClient();
         mqttClient.ConnectedAsync += MqttClient_ConnectedAsync;
-        mqttClient.ConnectingFailedAsync += MqttClient_ConnectingFailedAsync;
+        mqttClient.DisconnectedAsync += MqttClient_DisconnectedAsync;
         mqttClient.ApplicationMessageReceivedAsync += MqttClient_ApplicationMessageReceivedAsync;
+    }
 
-        if (this.mqttClientSettings.Enabled)
-        {
-            Connect().Wait();
-        }
-        else
-        {
-            logger?.LogInformation("MQTT-Client is disabled per configuration");
-        }
+    private async Task MqttClient_DisconnectedAsync(MqttClientDisconnectedEventArgs args)
+    {
+        IsConnected = false;
+        logger?.LogWarning($"MQTT-Client disconnected from {mqttClientSettings.BrokerHost}:{mqttClientSettings.BrokerPort}");
+        await Task.Delay(2000);
+        logger?.LogInformation("Reconnecting...");
+        await Connect();
     }
 
     private async Task MqttClient_ApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs arg)
@@ -73,9 +72,46 @@ public class MqttClientService : IDisposable, IMqttClientService
     {
         if (!mqttClient.IsConnected)
         {
-            var mqttClientOptions = TcpMqttClientOptions(this.mqttClientSettings);
-            await mqttClient.StartAsync(mqttClientOptions);
+            try
+            {
+                var mqttClientOptions = new MqttClientOptionsBuilder().WithTcpServer(mqttClientSettings.BrokerHost, mqttClientSettings.BrokerPort)
+                      .WithTlsOptions(
+                      o =>
+                      {
+                          // The used public broker sometimes has invalid certificates. This sample accepts all
+                          // certificates. This should not be used in live environments.
+                          o.WithCertificateValidationHandler(_ => true);
+
+                          // The default value is determined by the OS. Set manually to force version.
+                          o.WithSslProtocols(SslProtocols.Tls12);
+                      })
+                      .WithCredentials(mqttClientSettings.UserName, mqttClientSettings.Password)
+                        .WithClientId(mqttClientSettings.ServiceName + Guid.NewGuid().ToString())
+                  .Build();
+
+                using var timeout = new CancellationTokenSource(mqttClientOptions.Timeout);
+                MqttClientConnectResult result = await mqttClient.ConnectAsync(mqttClientOptions, timeout.Token);
+                if (result.ResultCode == MqttClientConnectResultCode.Success)
+                {
+                    logger?.LogInformation($"MQTT-Client connected to {mqttClientSettings.BrokerHost}:{mqttClientSettings.BrokerPort}");
+                }
+                else
+                {
+                    logger?.LogError($"MQTT-Client connection failed to {mqttClientSettings.BrokerHost}:{mqttClientSettings.BrokerPort}, Result-Code: {result.ResultCode.ToString()}");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError("Error connecting to MQTT Broker");
+                Thread.Sleep(2000);
+                await Connect();
+            }
         }
+    }
+    public async Task Disconnect()
+    {
+        var mqttClientDisconnectOptions = mqttClientFactory.CreateClientDisconnectOptionsBuilder().Build();
+        await mqttClient.DisconnectAsync();
     }
 
     public async Task PublishMessage(string topic, object payload)
@@ -100,7 +136,7 @@ public class MqttClientService : IDisposable, IMqttClientService
                        .WithPayload(JsonSerializer.Serialize(payload, serializeOptions))
                        .Build();
 
-                await mqttClient.InternalClient.PublishAsync(applicationMessage, CancellationToken.None);
+                await mqttClient.PublishAsync(applicationMessage, CancellationToken.None);
             }
             catch (Exception ex)
             {
@@ -119,7 +155,7 @@ public class MqttClientService : IDisposable, IMqttClientService
                        .WithPayload(payload)
                        .Build();
 
-                await mqttClient.InternalClient.PublishAsync(applicationMessage, CancellationToken.None);
+                await mqttClient.PublishAsync(applicationMessage, CancellationToken.None);
             }
         }
         catch (Exception ex)
@@ -133,17 +169,17 @@ public class MqttClientService : IDisposable, IMqttClientService
         if (mqttClient.IsConnected)
         {
             logger.LogInformation($"Subscribing to {topic}");
-            await mqttClient.InternalClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(topic).Build());
+            await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(topic).Build());
         }
     }
 
-    private Task MqttClient_ConnectingFailedAsync(ConnectingFailedEventArgs arg)
-    {
-        IsConnected = false;
-        logger?.LogError(arg.Exception, arg.Exception.Message);
-        ClientConnectionFailed?.Invoke(this, arg);
-        return Task.CompletedTask;
-    }
+    //private Task MqttClient_ConnectingFailedAsync(ConnectingFailedEventArgs arg)
+    //{
+    //    IsConnected = false;
+    //    logger?.LogError(arg.Exception, arg.Exception.Message);
+    //    ClientConnectionFailed?.Invoke(this, arg);
+    //    return Task.CompletedTask;
+    //}
 
     private Task MqttClient_ConnectedAsync(MqttClientConnectedEventArgs arg)
     {
@@ -154,58 +190,58 @@ public class MqttClientService : IDisposable, IMqttClientService
         return Task.CompletedTask;
     }
 
-    private ManagedMqttClientOptions TcpMqttClientOptions(MqttClientSettings settings)
-    {
-        return new ManagedMqttClientOptionsBuilder()
-            .WithClientOptions(
-                new MqttClientOptionsBuilder()
-                    .WithClientId(settings.ServiceName + Guid.NewGuid().ToString())
-                    .WithTcpServer($"{settings.BrokerHost}", settings.BrokerPort)
-                    .WithTls(o =>
-                    {
-                        o.UseTls = settings.EncryptWithTls;
-                        // The used public broker sometimes has invalid certificates. This sample accepts all
-                        // certificates. This should not be used in live environments.
-                        o.CertificateValidationHandler = _ => true;
+    //private ManagedMqttClientOptions TcpMqttClientOptions(MqttClientSettings settings)
+    //{
+    //    return new ManagedMqttClientOptionsBuilder()
+    //        .WithClientOptions(
+    //            new MqttClientOptionsBuilder()
+    //                .WithClientId(settings.ServiceName + Guid.NewGuid().ToString())
+    //                .WithTcpServer($"{settings.BrokerHost}", settings.BrokerPort)
+    //                .WithTls(o =>
+    //                {
+    //                    o.UseTls = settings.EncryptWithTls;
+    //                    // The used public broker sometimes has invalid certificates. This sample accepts all
+    //                    // certificates. This should not be used in live environments.
+    //                    o.CertificateValidationHandler = _ => true;
 
-                        // The default value is determined by the OS. Set manually to force version.
-                        o.SslProtocol = TlsVersion;
-                    })
-                    .WithCredentials(settings.UserName, settings.Password)
-                    .WithCleanSession()
-                    .Build()
-            )
-            .Build();
-    }
+    //                    // The default value is determined by the OS. Set manually to force version.
+    //                    o.SslProtocol = TlsVersion;
+    //                })
+    //                .WithCredentials(settings.UserName, settings.Password)
+    //                .WithCleanSession()
+    //                .Build()
+    //        )
+    //        .Build();
+    //}
 
-    private ManagedMqttClientOptions TlsMqttClientOptions(string url, string caFile)
-    {
-        return new ManagedMqttClientOptionsBuilder()
-            .WithClientOptions(
-                new MqttClientOptionsBuilder()
-                    .WithClientId("EMQX_" + Guid.NewGuid().ToString())
-                    .WithTcpServer(url)
-                    //.WithCredentials("user", "pass")
-                    .WithCleanSession()
-                    .WithTls(
-                        new MqttClientOptionsBuilderTlsParameters()
-                        {
-                            UseTls = true,
-                            SslProtocol = TlsVersion,
-                            Certificates = new List<X509Certificate>()
-                            {
-                                // Download from https://www.emqx.com/en/mqtt/public-mqtt5-broker
-                                X509Certificate.CreateFromCertFile(caFile)
-                            }
-                        }
-                    )
-                    .Build()
-            )
-            .Build();
-    }
+    //private ManagedMqttClientOptions TlsMqttClientOptions(string url, string caFile)
+    //{
+    //    return new ManagedMqttClientOptionsBuilder()
+    //        .WithClientOptions(
+    //            new MqttClientOptionsBuilder()
+    //                .WithClientId("EMQX_" + Guid.NewGuid().ToString())
+    //                .WithTcpServer(url)
+    //                //.WithCredentials("user", "pass")
+    //                .WithCleanSession()
+    //                .WithTls(
+    //                    new MqttClientOptionsBuilderTlsParameters()
+    //                    {
+    //                        UseTls = true,
+    //                        SslProtocol = TlsVersion,
+    //                        Certificates = new List<X509Certificate>()
+    //                        {
+    //                            // Download from https://www.emqx.com/en/mqtt/public-mqtt5-broker
+    //                            X509Certificate.CreateFromCertFile(caFile)
+    //                        }
+    //                    }
+    //                )
+    //                .Build()
+    //        )
+    //        .Build();
+    //}
 
-    public void Dispose()
+    public async void Dispose()
     {
-        mqttClient.StopAsync();
+        await Disconnect();
     }
 }

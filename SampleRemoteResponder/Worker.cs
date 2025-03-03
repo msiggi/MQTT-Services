@@ -8,9 +8,9 @@ namespace SampleRemoteResponder;
 public class Worker : IHostedService
 {
     private readonly ILogger<Worker> _logger;
-    private readonly IRemoteCallResponder<PersonData> remoteCallResponder;
+    private readonly IRemoteCallResponder<GuitarPlayer> remoteCallResponder;
 
-    public Worker(ILogger<Worker> logger, IRemoteCallResponder<PersonData> remoteCallResponder)
+    public Worker(ILogger<Worker> logger, IRemoteCallResponder<GuitarPlayer> remoteCallResponder)
     {
         _logger = logger;
         this.remoteCallResponder = remoteCallResponder;
@@ -19,12 +19,12 @@ public class Worker : IHostedService
 
     private async void RemoteCallResponder_GetAllItemsRequestReceived(object? sender, RequestFilter e)
     {
-        await remoteCallResponder.SendAllItems(new List<PersonData> 
+        await remoteCallResponder.SendAllItems(new List<GuitarPlayer> 
         {
-            new PersonData { Name = "Jimi Hendrix" },
-            new PersonData { Name = "Janis Joplin" },
-            new PersonData { Name = "Jim Morrison" },
-            new PersonData { Name = "Kurt Cobain" }
+            new GuitarPlayer { Name = "Jimi Hendrix" },
+            new GuitarPlayer { Name = "Janis Joplin" },
+            new GuitarPlayer { Name = "Jim Morrison" },
+            new GuitarPlayer { Name = "Kurt Cobain" }
         });
     }
 

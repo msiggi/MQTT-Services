@@ -1,53 +1,101 @@
 ﻿using Microsoft.Extensions.Logging;
 using MqttServices.Core.Client;
 using MqttServices.Core.Common;
+using System.Buffers;
 using System.Text;
 using System.Text.Json;
 
 namespace MqttServices.Core.Services;
 
-public class MessagingManager : IMessagingManager
+public class MessagingManager : IMessagingManager, IDisposable
 {
     private readonly ILogger<MessagingManager> logger;
+    private readonly string exchangeTopicPrefix;
     private readonly IMqttClientService mqttClientService;
-    private const string subscribeRequestTopic = "subscribe__Request";
-    private const string subscribeMessageTopic = "subscribe__Message";
-    private const string resonseTopicSuffix = "__respnse";
+    private bool disposed = false;
 
+    private const string resonseTopicSuffix = "__Respnse";
     private Dictionary<string, dynamic> subscriptions = new Dictionary<string, dynamic>();
 
+    public string SubscribeRequestTopic { get => string.Concat(exchangeTopicPrefix, "subscribe__Request"); }
+    public string SubscribeMessageTopic { get => string.Concat(exchangeTopicPrefix, "subscribe__Message"); }
+    public string SubscribeMessageTopicDefaultExchange { get => string.Concat(exchangeTopicPrefix, "subscribe__DefaultMessage"); }
+    public string SubscribeRequestTopicDefaultExchange { get => string.Concat(exchangeTopicPrefix, "subscribe__DefaultMessage"); }
+
     public event EventHandler<Payload> RequestReceived;
+    public event EventHandler<Payload> RequestOneReceived;
+    public event EventHandler<Payload> RequestAllReceived;
+    public event EventHandler<Payload> RequestUpsertReceived;
+    public event EventHandler<Payload> RequestUpdateReceived;
+    public event EventHandler<Payload> RequestInsertReceived;
+    public event EventHandler<Payload> ResponseDeleteReceived;
+
     public event EventHandler<Payload> ResponseReceived;
     public event EventHandler<Payload> MessageReceived;
 
-    public MessagingManager(ILogger<MessagingManager> logger, IMqttClientService mqttClientService)
+    public MessagingManager(ILogger<MessagingManager> logger, IMqttClientService mqttClientService, string exchangeTopicPrefix = "") 
     {
         this.logger = logger;
-
+        this.exchangeTopicPrefix = string.Concat(exchangeTopicPrefix, "_");
         if (mqttClientService is not null)
         {
             this.mqttClientService = mqttClientService;
             this.mqttClientService.ClientConnected += MqttClientService_ClientConnected;
             this.mqttClientService.MessageReceived += MqttClientService_MessageReceived;
+            this.mqttClientService.Connect();
         }
     }
 
-    private async void MqttClientService_MessageReceived(object? sender, MQTTnet.Client.MqttApplicationMessageReceivedEventArgs e)
+    private void MqttClientService_MessageReceived(object? sender, MQTTnet.MqttApplicationMessageReceivedEventArgs e)
     {
-        if (e.ApplicationMessage.Topic == subscribeRequestTopic)
+        if (e.ApplicationMessage.Topic == SubscribeRequestTopic || e.ApplicationMessage.Topic == SubscribeMessageTopicDefaultExchange)
         {
-            Payload payload = DeserializePayloadObject(e.ApplicationMessage.PayloadSegment);
+            Payload payload = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
 
             if (payload is not null)
             {
-                RequestReceived?.Invoke(this, payload);
+                switch (payload.RequestType)
+                {
+                    case RequestType.Generic:
+                        RequestReceived?.Invoke(this, payload);
+                        break;
+                    case RequestType.GetOne:
+                        RequestOneReceived?.Invoke(this, payload);
+                        break;
+                    case RequestType.GetAll:
+                        RequestAllReceived?.Invoke(this, payload);
+                        break;
+                    case RequestType.Upsert:
+                        RequestUpsertReceived?.Invoke(this, payload);
+                        break;
+                    case RequestType.Update:
+                        RequestUpdateReceived?.Invoke(this, payload);
+                        break;
+                    case RequestType.Insert:
+                        RequestInsertReceived?.Invoke(this, payload);
+                        break;
+                    case RequestType.Delete:
+                        ResponseDeleteReceived?.Invoke(this, payload);
+                        break;
+                    default:
+                        break;
+                }
             }
 
             return;
         }
+        //if (e.ApplicationMessage.Topic == SubscribeRequestTopicDefaultExchange)
+        //{
+        //    Payload payload = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
+        //    if (payload is not null)
+        //    {
+        //        RequestReceived?.Invoke(this, payload);
+        //    }
+        //}
+
         if (e.ApplicationMessage.Topic.Contains(resonseTopicSuffix))
         {
-            Payload payload = DeserializePayloadObject(e.ApplicationMessage.PayloadSegment);
+            Payload payload = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
 
             if (payload is not null)
             {
@@ -55,18 +103,25 @@ public class MessagingManager : IMessagingManager
             }
             return;
         }
-
-        if (e.ApplicationMessage.Topic == subscribeMessageTopic)
+        if (e.ApplicationMessage.Topic == SubscribeMessageTopic)
         {
-            Payload payloadMessageReceived = DeserializePayloadObject(e.ApplicationMessage.PayloadSegment);
+            Payload payloadMessageReceived = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
 
             if (payloadMessageReceived is not null)
             {
                 MessageReceived?.Invoke(this, payloadMessageReceived);
             }
         }
+        if (e.ApplicationMessage.Topic == SubscribeMessageTopicDefaultExchange)
+        {
+            Payload payloadMessageReceived = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
+            if (payloadMessageReceived is not null)
+            {
+                MessageReceived?.Invoke(this, payloadMessageReceived);
+            }
+        }
     }
-    public Payload DeserializePayloadObject(ArraySegment<byte> bytes)
+    public Payload DeserializePayloadObject(byte[] bytes)
     {
         try
         {
@@ -89,7 +144,9 @@ public class MessagingManager : IMessagingManager
                     if (obj is not null)
                     {
                         Payload retPayload = new Payload(payload.ExchangeName, obj);
-                        retPayload.ValueType = payload.ValueType;
+                        //retPayload.ValueType = payload.ValueType;
+                        retPayload.MessageId = payload.MessageId;
+                        retPayload.RequestType = payload.RequestType;
                         return retPayload;
                     }
                 }
@@ -105,28 +162,91 @@ public class MessagingManager : IMessagingManager
         }
         return null;
     }
-    private async void MqttClientService_ClientConnected(object? sender, MQTTnet.Client.MqttClientConnectedEventArgs e)
+    private async void MqttClientService_ClientConnected(object? sender, MQTTnet.MqttClientConnectedEventArgs e)
     {
         logger.LogInformation("MqttClientService MQTT-Client connected!");
-        await mqttClientService.Subscribe(subscribeRequestTopic);
-        await mqttClientService.Subscribe(subscribeMessageTopic);
+        await mqttClientService.Subscribe(SubscribeRequestTopic);
+        await mqttClientService.Subscribe(SubscribeMessageTopic);
+        await mqttClientService.Subscribe(SubscribeMessageTopicDefaultExchange);
+        await mqttClientService.Subscribe(SubscribeRequestTopicDefaultExchange);
     }
 
-    public async Task SendMessageRequest<T>(T payload, string exchangeName)
+    public async Task<Guid> SendMessageRequest<T>(T payload, string exchangeName)
     {
+        Guid guid = Guid.NewGuid();
         if (mqttClientService.IsConnected)
         {
             // subscribe for Response:
             string topic = GetResponseTopic(exchangeName);
             await mqttClientService.Subscribe(topic);
-            await mqttClientService.PublishMessage(subscribeRequestTopic, new Payload(exchangeName, payload));
+            await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, payload, guid));
         }
         else
         {
             Thread.Sleep(500);
             await SendMessageRequest(payload, exchangeName);
         }
+        return guid;
     }
+    public async Task<Guid> SendMessageRequest<T>(T payload)
+    {
+        Guid guid = Guid.NewGuid();
+        if (mqttClientService.IsConnected && payload is not null)
+        {
+            // subscribe for Response:
+            string exchangeName = payload.GetType().Name;
+            string topic = GetResponseTopic(exchangeName);
+            await mqttClientService.Subscribe(topic);
+            await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, payload, guid));
+        }
+        else
+        {
+            Thread.Sleep(500);
+            await SendMessageRequest(payload);
+        }
+        return guid;
+    }
+    public async Task<Guid> SendMessageRequest<T>(T payload, RequestType requestType)
+    {
+        Guid guid = Guid.NewGuid();
+        if (mqttClientService.IsConnected && payload is not null)
+        {
+            // subscribe for Response:
+            string exchangeName = payload.GetType().Name;
+            string topic = GetResponseTopic(exchangeName);
+            await mqttClientService.Subscribe(topic);
+            await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, payload, guid, requestType));
+        }
+        else
+        {
+            Thread.Sleep(500);
+            await SendMessageRequest(payload, requestType);
+        }
+        return guid;
+    }
+    public async Task<Guid> SendMessageRequest(string exchangeName, RequestType requestType)
+    {
+        Guid guid = Guid.NewGuid();
+        if (mqttClientService.IsConnected)
+        {
+            // subscribe for Response:
+            string topic = GetResponseTopic(exchangeName);
+            await mqttClientService.Subscribe(topic);
+            await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, null, guid, requestType));
+        }
+        else
+        {
+            Thread.Sleep(500);
+            await SendMessageRequest(exchangeName, requestType);
+        }
+        return guid;
+    }
+
+    /// <summary>
+    /// To trigger something without response
+    /// </summary>
+    /// <param name="exchangeName"></param>
+    /// <returns></returns>
     public async Task SendMessageRequest(string exchangeName)
     {
         if (mqttClientService.IsConnected)
@@ -134,7 +254,7 @@ public class MessagingManager : IMessagingManager
             // subscribe for Response:
             string topic = GetResponseTopic(exchangeName);
             await mqttClientService.Subscribe(topic);
-            await mqttClientService.PublishMessage(subscribeRequestTopic, new Payload(exchangeName, null));
+            await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, null));
         }
         else
         {
@@ -147,20 +267,40 @@ public class MessagingManager : IMessagingManager
         if (mqttClientService.IsConnected)
         {
             string topic = GetResponseTopic(exchangeName);
-            await mqttClientService.PublishMessage(topic, new Payload(exchangeName, payload));
+
+            if (payload is Payload)
+            {
+                await mqttClientService.PublishMessage(topic, payload as Payload);
+            }
+            else
+            {
+                await mqttClientService.PublishMessage(topic, new Payload(exchangeName, payload));
+            }
         }
         else
         {
             Thread.Sleep(500);
-            await SendMessageRequest(payload, exchangeName);
+            await SendMessageResponse(payload, exchangeName);
         }
     }
-
+    public async Task SendMessageResponse(Payload payload)
+    {
+        if (mqttClientService.IsConnected && payload is not null)
+        {
+            string topic = GetResponseTopic(payload.ExchangeName);
+            await mqttClientService.PublishMessage(topic, payload);
+        }
+        else
+        {
+            Thread.Sleep(500);
+            await SendMessageResponse(payload);
+        }
+    }
     public async Task SendMessage<T>(T payload, string exchangeName)
     {
         if (mqttClientService.IsConnected)
         {
-            await mqttClientService.PublishMessage(subscribeMessageTopic, new Payload(exchangeName, payload));
+            await mqttClientService.PublishMessage(SubscribeMessageTopic, new Payload(exchangeName, payload));
         }
         else
         {
@@ -168,25 +308,42 @@ public class MessagingManager : IMessagingManager
             await SendMessage(payload, exchangeName);
         }
     }
-
-    private string GetRequestTopic(string exchangeName)
+    public async Task SendMessage<T>(T payload)
     {
-        return string.Concat(exchangeName, "_request");
+        if (mqttClientService.IsConnected && payload is not null)
+        {
+            string exchangeName = payload.GetType().Name;
+            await mqttClientService.PublishMessage(SubscribeMessageTopicDefaultExchange, new Payload(exchangeName, payload));
+        }
+        else
+        {
+            Thread.Sleep(500);
+            await SendMessage(payload);
+        }
     }
+
     private string GetResponseTopic(string exchangeName)
     {
-        return string.Concat(exchangeName, resonseTopicSuffix);
+        return string.Concat(exchangeTopicPrefix, exchangeName, resonseTopicSuffix);
     }
-    private static bool IsValidJson(string strInput)
+
+    public void Dispose()
     {
-        try
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposed)
         {
-            JsonDocument.Parse(strInput);
-            return true;
-        }
-        catch (JsonException)
-        {
-            return false;
+            if (disposing)
+            {
+                mqttClientService?.Disconnect();
+                mqttClientService?.Dispose();
+                this.mqttClientService.ClientConnected -= MqttClientService_ClientConnected;
+                this.mqttClientService.MessageReceived -= MqttClientService_MessageReceived;
+            }
+            disposed = true;
         }
     }
 }
