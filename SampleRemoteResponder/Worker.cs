@@ -1,6 +1,5 @@
 
 using MqttServices.Core.Services;
-using Optilog.Common.Services.Configurations;
 using SampleCommon;
 
 namespace SampleRemoteResponder;
