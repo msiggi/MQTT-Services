@@ -15,7 +15,7 @@ public class ResponseWorker : IHostedService
         this.logger = logger;
         this.messagingManager = messagingManager;
         this.messagingManager.RequestReceived += MessagingManager_RequestReceived;
-        this.messagingManager.RequestAllReceived += MessagingManager_RequestAllReceived;
+        this.messagingManager.RequestForGetAllReceived += MessagingManager_RequestAllReceived;
         this.messagingManager.MessageReceived += MessagingManager_MessageReceived;
     }
 

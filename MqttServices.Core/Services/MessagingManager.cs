@@ -23,12 +23,12 @@ public class MessagingManager : IMessagingManager, IDisposable
     public string SubscribeRequestTopicDefaultExchange { get => string.Concat(exchangeTopicPrefix, "subscribe__DefaultMessage"); }
 
     public event EventHandler<Payload> RequestReceived;
-    public event EventHandler<Payload> RequestOneReceived;
-    public event EventHandler<Payload> RequestAllReceived;
-    public event EventHandler<Payload> RequestUpsertReceived;
-    public event EventHandler<Payload> RequestUpdateReceived;
-    public event EventHandler<Payload> RequestInsertReceived;
-    public event EventHandler<Payload> ResponseDeleteReceived;
+    public event EventHandler<Payload> RequestForGetOneReceived;
+    public event EventHandler<Payload> RequestForGetAllReceived;
+    public event EventHandler<Payload> RequestForUpsertReceived;
+    public event EventHandler<Payload> RequestForUpdateReceived;
+    public event EventHandler<Payload> RequestForInsertReceived;
+    public event EventHandler<Payload> RequestForDeleteReceived;
 
     public event EventHandler<Payload> ResponseReceived;
     public event EventHandler<Payload> MessageReceived;
@@ -60,22 +60,22 @@ public class MessagingManager : IMessagingManager, IDisposable
                         RequestReceived?.Invoke(this, payload);
                         break;
                     case RequestType.GetOne:
-                        RequestOneReceived?.Invoke(this, payload);
+                        RequestForGetOneReceived?.Invoke(this, payload);
                         break;
                     case RequestType.GetAll:
-                        RequestAllReceived?.Invoke(this, payload);
+                        RequestForGetAllReceived?.Invoke(this, payload);
                         break;
                     case RequestType.Upsert:
-                        RequestUpsertReceived?.Invoke(this, payload);
+                        RequestForUpsertReceived?.Invoke(this, payload);
                         break;
                     case RequestType.Update:
-                        RequestUpdateReceived?.Invoke(this, payload);
+                        RequestForUpdateReceived?.Invoke(this, payload);
                         break;
                     case RequestType.Insert:
-                        RequestInsertReceived?.Invoke(this, payload);
+                        RequestForInsertReceived?.Invoke(this, payload);
                         break;
                     case RequestType.Delete:
-                        ResponseDeleteReceived?.Invoke(this, payload);
+                        RequestForDeleteReceived?.Invoke(this, payload);
                         break;
                     default:
                         break;
