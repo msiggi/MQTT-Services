@@ -69,6 +69,7 @@ public class ResponseWorker : IHostedService
         {
             Console.WriteLine($"**** Trigger-Request without Payload Received!");
             // Do something with this!
+            await messagingManager.SendMessageResponse(e);
         }
 
         if (e.ExchangeName == typeof(GuitarPlayer).Name)

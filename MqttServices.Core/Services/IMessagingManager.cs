@@ -43,7 +43,7 @@ public interface IMessagingManager
     /// </summary>
     /// <param name="exchangeName"></param>
     /// <returns></returns>
-    Task SendMessageRequest(string exchangeName);
+    Task<Guid> SendMessageRequest(string exchangeName);
 
     /// <summary>
     /// Sends a respond message to a request
