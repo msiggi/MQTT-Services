@@ -15,6 +15,10 @@ public static class ServiceCollectionsExtensions
         services.Configure(setupAction);
         services.AddSingleton<IMqttBrokerService, MqttBrokerService>();
 
+        // Resolve the service to create an instance
+        var serviceProvider = services.BuildServiceProvider();
+        var brokerService = serviceProvider.GetRequiredService<IMqttBrokerService>();
+
         return services;
     }
 

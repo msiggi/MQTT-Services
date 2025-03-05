@@ -13,10 +13,9 @@ public class Worker : BackgroundService
     private readonly IMqttClientService mqttClientService;
     private int counter = 0;
 
-    public Worker(ILogger<Worker> logger, IMqttBrokerService mqttBrokerService, IMqttClientService mqttClientService)
+    public Worker(ILogger<Worker> logger, IMqttClientService mqttClientService)
     {
         _logger = logger;
-        this.mqttBrokerService = mqttBrokerService;
         this.mqttClientService = mqttClientService;
         this.mqttClientService.MessageReceived += MqttClientService_MessageReceived;
         this.mqttClientService.ClientConnected += MqttClientService_ClientConnected;
