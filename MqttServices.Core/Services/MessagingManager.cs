@@ -33,7 +33,7 @@ public class MessagingManager : IMessagingManager, IDisposable
     public event EventHandler<Payload> ResponseReceived;
     public event EventHandler<Payload> MessageReceived;
 
-    public MessagingManager(ILogger<MessagingManager> logger, IMqttClientService mqttClientService, string exchangeTopicPrefix = "") 
+    public MessagingManager(ILogger<MessagingManager> logger, IMqttClientService mqttClientService, string exchangeTopicPrefix = "")
     {
         this.logger = logger;
         this.exchangeTopicPrefix = string.Concat(exchangeTopicPrefix, "_");
@@ -247,20 +247,22 @@ public class MessagingManager : IMessagingManager, IDisposable
     /// </summary>
     /// <param name="exchangeName"></param>
     /// <returns></returns>
-    public async Task SendMessageRequest(string exchangeName)
+    public async Task<Guid> SendMessageRequest(string exchangeName)
     {
+        Guid guid = Guid.NewGuid();
         if (mqttClientService.IsConnected)
         {
             // subscribe for Response:
             string topic = GetResponseTopic(exchangeName);
             await mqttClientService.Subscribe(topic);
-            await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, null));
+            await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, null, guid));
         }
         else
         {
             Thread.Sleep(500);
             await SendMessageRequest(exchangeName);
         }
+        return guid;
     }
     public async Task SendMessageResponse<T>(T payload, string exchangeName)
     {
@@ -346,4 +348,5 @@ public class MessagingManager : IMessagingManager, IDisposable
             disposed = true;
         }
     }
+
 }

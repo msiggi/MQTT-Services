@@ -44,6 +44,11 @@ public class RequestWorker : IHostedService
                 Console.WriteLine($"MessageId: {e.MessageId}. Use it, to assign Response to Request");
             }
         }
+
+        if (e.ExchangeName == Configs.triggerExchangeName)
+        {
+            Console.WriteLine($"Trigger-Acknowledge {e.MessageId} received!");
+        }
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -137,8 +142,8 @@ public class RequestWorker : IHostedService
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Simple SendMessage without data (without Response, to trigger something)");
         Console.ResetColor();
-        await messagingManager.SendMessageRequest(Configs.triggerExchangeName);
-        Console.WriteLine($"**** Trigger-Message sent!");
+        Guid messageId = await messagingManager.SendMessageRequest(Configs.triggerExchangeName);
+        Console.WriteLine($"**** Trigger-Message {messageId} sent!");
     }
 
     private async Task SendMessageRequest(GuitarPlayer guitarPlayer1, GuitarPlayer guitarPlayer2)
