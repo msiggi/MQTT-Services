@@ -13,10 +13,11 @@
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageId>MQTT-Services</PackageId>
 		<Title>MQTT-Services</Title>
-		<Version>1.0.27-prerelease3</Version>
+		<Version>1.0.27-prerelease4</Version>
 		<Product>MQTT-Services</Product>
 		<AssemblyName>MQTT-Services</AssemblyName>
 		<PackageIcon>Logo.png</PackageIcon>
+		<IncludeSymbols>True</IncludeSymbols>
 	</PropertyGroup>
 
 
