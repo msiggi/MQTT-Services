@@ -3,7 +3,6 @@
 public class Payload
 {
     public string? ExchangeName { get; set; }
-    //private object _value;
     public object Value { get;  set; }
     public string? ValueType { get;  set; }
     public Guid MessageId { get; set; }
@@ -48,6 +47,4 @@ public class Payload
         ValueType = value?.GetType().AssemblyQualifiedName;
     }
 }
-
-//public record TransferRecord(Guid MessageId, object value);
 
