@@ -23,6 +23,7 @@ Set Client-Connection parameters in appsettings.json:
 
 ```json
 "MqttClientSettings": {
+    "ApplicationKey": "mqtttestapp"
     "ServiceName": "MyApp",
     "BrokerHost": "localhost",
     "BrokerPort": 8883,

@@ -75,6 +75,7 @@ public class MqttClientService : IDisposable, IMqttClientService
     {
         if (!mqttClient.IsConnected)
         {
+            var sslVersion = TlsVersion;
             try
             {
                 var mqttClientOptions = new MqttClientOptionsBuilder().WithTcpServer(mqttClientSettings.BrokerHost, mqttClientSettings.BrokerPort)
@@ -86,7 +87,7 @@ public class MqttClientService : IDisposable, IMqttClientService
                           o.WithCertificateValidationHandler(_ => true);
 
                           // The default value is determined by the OS. Set manually to force version.
-                          o.WithSslProtocols(SslProtocols.Tls12);
+                          o.WithSslProtocols(sslVersion);
                       })
                       .WithCredentials(mqttClientSettings.UserName, mqttClientSettings.Password)
                         .WithClientId(mqttClientSettings.ServiceName + Guid.NewGuid().ToString())
@@ -128,11 +129,7 @@ public class MqttClientService : IDisposable, IMqttClientService
                     WriteIndented = true
                 };
 
-                if (mqttClientSettings.SerializeWithCamelCase)
-                    serializeOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-
-                if (mqttClientSettings.IgnoreCycles)
-                    serializeOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                serializeOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 
                 var applicationMessage = new MqttApplicationMessageBuilder()
                        .WithTopic(topic)
