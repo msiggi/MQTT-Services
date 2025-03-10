@@ -96,7 +96,6 @@ messagingManager.RequestReceived += async (sender, e) =>
 Best overview in Sample-Project *SampleClientMessaging1* (Sender) and *SampleClientMessaging2* (Receiver and Responder) (Startconfig "Two Sample Clients" in Solution)
 
 ## Contribution
-## Contribution
 Contributions are highly welcome! If you would like to contribute to this project, please follow these steps:
 
 1. Fork the repository.
