@@ -83,7 +83,7 @@ messagingManager.RequestReceived += async (sender, e) =>
     if (e.ExchangeName == typeof(GuitarPlayer).Name)
         {
             var player = (GuitarPlayer)e.Value;
-            Console.WriteLine($"**** Message Received with GuitarPlayer {player.Name}, add Guitar and send it back!");
+            Console.WriteLine($"**** Message Received with GuitarPlayer {player.Name}, add Guitar Model and send it back!");
 
             player.OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "Sunburst" } };
             e.SetValue(player);
