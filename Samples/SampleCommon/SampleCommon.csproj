@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\MqttServices.Core\MqttServices.Core.csproj" />
-  </ItemGroup>
-
 </Project>

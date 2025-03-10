@@ -1,34 +1,26 @@
 [
   {
     "Name": "Broker & Client",
-    "Projects": []
-  },
-  {
-    "Name": "Two Sample Clients",
     "Projects": [
       {
-        "Path": "SampleClientMessaging1\\SampleClientMessaging1.csproj",
+        "Path": "Samples\\SampleWorkerService_Client\\SampleWorkerService_Client.csproj",
         "Action": "Start"
       },
       {
-        "Path": "SampleClientMessaging2\\SampleClientMessaging2.csproj",
+        "Path": "Samples\\SampleBrokerUsingNuget\\SampleBrokerUsingNuget.csproj",
         "Action": "Start"
       }
     ]
   },
   {
-    "Name": "Broker and Clients",
+    "Name": "Two Sample Clients",
     "Projects": [
       {
-        "Path": "SampleWebApiWithMqttBroker\\SampleWebApiWithMqttBroker.csproj",
+        "Path": "Samples\\SampleClientMessaging1\\SampleClientMessaging1.csproj",
         "Action": "Start"
       },
       {
-        "Path": "SampleClientMessaging1\\SampleClientMessaging1.csproj",
-        "Action": "Start"
-      },
-      {
-        "Path": "SampleClientMessaging2\\SampleClientMessaging2.csproj",
+        "Path": "Samples\\SampleClientMessaging2\\SampleClientMessaging2.csproj",
         "Action": "Start"
       }
     ]

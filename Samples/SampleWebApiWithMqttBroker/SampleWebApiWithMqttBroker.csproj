@@ -10,6 +10,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MqttServices.Core\MqttServices.Core.csproj" />
+    <ProjectReference Include="..\..\MqttServices.Core\MqttServices.Core.csproj" />
   </ItemGroup>
 </Project>
