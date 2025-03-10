@@ -3,6 +3,7 @@
 public class MqttClientSettings
 {
     public bool Enabled { get; set; } = true;
+    public string ApplicationKey { get; set; } = "";
     public string ServiceName { get; set; } = "";
     public string BrokerHost { get; set; } = "";
     public int BrokerPort { get; set; }

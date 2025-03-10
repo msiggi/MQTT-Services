@@ -33,12 +33,12 @@ public class MessagingManager : IMessagingManager, IDisposable
     public event EventHandler<Payload> ResponseReceived;
     public event EventHandler<Payload> MessageReceived;
 
-    public MessagingManager(ILogger<MessagingManager> logger, IMqttClientService mqttClientService, string exchangeTopicPrefix = "")
+    public MessagingManager(ILogger<MessagingManager> logger, IMqttClientService mqttClientService)
     {
         this.logger = logger;
-        this.exchangeTopicPrefix = string.Concat(exchangeTopicPrefix, "_");
         if (mqttClientService is not null)
         {
+            this.exchangeTopicPrefix = string.Concat(mqttClientService.ApplicationKey, "_");
             this.mqttClientService = mqttClientService;
             this.mqttClientService.ClientConnected += MqttClientService_ClientConnected;
             this.mqttClientService.MessageReceived += MqttClientService_MessageReceived;

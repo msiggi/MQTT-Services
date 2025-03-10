@@ -14,6 +14,7 @@ public class MqttClientService : IDisposable, IMqttClientService
     private readonly ILogger<MqttClientService> logger;
     private MqttClientFactory mqttClientFactory;
     private IMqttClient mqttClient;
+    public string ApplicationKey { get; set; }
 
     public event EventHandler<MqttClientConnectedEventArgs>? ClientConnected;
     public event EventHandler<MqttApplicationMessageReceivedEventArgs>? MessageReceived;
@@ -34,10 +35,12 @@ public class MqttClientService : IDisposable, IMqttClientService
         }
     }
 
+
     public MqttClientService(ILogger<MqttClientService> logger, IOptions<MqttClientSettings> mqttClientSettings)
     {
         IsConnected = false;
         this.mqttClientSettings = mqttClientSettings.Value;
+        this.ApplicationKey = mqttClientSettings.Value.ApplicationKey;
         this.logger = logger;
 
         if (string.IsNullOrEmpty(this.mqttClientSettings.BrokerHost))

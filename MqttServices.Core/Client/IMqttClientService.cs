@@ -5,10 +5,9 @@ namespace MqttServices.Core.Client;
 public interface IMqttClientService
 {
     event EventHandler<MqttClientConnectedEventArgs>? ClientConnected;
-    //event EventHandler<ConnectingFailedEventArgs>? ClientConnectionFailed;
     event EventHandler<MqttApplicationMessageReceivedEventArgs>? MessageReceived;
     bool IsConnected { get; set; }
-
+    string ApplicationKey { get; set; }
     Task Connect();
     Task Disconnect();
     void Dispose();
