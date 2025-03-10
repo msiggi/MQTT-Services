@@ -57,5 +57,5 @@ this.messagingManager.MessageReceived += async (sender, e) =>
 ```
 
 ## Sample
-Best overview in Sample-Project *SampleClientMessaging1* (Sender) and *SampleClientMessaging2* (Receiver and Responder)
+Best overview in Sample-Project *SampleClientMessaging1* (Sender) and *SampleClientMessaging2* (Receiver and Responder) (Startconfig "Two Sample Clients" in Solution)
 
