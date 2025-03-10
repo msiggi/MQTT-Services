@@ -5,7 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<Company>SiegelNet</Company>
-		<Description>Helper-Services for easier implementing MQTT-Broker and Clients</Description>
+		<Description>Helper-Services to simplify communication between multiple applications using MQTT</Description>
 		<PackageProjectUrl>https://github.com/msiggi/MQTT-Services</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/msiggi/MQTT-Services</RepositoryUrl>
 		<PackageTags>MQTT</PackageTags>

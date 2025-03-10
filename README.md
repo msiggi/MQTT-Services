@@ -1,5 +1,5 @@
 # MQTT-Services
-Helper-Services for easier implementing MQTT-Broker and Clients 
+Helper-Services to simplify communication between multiple applications using MQTT. 
 
 using https://github.com/dotnet/MQTTnet
 
