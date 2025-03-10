@@ -32,8 +32,6 @@ Set Client-Connection parameters in appsettings.json:
   }
 ```
 
-Inje
-
 Request Message using exchange string to identify the response:
 ```csharp
 await messagingManager.SendMessageRequest<PersonDataRequest>(payloadPersonRequest, "personExchange");
@@ -51,6 +49,9 @@ messagingManager.ResponseReceived += (sender, args) =>
 	}
 };
 ```
+
+## Sample
+Best overview in Sample-Project *SampleClientMessaging1* (Sender) and *SampleClientMessaging2* (Receiver and Responder)
 
 ## General Usage
 
