@@ -26,7 +26,7 @@ Set Client-Connection parameters in appsettings.json:
 
 ```json
 "MqttClientSettings": {
-    "ApplicationKey": "mqtttestapp"  // must be unique for all applications which should communicate for each other
+    "ApplicationKey": "mqtttestapp"  // must be unique for all applications which should communicate with each other
     "ServiceName": "MyApp",
     "BrokerHost": "localhost",
     "BrokerPort": 8883,
@@ -46,7 +46,7 @@ await messagingManager.SendMessage<GuitarPlayer>(guitarPlayer1, "guitarplayersex
 
 Waiting for message in Receiver-App:
 ```csharp
-this.messagingManager.MessageReceived += async (sender, e) =>
+messagingManager.MessageReceived += async (sender, e) =>
 {
     if (e.ExchangeName == "guitarplayersexchangename")
     {
@@ -56,6 +56,42 @@ this.messagingManager.MessageReceived += async (sender, e) =>
 };
 ```
 
-## Sample
+#### Send Request and wait for Response
+##### Request-App:
+```csharp
+// Register Event for Response:
+messagingManager.ResponseReceived += (sender, e) =>
+{
+    if (e.ExchangeName == typeof(GuitarPlayer).Name)
+    {
+        GuitarPlayer player = (GuitarPlayer)e.Value;
+        Console.WriteLine($"**** Response Received with GuitarPlayer {player.Name} owned a {player.OwnedGuitars.FirstOrDefault().Color} {player.OwnedGuitars.FirstOrDefault().Brand} {player.OwnedGuitars.FirstOrDefault().Model} (using Default Exchange Name)!");
+        if (e.MessageId != Guid.Empty)
+        {
+            Console.WriteLine($"MessageId: {e.MessageId}. Use it, to assign Response to Request");
+        }
+    }
+};
+
+// Send Request:
+await messagingManager.SendMessageRequest<GuitarPlayer>(guitarPlayer1); // no explicit exchange name needed, ExchangeName is set to typeof(GuitarPlayer).Name
+```
+##### Response-App:
+```csharp
+messagingManager.RequestReceived += async (sender, e) =>
+{
+    if (e.ExchangeName == typeof(GuitarPlayer).Name)
+        {
+            var player = (GuitarPlayer)e.Value;
+            Console.WriteLine($"**** Message Received with GuitarPlayer {player.Name}, add Guitar and send it back!");
+
+            player.OwnedGuitars = new List<Guitar> { new Guitar { Model = "Stratocaster", Brand = "Fender", Color = "Sunburst" } };
+            e.SetValue(player);
+
+            await messagingManager.SendMessageResponse(e);
+        }
+};
+```
+## Samples
 Best overview in Sample-Project *SampleClientMessaging1* (Sender) and *SampleClientMessaging2* (Receiver and Responder) (Startconfig "Two Sample Clients" in Solution)
 

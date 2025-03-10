@@ -17,8 +17,6 @@ public class ResponseWorker : IHostedService
         this.messagingManager.RequestReceived += MessagingManager_RequestReceived;
         this.messagingManager.RequestForGetAllReceived += MessagingManager_RequestAllReceived;
         this.messagingManager.MessageReceived += MessagingManager_MessageReceived;
-
-
     }
 
     private async void MessagingManager_RequestAllReceived(object? sender, Payload e)
