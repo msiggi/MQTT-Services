@@ -19,8 +19,8 @@ public class MessagingManager : IMessagingManager, IDisposable
 
     public string SubscribeRequestTopic { get => string.Concat(exchangeTopicPrefix, "subscribe__Request"); }
     public string SubscribeMessageTopic { get => string.Concat(exchangeTopicPrefix, "subscribe__Message"); }
-    public string SubscribeMessageTopicDefaultExchange { get => string.Concat(exchangeTopicPrefix, "subscribe__DefaultMessage"); }
-    public string SubscribeRequestTopicDefaultExchange { get => string.Concat(exchangeTopicPrefix, "subscribe__DefaultRequest"); }
+    //public string SubscribeMessageTopicDefaultExchange { get => string.Concat(exchangeTopicPrefix, "subscribe__DefaultMessage"); }
+    //public string SubscribeRequestTopicDefaultExchange { get => string.Concat(exchangeTopicPrefix, "subscribe__DefaultRequest"); }
 
     public event EventHandler<Payload> RequestReceived;
     public event EventHandler<Payload> RequestForGetOneReceived;
@@ -48,7 +48,7 @@ public class MessagingManager : IMessagingManager, IDisposable
 
     private void MqttClientService_MessageReceived(object? sender, MQTTnet.MqttApplicationMessageReceivedEventArgs e)
     {
-        if (e.ApplicationMessage.Topic == SubscribeRequestTopic || e.ApplicationMessage.Topic == SubscribeMessageTopicDefaultExchange)
+        if (e.ApplicationMessage.Topic == SubscribeRequestTopic)
         {
             Payload payload = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
 
@@ -112,14 +112,14 @@ public class MessagingManager : IMessagingManager, IDisposable
                 MessageReceived?.Invoke(this, payloadMessageReceived);
             }
         }
-        if (e.ApplicationMessage.Topic == SubscribeMessageTopicDefaultExchange)
-        {
-            Payload payloadMessageReceived = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
-            if (payloadMessageReceived is not null)
-            {
-                MessageReceived?.Invoke(this, payloadMessageReceived);
-            }
-        }
+        //if (e.ApplicationMessage.Topic == SubscribeMessageTopicDefaultExchange)
+        //{
+        //    Payload payloadMessageReceived = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
+        //    if (payloadMessageReceived is not null)
+        //    {
+        //        MessageReceived?.Invoke(this, payloadMessageReceived);
+        //    }
+        //}
     }
     public Payload DeserializePayloadObject(byte[] bytes)
     {
@@ -167,8 +167,8 @@ public class MessagingManager : IMessagingManager, IDisposable
         logger.LogInformation("MqttClientService MQTT-Client connected!");
         await mqttClientService.Subscribe(SubscribeRequestTopic);
         await mqttClientService.Subscribe(SubscribeMessageTopic);
-        await mqttClientService.Subscribe(SubscribeMessageTopicDefaultExchange);
-        await mqttClientService.Subscribe(SubscribeRequestTopicDefaultExchange);
+        //await mqttClientService.Subscribe(SubscribeMessageTopicDefaultExchange);
+        //await mqttClientService.Subscribe(SubscribeRequestTopicDefaultExchange);
     }
 
     public async Task<Guid> SendMessageRequest<T>(T payload, string exchangeName)
@@ -315,7 +315,7 @@ public class MessagingManager : IMessagingManager, IDisposable
         if (mqttClientService.IsConnected && payload is not null)
         {
             string exchangeName = payload.GetType().Name;
-            await mqttClientService.PublishMessage(SubscribeMessageTopicDefaultExchange, new Payload(exchangeName, payload));
+            await mqttClientService.PublishMessage(SubscribeMessageTopic, new Payload(exchangeName, payload));
         }
         else
         {
