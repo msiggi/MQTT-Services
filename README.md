@@ -37,6 +37,15 @@ Set Client-Connection parameters in appsettings.json:
 Both (or more) applications must be connected to the same MQTT-Broker and must have the same ApplicationKey to communicate with each other.
 
 #### Send simple Message
+Inject IMessagingManager in your class:
+```csharp
+public MyClass(IMessagingManager messagingManager)
+{
+    this.messagingManager = messagingManager;
+    this.messagingManager.ResponseReceived += MessagingManager_ResponseReceived;
+}
+```
+
 Send Message using exchange string to identify the message:
 
 ```csharp
