@@ -14,9 +14,6 @@ builder.Services.AddMqttBrokerService(opts => builder.Configuration.GetSection(n
 
 var app = builder.Build();
 
-// warm MQTT-Broker up:
-app.Services.GetService<IMqttBrokerService>();
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

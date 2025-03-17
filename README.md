@@ -101,6 +101,31 @@ messagingManager.RequestReceived += async (sender, e) =>
         }
 };
 ```
+## Create MQTT-Broker
+### Features
+- Create a simple MQTT-Broker using in own Asp.Net Core Application, Worker Service or Console Application
+
+- Set Broker-Connection parameters in appsettings.json:
+
+```json
+"MqttBrokerSettings": {
+    "EnableBroker": true,
+    "Users": [
+      {
+        "UserName": "Testuser",
+        "Password": "SecRet"
+      }
+    ],
+    "TlsPort": 8883
+  }
+```
+
+- Register Broker in Startup.cs/Program.cs:
+```csharp
+builder.Services.AddMqttBrokerService(opts => builder.Configuration.GetSection(nameof(MqttBrokerSettings)).Bind(opts));
+```
+That's it! Now you have a simple MQTT-Broker running in your application. Use for example https://github.com/thomasnordquist/MQTT-Explorer to connect to test the connection to your Broker.
+
 ## Samples
 Best overview in Sample-Project *SampleClientMessaging1* (Sender) and *SampleClientMessaging2* (Receiver and Responder) (Startconfig "Two Sample Clients" in Solution)
 
