@@ -12,4 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\MqttServices.Core\MqttServices.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
 </Project>
