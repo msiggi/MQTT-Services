@@ -150,6 +150,10 @@ public class MessagingManager : IMessagingManager, IDisposable
                         return retPayload;
                     }
                 }
+                else
+                {
+                    logger.LogError("Error DeserializePayloadObject: Type not found. Please consider using a common type from same solution!");
+                }
             }
             else
             {
