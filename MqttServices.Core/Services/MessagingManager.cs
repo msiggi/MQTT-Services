@@ -166,6 +166,49 @@ public class MessagingManager : IMessagingManager, IDisposable
         }
         return null;
     }
+    public Payload DeserializePayloadObject(byte[] bytes, Type targetType)
+    {
+        try
+        {
+            var jsonString = Encoding.UTF8.GetString(bytes);
+            Payload payload = JsonSerializer.Deserialize<Payload>(jsonString);
+
+            if (payload.Value is not null)
+            {
+                var options = new JsonSerializerOptions();
+                options.PropertyNameCaseInsensitive = true;
+
+                if (targetType != null)
+                {
+                    var deserializeMethod = typeof(JsonSerializer)
+                        .GetMethod(nameof(JsonSerializer.Deserialize), new[] { typeof(string), typeof(Type), typeof(JsonSerializerOptions) });
+
+                    object obj = deserializeMethod.Invoke(null, new object[] { payload.Value.ToString(), targetType, options });
+                    if (obj is not null)
+                    {
+                        Payload retPayload = new Payload(payload.ExchangeName, obj);
+                        retPayload.MessageId = payload.MessageId;
+                        retPayload.RequestType = payload.RequestType;
+                        return retPayload;
+                    }
+                }
+                else
+                {
+                    logger.LogError("Error DeserializePayloadObject: Type not found. Please consider using a common type from same solution!");
+                }
+            }
+            else
+            {
+                return payload;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error DeserializePayloadObject");
+        }
+        return null;
+    }
+
     private async void MqttClientService_ClientConnected(object? sender, MQTTnet.MqttClientConnectedEventArgs e)
     {
         logger.LogInformation("MqttClientService MQTT-Client connected!");
