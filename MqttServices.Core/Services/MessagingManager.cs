@@ -19,8 +19,6 @@ public class MessagingManager : IMessagingManager, IDisposable
 
     public string SubscribeRequestTopic { get => string.Concat(exchangeTopicPrefix, "subscribe__Request"); }
     public string SubscribeMessageTopic { get => string.Concat(exchangeTopicPrefix, "subscribe__Message"); }
-    //public string SubscribeMessageTopicDefaultExchange { get => string.Concat(exchangeTopicPrefix, "subscribe__DefaultMessage"); }
-    //public string SubscribeRequestTopicDefaultExchange { get => string.Concat(exchangeTopicPrefix, "subscribe__DefaultRequest"); }
 
     public event EventHandler<Payload> RequestReceived;
     public event EventHandler<Payload> RequestForGetOneReceived;
@@ -84,14 +82,6 @@ public class MessagingManager : IMessagingManager, IDisposable
 
             return;
         }
-        //if (e.ApplicationMessage.Topic == SubscribeRequestTopicDefaultExchange)
-        //{
-        //    Payload payload = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
-        //    if (payload is not null)
-        //    {
-        //        RequestReceived?.Invoke(this, payload);
-        //    }
-        //}
 
         if (e.ApplicationMessage.Topic.Contains(resonseTopicSuffix))
         {
@@ -112,14 +102,6 @@ public class MessagingManager : IMessagingManager, IDisposable
                 MessageReceived?.Invoke(this, payloadMessageReceived);
             }
         }
-        //if (e.ApplicationMessage.Topic == SubscribeMessageTopicDefaultExchange)
-        //{
-        //    Payload payloadMessageReceived = DeserializePayloadObject(e.ApplicationMessage.Payload.ToArray());
-        //    if (payloadMessageReceived is not null)
-        //    {
-        //        MessageReceived?.Invoke(this, payloadMessageReceived);
-        //    }
-        //}
     }
     public Payload DeserializePayloadObject(byte[] bytes)
     {
@@ -144,7 +126,6 @@ public class MessagingManager : IMessagingManager, IDisposable
                     if (obj is not null)
                     {
                         Payload retPayload = new Payload(payload.ExchangeName, obj);
-                        //retPayload.ValueType = payload.ValueType;
                         retPayload.MessageId = payload.MessageId;
                         retPayload.RequestType = payload.RequestType;
                         return retPayload;
@@ -152,49 +133,9 @@ public class MessagingManager : IMessagingManager, IDisposable
                 }
                 else
                 {
-                    logger.LogError("Error DeserializePayloadObject: Type not found. Please consider using a common type from same solution!");
-                }
-            }
-            else
-            {
-                return payload;
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error DeserializePayloadObject");
-        }
-        return null;
-    }
-    public Payload DeserializePayloadObject(byte[] bytes, Type targetType)
-    {
-        try
-        {
-            var jsonString = Encoding.UTF8.GetString(bytes);
-            Payload payload = JsonSerializer.Deserialize<Payload>(jsonString);
-
-            if (payload.Value is not null)
-            {
-                var options = new JsonSerializerOptions();
-                options.PropertyNameCaseInsensitive = true;
-
-                if (targetType != null)
-                {
-                    var deserializeMethod = typeof(JsonSerializer)
-                        .GetMethod(nameof(JsonSerializer.Deserialize), new[] { typeof(string), typeof(Type), typeof(JsonSerializerOptions) });
-
-                    object obj = deserializeMethod.Invoke(null, new object[] { payload.Value.ToString(), targetType, options });
-                    if (obj is not null)
-                    {
-                        Payload retPayload = new Payload(payload.ExchangeName, obj);
-                        retPayload.MessageId = payload.MessageId;
-                        retPayload.RequestType = payload.RequestType;
-                        return retPayload;
-                    }
-                }
-                else
-                {
-                    logger.LogError("Error DeserializePayloadObject: Type not found. Please consider using a common type from same solution!");
+                    logger.LogError($"Error DeserializePayloadObject: Type not found. Please consider using a known type!" +
+                        $" {Environment.NewLine}" +
+                        $"Type: {payload.ValueType}");
                 }
             }
             else
@@ -214,8 +155,6 @@ public class MessagingManager : IMessagingManager, IDisposable
         logger.LogInformation("MqttClientService MQTT-Client connected!");
         await mqttClientService.Subscribe(SubscribeRequestTopic);
         await mqttClientService.Subscribe(SubscribeMessageTopic);
-        //await mqttClientService.Subscribe(SubscribeMessageTopicDefaultExchange);
-        //await mqttClientService.Subscribe(SubscribeRequestTopicDefaultExchange);
     }
 
     public async Task<Guid> SendMessageRequest<T>(T payload, string exchangeName)
