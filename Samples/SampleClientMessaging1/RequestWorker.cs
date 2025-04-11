@@ -1,3 +1,4 @@
+using MqttServices.Core.Client;
 using MqttServices.Core.Common;
 using MqttServices.Core.Services;
 using SampleCommon;
@@ -9,11 +10,14 @@ public class RequestWorker : IHostedService
 {
     private readonly ILogger<RequestWorker> logger;
     private readonly IMessagingManager messagingManager;
+    private readonly IMqttClientService mqttClientService;
 
-    public RequestWorker(ILogger<RequestWorker> logger, IMessagingManager messagingManager)
+    public RequestWorker(ILogger<RequestWorker> logger, IMessagingManager messagingManager, IMqttClientService mqttClientService)
     {
         this.logger = logger;
         this.messagingManager = messagingManager;
+        this.mqttClientService = mqttClientService;
+        this.mqttClientService.Connect();
         this.messagingManager.ResponseReceived += MessagingManager_ResponseReceived;
     }
 
@@ -52,6 +56,8 @@ public class RequestWorker : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        await mqttClientService.PublishMessage(Configs.guitarPlayersExchangeName, "Hello from Requester!");
+
         await StartDemo();
     }
 

@@ -157,6 +157,10 @@ public class MqttClientService : IDisposable, IMqttClientService
 
                 await mqttClient.PublishAsync(applicationMessage, CancellationToken.None);
             }
+            else
+            {
+                logger.LogWarning($"MQTT-Client not connected. Cannot publish message to {topic}");   
+            }
         }
         catch (Exception ex)
         {
