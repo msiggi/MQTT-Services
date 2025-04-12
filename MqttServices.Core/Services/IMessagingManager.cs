@@ -33,8 +33,6 @@ public interface IMessagingManager
     /// <param name="payload"></param>
     /// <returns></returns>
     Task<Guid> SendMessageRequest<T>(T payload);
-
-
     Task<Guid> SendMessageRequest<T>(T payload, RequestType requestType);
     Task<Guid> SendMessageRequest(string exchangeName, RequestType requestType);
 
@@ -55,4 +53,6 @@ public interface IMessagingManager
     /// <returns></returns>
     Task SendMessageResponse<T>(T payload, string exchangeName);
     Task SendMessageResponse(Payload payload);
+    Task PublishMqttMessage(string topic, object payload);
+
 }

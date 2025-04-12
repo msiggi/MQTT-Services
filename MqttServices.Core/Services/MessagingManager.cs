@@ -310,6 +310,14 @@ public class MessagingManager : IMessagingManager, IDisposable
         }
     }
 
+    public async Task PublishMqttMessage(string topic, object payload)
+    {
+        if (!mqttClientService.IsConnected)
+        {
+            await mqttClientService.Connect();
+        }
+        await mqttClientService.PublishMessage(topic, payload);
+    }
     private string GetResponseTopic(string exchangeName)
     {
         return string.Concat(exchangeTopicPrefix, exchangeName, resonseTopicSuffix);
@@ -335,4 +343,5 @@ public class MessagingManager : IMessagingManager, IDisposable
         }
     }
 
+    
 }

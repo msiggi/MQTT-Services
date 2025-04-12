@@ -1,3 +1,4 @@
+using MQTTnet;
 using MqttServices.Core.Client;
 using MqttServices.Core.Common;
 using MqttServices.Core.Services;
@@ -96,7 +97,8 @@ public class RequestWorker : IHostedService
             Console.WriteLine("2. Send Trigger Message");
             Console.WriteLine("3. Send Message Request");
             Console.WriteLine("4. Send Message Request for all GuitarPlayers");
-            Console.WriteLine("5. Exit");
+            Console.WriteLine("5. Send Raw MQTT-Message");
+            Console.WriteLine("6. Exit");
 
             var input = Console.ReadLine();
 
@@ -119,12 +121,31 @@ public class RequestWorker : IHostedService
                     await StartDemo();
                     break;
                 case "5":
+                    await SendMqttMessage();
+                    await StartDemo();
+                    break;
+                case "6":
                     return;
                 default:
                     Console.WriteLine("Invalid option. Please try again.");
                     break;
             }
         }
+    }
+
+    private async Task SendMqttMessage()
+    {
+        Console.WriteLine();
+        Console.WriteLine();
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Send Raw MQTT-Message");
+        Console.ResetColor();
+        var guitarPlayer = new GuitarPlayer
+        {
+            Name = "Jimi Hendrix",
+            BirthDate = new DateTime(1942, 11, 27)
+        };
+        await mqttClientService.PublishMessage("mqttservices/test", guitarPlayer);
     }
 
     private async Task SendSimpleMessage(GuitarPlayer guitarPlayer1, GuitarPlayer guitarPlayer2)
