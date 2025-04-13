@@ -19,6 +19,7 @@ public class MqttClientService : IDisposable, IMqttClientService
     public event EventHandler<MqttClientConnectedEventArgs>? ClientConnected;
     public event EventHandler<MqttApplicationMessageReceivedEventArgs>? MessageReceived;
     public bool IsConnected { get; set; }
+    public bool IsConnecting { get; set; }
 
     private SslProtocols TlsVersion
     {
@@ -73,9 +74,10 @@ public class MqttClientService : IDisposable, IMqttClientService
 
     public async Task Connect()
     {
-        if (!mqttClient.IsConnected)
+        if (!mqttClient.IsConnected && !IsConnecting)
         {
             var sslVersion = TlsVersion;
+            IsConnecting = true;
             try
             {
                 var mqttClientOptions = new MqttClientOptionsBuilder().WithTcpServer(mqttClientSettings.BrokerHost, mqttClientSettings.BrokerPort)
@@ -107,7 +109,9 @@ public class MqttClientService : IDisposable, IMqttClientService
             catch (Exception ex)
             {
                 logger.LogError("Error connecting to MQTT Broker");
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
+                IsConnecting = false;
+                
                 await Connect();
             }
         }
@@ -159,7 +163,7 @@ public class MqttClientService : IDisposable, IMqttClientService
             }
             else
             {
-                logger.LogWarning($"MQTT-Client not connected. Cannot publish message to {topic}");   
+                logger.LogWarning($"MQTT-Client not connected. Cannot publish message to {topic}");
             }
         }
         catch (Exception ex)
@@ -188,6 +192,7 @@ public class MqttClientService : IDisposable, IMqttClientService
     private Task MqttClient_ConnectedAsync(MqttClientConnectedEventArgs arg)
     {
         IsConnected = true;
+        IsConnecting = false;
         logger?.LogInformation($"MQTT Connection to {mqttClientSettings.BrokerHost}:{mqttClientSettings.BrokerPort} successful!");
         ClientConnected?.Invoke(this, arg);
 

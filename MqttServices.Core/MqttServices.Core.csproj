@@ -13,10 +13,10 @@
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageId>MQTT-Services</PackageId>
 		<Title>MQTT-Services</Title>
-		<Version>2.0.4</Version>
+		<Version>2.0.5</Version>
 		<Product>MQTT-Services</Product>
 		<AssemblyName>MQTT-Services</AssemblyName>
-		<PackageIcon>Logo.png</PackageIcon>
+		<PackageIcon>Logo2.png</PackageIcon>
 		<IncludeSymbols>True</IncludeSymbols>
 	</PropertyGroup>
 
@@ -32,7 +32,7 @@
 
 
 	<ItemGroup>
-	  <None Update="Logo.png">
+	  <None Update="Logo2.png">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
