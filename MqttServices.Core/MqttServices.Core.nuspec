@@ -17,9 +17,9 @@
 				<dependency id="MQTTnet.Server" version="5.0.1.1416" />
 			</group>
 		</dependencies>
-		<icon>Logo.png</icon>
+		<icon>Logo2.png</icon>
 	</metadata>
 	<files>
-		<file src="Logo.png" target="" />
+		<file src="Logo2.png" target="" />
 	</files>
 </package>
