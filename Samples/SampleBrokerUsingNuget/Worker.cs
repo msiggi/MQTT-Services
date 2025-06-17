@@ -7,10 +7,9 @@ namespace SampleBrokerUsingNuget
         private readonly ILogger<Worker> _logger;
         private readonly IMqttBrokerService mqttBrokerService;
 
-        public Worker(ILogger<Worker> logger, IMqttBrokerService mqttBrokerService)
+        public Worker(ILogger<Worker> logger)
         {
             _logger = logger;
-            this.mqttBrokerService = mqttBrokerService;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -19,7 +18,7 @@ namespace SampleBrokerUsingNuget
             {
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
-                    _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                 //   _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 }
                 await Task.Delay(1000, stoppingToken);
             }
