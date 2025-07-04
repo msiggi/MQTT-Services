@@ -9,6 +9,7 @@ public interface IMqttClientService
     bool IsConnected { get; set; }
     string ApplicationKey { get; set; }
     Task Connect();
+    Task Reconnect(string brokerHost, int brokerPort);
     Task Disconnect();
     void Dispose();
     Task PublishMessage(string topic, object payload);

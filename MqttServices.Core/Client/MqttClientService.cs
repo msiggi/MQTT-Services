@@ -35,8 +35,6 @@ public class MqttClientService : IDisposable, IMqttClientService
             };
         }
     }
-
-
     public MqttClientService(ILogger<MqttClientService> logger, IOptions<MqttClientSettings> mqttClientSettings)
     {
         IsConnected = false;
@@ -56,7 +54,6 @@ public class MqttClientService : IDisposable, IMqttClientService
         mqttClient.DisconnectedAsync += MqttClient_DisconnectedAsync;
         mqttClient.ApplicationMessageReceivedAsync += MqttClient_ApplicationMessageReceivedAsync;
     }
-
     private async Task MqttClient_DisconnectedAsync(MqttClientDisconnectedEventArgs args)
     {
         IsConnected = false;
@@ -65,7 +62,6 @@ public class MqttClientService : IDisposable, IMqttClientService
         logger?.LogInformation("Reconnecting...");
         await Connect();
     }
-
     private async Task MqttClient_ApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs arg)
     {
         MessageReceived?.Invoke(this, arg);
@@ -108,13 +104,23 @@ public class MqttClientService : IDisposable, IMqttClientService
             }
             catch (Exception ex)
             {
-                logger.LogError("Error connecting to MQTT Broker");
+                logger.LogError(ex, "Error connecting to MQTT Broker");
                 Thread.Sleep(5000);
                 IsConnecting = false;
                 
                 await Connect();
             }
         }
+    }
+    public async Task Reconnect(string brokerHost, int brokerPort)
+    {
+        if (mqttClient.IsConnected)
+        {
+            await Disconnect();
+        }
+        mqttClientSettings.BrokerHost = brokerHost;
+        mqttClientSettings.BrokerPort = brokerPort;
+        await Connect();
     }
     public async Task Disconnect()
     {

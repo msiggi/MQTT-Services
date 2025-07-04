@@ -1,6 +1,7 @@
 using MQTTnet;
 using MqttServices.Core.Client;
 using MqttServices.Core.Common;
+using MqttServices.Core.Discovery;
 using MqttServices.Core.Services;
 using SampleCommon;
 using System.Threading.Tasks;
@@ -13,13 +14,25 @@ public class RequestWorker : IHostedService
     private readonly IMessagingManager messagingManager;
     private readonly IMqttClientService mqttClientService;
 
-    public RequestWorker(ILogger<RequestWorker> logger, IMessagingManager messagingManager, IMqttClientService mqttClientService)
+    public RequestWorker(ILogger<RequestWorker> logger, IMessagingManager messagingManager, IMqttClientService mqttClientService, DiscoveryClient discoveryClient)
     {
         this.logger = logger;
         this.messagingManager = messagingManager;
         this.mqttClientService = mqttClientService;
         this.mqttClientService.Connect();
         this.messagingManager.ResponseReceived += MessagingManager_ResponseReceived;
+
+        discoveryClient.SendBroadcastDiscoveryRequest().ContinueWith(task =>
+        {
+            if (task.IsFaulted)
+            {
+                logger.LogError("Error during discovery: {Message}", task.Exception?.Message);
+            }
+            else
+            {
+                logger.LogInformation("Discovery completed successfully.");
+            }
+        });
     }
 
     private void MessagingManager_ResponseReceived(object? sender, Payload e)
