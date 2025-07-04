@@ -104,10 +104,10 @@ public class MqttClientService : IDisposable, IMqttClientService
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error connecting to MQTT Broker");
+                logger.LogError(ex, $"Error connecting to MQTT Broker {mqttClientSettings.BrokerHost}:{mqttClientSettings.BrokerPort}");
                 Thread.Sleep(5000);
                 IsConnecting = false;
-                
+
                 await Connect();
             }
         }
@@ -118,14 +118,22 @@ public class MqttClientService : IDisposable, IMqttClientService
         {
             await Disconnect();
         }
+        IsConnected = false;
+        IsConnecting = false;
+
         mqttClientSettings.BrokerHost = brokerHost;
         mqttClientSettings.BrokerPort = brokerPort;
+
+        logger.LogInformation($"Reconnecting to MQTT Broker {brokerHost}:{brokerPort}");
+
         await Connect();
     }
     public async Task Disconnect()
     {
         var mqttClientDisconnectOptions = mqttClientFactory.CreateClientDisconnectOptionsBuilder().Build();
         await mqttClient.DisconnectAsync();
+        IsConnecting = false;
+        IsConnected = false;
     }
 
     public async Task PublishMessage(string topic, object payload)
