@@ -80,6 +80,8 @@ public class MqttClientService : IDisposable, IMqttClientService
             IsConnecting = true;
             try
             {
+                logger?.LogInformation($"MQTT-Client connecting to {mqttClientSettings.BrokerHost}:{mqttClientSettings.BrokerPort}");
+
                 var mqttClientOptions = new MqttClientOptionsBuilder().WithTcpServer(mqttClientSettings.BrokerHost, mqttClientSettings.BrokerPort)
                       .WithTlsOptions(
                       o =>
@@ -111,15 +113,21 @@ public class MqttClientService : IDisposable, IMqttClientService
                 logger.LogError("Error connecting to MQTT Broker");
                 Thread.Sleep(5000);
                 IsConnecting = false;
-                
+
                 await Connect();
             }
         }
     }
     public async Task Disconnect()
     {
-        var mqttClientDisconnectOptions = mqttClientFactory.CreateClientDisconnectOptionsBuilder().Build();
-        await mqttClient.DisconnectAsync();
+        try
+        {
+            await mqttClient.DisconnectAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Error disconnecting MQTT-Client");
+        }
     }
 
     public async Task PublishMessage(string topic, object payload)
