@@ -64,13 +64,11 @@ public static class ServiceCollectionsExtensions
 
         services.Configure(setupAction);
         services.AddSingleton<IMqttClientService>(provider =>
-        {
-            return (IMqttClientService)ActivatorUtilities.CreateInstance(provider, typeof(MqttClientService));
-        });
+            (IMqttClientService)ActivatorUtilities.CreateInstance(provider, typeof(MqttClientService)));
         services.AddSingleton<IMessagingManager>(provider =>
-        {
-            return (IMessagingManager)ActivatorUtilities.CreateInstance(provider, typeof(MessagingManager));
-        });
+            (IMessagingManager)ActivatorUtilities.CreateInstance(provider, typeof(MessagingManager)));
+
+        services.AddHostedService<MqttClientReconnectService>();
         return services;
     }
 

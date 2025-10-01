@@ -119,10 +119,10 @@ public class MqttClientService : IDisposable, IMqttClientService
             catch (Exception ex)
             {
                 logger.LogError("Error connecting to MQTT Broker");
-                Thread.Sleep(5000);
+         //       Thread.Sleep(5000);
                 IsConnecting = false;
 
-                await Connect();
+           //     await Connect();
             }
         }
     }

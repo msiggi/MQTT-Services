@@ -7,6 +7,7 @@ public interface IMqttClientService
     event EventHandler<MqttClientConnectedEventArgs>? ClientConnected;
     event EventHandler<MqttApplicationMessageReceivedEventArgs>? MessageReceived;
     bool IsConnected { get; set; }
+    bool IsConnecting { get; set; }
     string ApplicationKey { get; set; }
     Task Connect();
     Task ReConnect(string brokerHost, int brokerPort, string username, string password);
