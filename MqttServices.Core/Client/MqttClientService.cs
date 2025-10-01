@@ -71,7 +71,15 @@ public class MqttClientService : IDisposable, IMqttClientService
         MessageReceived?.Invoke(this, arg);
         await Task.CompletedTask;
     }
-
+    public async Task ReConnect(string brokerHost, int brokerPort, string username = "", string password = "")
+    {
+        await Disconnect();
+        mqttClientSettings.BrokerHost = brokerHost;
+        mqttClientSettings.BrokerPort = brokerPort;
+        mqttClientSettings.UserName = username;
+        mqttClientSettings.Password = password;
+        await Connect();
+    }
     public async Task Connect()
     {
         if (!mqttClient.IsConnected && !IsConnecting)
