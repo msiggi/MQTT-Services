@@ -57,13 +57,13 @@ public class MqttClientService : IDisposable, IMqttClientService
         mqttClient.ApplicationMessageReceivedAsync += MqttClient_ApplicationMessageReceivedAsync;
     }
 
-    private async Task MqttClient_DisconnectedAsync(MqttClientDisconnectedEventArgs args)
+    private  Task MqttClient_DisconnectedAsync(MqttClientDisconnectedEventArgs args)
     {
         IsConnected = false;
+        IsConnecting = false; // wichtig, damit der Reconnect-Service wieder übernehmen kann
         logger?.LogWarning($"MQTT-Client disconnected from {mqttClientSettings.BrokerHost}:{mqttClientSettings.BrokerPort}");
-        await Task.Delay(2000);
-        logger?.LogInformation("Reconnecting...");
-        await Connect();
+        // Kein direktes Reconnect hier. Der BackgroundService übernimmt das Retry.
+        return Task.CompletedTask;
     }
 
     private async Task MqttClient_ApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs arg)
@@ -90,39 +90,32 @@ public class MqttClientService : IDisposable, IMqttClientService
             {
                 logger?.LogInformation($"MQTT-Client connecting to {mqttClientSettings.BrokerHost}:{mqttClientSettings.BrokerPort}");
 
-                var mqttClientOptions = new MqttClientOptionsBuilder().WithTcpServer(mqttClientSettings.BrokerHost, mqttClientSettings.BrokerPort)
-                      .WithTlsOptions(
-                      o =>
-                      {
-                          // The used public broker sometimes has invalid certificates. This sample accepts all
-                          // certificates. This should not be used in live environments.
-                          o.WithCertificateValidationHandler(_ => true);
-
-                          // The default value is determined by the OS. Set manually to force version.
-                          o.WithSslProtocols(sslVersion);
-                      })
-                      .WithCredentials(mqttClientSettings.UserName, mqttClientSettings.Password)
-                        .WithClientId(mqttClientSettings.ServiceName + Guid.NewGuid().ToString())
-                  .Build();
+                var mqttClientOptions = new MqttClientOptionsBuilder()
+                    .WithTcpServer(mqttClientSettings.BrokerHost, mqttClientSettings.BrokerPort)
+                    .WithTlsOptions(o =>
+                    {
+                        o.WithCertificateValidationHandler(_ => true);
+                        o.WithSslProtocols(sslVersion);
+                    })
+                    .WithCredentials(mqttClientSettings.UserName, mqttClientSettings.Password)
+                    .WithClientId(mqttClientSettings.ServiceName + Guid.NewGuid().ToString())
+                    .Build();
 
                 using var timeout = new CancellationTokenSource(mqttClientOptions.Timeout);
-                MqttClientConnectResult result = await mqttClient.ConnectAsync(mqttClientOptions, timeout.Token);
-                if (result.ResultCode == MqttClientConnectResultCode.Success)
+                var result = await mqttClient.ConnectAsync(mqttClientOptions, timeout.Token);
+                if (result.ResultCode != MqttClientConnectResultCode.Success)
                 {
-                    logger?.LogInformation($"MQTT-Client connected to {mqttClientSettings.BrokerHost}:{mqttClientSettings.BrokerPort}");
-                }
-                else
-                {
-                    logger?.LogError($"MQTT-Client connection failed to {mqttClientSettings.BrokerHost}:{mqttClientSettings.BrokerPort}, Result-Code: {result.ResultCode.ToString()}");
+                    logger?.LogError($"MQTT-Client connection failed to {mqttClientSettings.BrokerHost}:{mqttClientSettings.BrokerPort}, Result-Code: {result.ResultCode}");
                 }
             }
             catch (Exception ex)
             {
-                logger.LogError("Error connecting to MQTT Broker");
-         //       Thread.Sleep(5000);
+                logger.LogError(ex, "Error connecting to MQTT Broker");
+            }
+            finally
+            {
+                // Nicht hängen bleiben, damit weitere Versuche möglich sind
                 IsConnecting = false;
-
-           //     await Connect();
             }
         }
     }

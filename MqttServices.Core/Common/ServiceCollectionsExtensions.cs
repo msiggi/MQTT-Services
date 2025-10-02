@@ -3,8 +3,6 @@ using MqttServices.Core.Broker;
 using MqttServices.Core.Client;
 using MqttServices.Core.Services;
 
-//namespace MqttServices.Core.Common;
-
 public static class ServiceCollectionsExtensions
 {
     public static IServiceCollection AddMqttBrokerService(this IServiceCollection services, Action<MqttBrokerSettings> setupAction)
@@ -15,10 +13,7 @@ public static class ServiceCollectionsExtensions
         services.Configure(setupAction);
         services.AddSingleton<IMqttBrokerService, MqttBrokerService>();
 
-        // Resolve the service to create an instance
-        var serviceProvider = services.BuildServiceProvider();
-        var brokerService = serviceProvider.GetRequiredService<IMqttBrokerService>();
-
+        // WICHTIG: Kein BuildServiceProvider/Resolve hier!
         return services;
     }
 
@@ -35,18 +30,9 @@ public static class ServiceCollectionsExtensions
             options.TlsPort = mqttBrokerSettings.TlsPort;
         });
         services.AddSingleton<IMqttBrokerService, MqttBrokerService>();
-
         return services;
     }
-    /// <summary>
-    /// Adds the MqttClientService to the service collection.
-    /// </summary>
-    /// <param name="services"></param>
-    /// <param name="setupAction"></param>
-    /// <param name="exchangeTopicPrefix">An unique string to distinguish the remote calls to other applications. It must be euqal for all applications which
-    /// must call to each other</param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentNullException"></exception>
+
     public static IServiceCollection AddMqttClientService(this IServiceCollection services, Action<MqttClientSettings> setupAction, string exchangeTopicPrefix = "mqttservices")
     {
         if (services == null) throw new ArgumentNullException(nameof(services));
@@ -63,11 +49,12 @@ public static class ServiceCollectionsExtensions
         if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
 
         services.Configure(setupAction);
-        services.AddSingleton<IMqttClientService>(provider =>
-            (IMqttClientService)ActivatorUtilities.CreateInstance(provider, typeof(MqttClientService)));
-        services.AddSingleton<IMessagingManager>(provider =>
-            (IMessagingManager)ActivatorUtilities.CreateInstance(provider, typeof(MessagingManager)));
 
+        // Konstruktoren dürfen KEIN I/O machen. Nur Dependencies cachen.
+        services.AddSingleton<IMqttClientService, MqttClientService>();
+        services.AddSingleton<IMessagingManager, MessagingManager>();
+
+        // Reconnect in einem BackgroundService starten (StartAsync darf NICHT blockieren).
         services.AddHostedService<MqttClientReconnectService>();
         return services;
     }
@@ -86,7 +73,6 @@ public static class ServiceCollectionsExtensions
             options.ServiceName = mqttClientSettings.ServiceName;
         });
         services.AddSingleton<IMqttClientService, MqttClientService>();
-
         return services;
     }
 }
