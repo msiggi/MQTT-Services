@@ -39,7 +39,7 @@ public class MqttBrokerSettings
     /// <summary>
     /// If true, attempt to open firewall rules for broker ports on supported platforms.
     /// </summary>
-    public bool TryOpenFirewall { get; set; } = false;
+    public bool OpenFirewall { get; set; } = false;
 
     /// <summary>
     /// Checks whether the configuration is valid or not.

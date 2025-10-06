@@ -28,7 +28,7 @@ public class MqttBrokerHostedService : BackgroundService
             return;
         }
 
-        if (_settings.TryOpenFirewall)
+        if (_settings.OpenFirewall)
         {
             TryOpenFirewall();
         }
