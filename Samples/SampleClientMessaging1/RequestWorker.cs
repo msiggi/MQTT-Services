@@ -14,7 +14,7 @@ public class RequestWorker : IHostedService
     private readonly IMessagingManager messagingManager;
     private readonly IMqttClientService mqttClientService;
 
-    public RequestWorker(ILogger<RequestWorker> logger, IMessagingManager messagingManager, IMqttClientService mqttClientService, DiscoveryClient discoveryClient)
+    public RequestWorker(ILogger<RequestWorker> logger, IMessagingManager messagingManager, IMqttClientService mqttClientService, IDiscoveryClient discoveryClient)
     {
         this.logger = logger;
         this.messagingManager = messagingManager;

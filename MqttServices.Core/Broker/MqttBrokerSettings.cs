@@ -2,6 +2,13 @@
 
 namespace MqttServices.Core.Broker;
 
+public class DiscoverySettings
+{
+    public bool Enabled { get; set; } = false;
+    public bool OpenFirewall { get; set; } = false;
+    public int Port { get; set; } = 5005;
+}
+
 public class MqttBrokerSettings
 {
     public bool EnableBroker { get; set; } = false;
@@ -26,6 +33,8 @@ public class MqttBrokerSettings
     public int TlsPort { get; set; } = 8883;
 
     public string TlsVersion { get; set; } = "1.2";
+
+    public DiscoverySettings Discovery { get; set; } = new();
 
     /// <summary>
     /// Checks whether the configuration is valid or not.

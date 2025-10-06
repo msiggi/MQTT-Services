@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MqttServices.Core.Broker;
 using MqttServices.Core.Client;
+using MqttServices.Core.Discovery;
 using MqttServices.Core.Services;
 
 //namespace MqttServices.Core.Common;
@@ -14,8 +15,10 @@ public static class ServiceCollectionsExtensions
 
         services.Configure(setupAction);
         services.AddSingleton<IMqttBrokerService, MqttBrokerService>();
+        services.AddSingleton<DiscoveryServer>();
+        services.AddHostedService<MqttBrokerHostedService>();
+        services.AddHostedService<DiscoveryServerHostedService>();
 
-        // Removed: building a provider & resolving services during registration can block and causes duplicate containers.
         return services;
     }
 
@@ -30,8 +33,13 @@ public static class ServiceCollectionsExtensions
             options.DelayInMilliSeconds = mqttBrokerSettings.DelayInMilliSeconds;
             options.Port = mqttBrokerSettings.Port;
             options.TlsPort = mqttBrokerSettings.TlsPort;
+            options.TlsVersion = mqttBrokerSettings.TlsVersion;
+            options.Discovery = mqttBrokerSettings.Discovery;
         });
         services.AddSingleton<IMqttBrokerService, MqttBrokerService>();
+        services.AddSingleton<DiscoveryServer>();
+        services.AddHostedService<MqttBrokerHostedService>();
+        services.AddHostedService<DiscoveryServerHostedService>();
 
         return services;
     }
@@ -51,6 +59,7 @@ public static class ServiceCollectionsExtensions
 
         services.Configure(setupAction);
         services.AddSingleton<IMqttClientService, MqttClientService>();
+        services.AddSingleton<IDiscoveryClient, DiscoveryClient>();
         return services;
     }
 
@@ -64,6 +73,7 @@ public static class ServiceCollectionsExtensions
             (IMqttClientService)ActivatorUtilities.CreateInstance(provider, typeof(MqttClientService)));
         services.AddSingleton<IMessagingManager>(provider =>
             (IMessagingManager)ActivatorUtilities.CreateInstance(provider, typeof(MessagingManager)));
+        services.AddSingleton<IDiscoveryClient, DiscoveryClient>();
 
         services.AddHostedService<MqttClientReconnectService>();
         return services;
@@ -81,8 +91,13 @@ public static class ServiceCollectionsExtensions
             options.UserName = mqttClientSettings.UserName;
             options.Password = mqttClientSettings.Password;
             options.ServiceName = mqttClientSettings.ServiceName;
+            options.TlsVersion = mqttClientSettings.TlsVersion;
+            options.EncryptWithTls = mqttClientSettings.EncryptWithTls;
+            options.ApplicationKey = mqttClientSettings.ApplicationKey;
+            options.Discovery = mqttClientSettings.Discovery;
         });
         services.AddSingleton<IMqttClientService, MqttClientService>();
+        services.AddSingleton<IDiscoveryClient, DiscoveryClient>();
 
         return services;
     }

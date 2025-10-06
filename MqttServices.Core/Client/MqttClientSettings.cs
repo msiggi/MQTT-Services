@@ -21,4 +21,11 @@ public class MqttClientSettings
     public string Password { get; set; } = "";
     public string TlsVersion { get; set; } = "1.2";
     public bool EncryptWithTls { get; set; } = true;
+    public DiscoverySettings Discovery { get; set; } = new();
+
+}
+public class DiscoverySettings
+{
+    public bool SearchForDiscoveryServer { get; set; } = false;
+    public int Port { get; set; } = 5005;
 }
