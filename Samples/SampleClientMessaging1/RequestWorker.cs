@@ -1,38 +1,24 @@
 using MQTTnet;
 using MqttServices.Core.Client;
 using MqttServices.Core.Common;
-using MqttServices.Core.Discovery;
 using MqttServices.Core.Services;
 using SampleCommon;
 using System.Threading.Tasks;
 
 namespace SampleClientMessaging1;
 
-public class RequestWorker : IHostedService
+public class RequestWorker : BackgroundService
 {
     private readonly ILogger<RequestWorker> logger;
     private readonly IMessagingManager messagingManager;
     private readonly IMqttClientService mqttClientService;
 
-    public RequestWorker(ILogger<RequestWorker> logger, IMessagingManager messagingManager, IMqttClientService mqttClientService, IDiscoveryClient discoveryClient)
+    public RequestWorker(ILogger<RequestWorker> logger, IMessagingManager messagingManager, IMqttClientService mqttClientService)
     {
         this.logger = logger;
         this.messagingManager = messagingManager;
         this.mqttClientService = mqttClientService;
-        this.mqttClientService.Connect();
         this.messagingManager.ResponseReceived += MessagingManager_ResponseReceived;
-
-        discoveryClient.SendBroadcastDiscoveryRequest().ContinueWith(task =>
-        {
-            if (task.IsFaulted)
-            {
-                logger.LogError("Error during discovery: {Message}", task.Exception?.Message);
-            }
-            else
-            {
-                logger.LogInformation("Discovery completed successfully.");
-            }
-        });
     }
 
     private void MessagingManager_ResponseReceived(object? sender, Payload e)
@@ -68,16 +54,17 @@ public class RequestWorker : IHostedService
         }
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Do not call Connect() here. The reconnect/discovery background service will handle connection & discovery.
         await mqttClientService.PublishMessage(Configs.guitarPlayersExchangeName, "Hello from Requester!");
 
-        await StartDemo();
+        await StartDemo(stoppingToken);
     }
 
-    public async Task StartDemo()
+    private async Task StartDemo(CancellationToken stoppingToken)
     {
-        await Task.Delay(500);
+        await Task.Delay(500, stoppingToken);
 
         Console.Title = "Requester";
         Console.BackgroundColor = ConsoleColor.White;
@@ -103,7 +90,7 @@ public class RequestWorker : IHostedService
             BirthDate = new DateTime(1945, 3, 30)
         };
 
-        while (true)
+        while (!stoppingToken.IsCancellationRequested)
         {
             Console.WriteLine("Select an option:");
             Console.WriteLine("1. Send Simple Message");
@@ -119,23 +106,18 @@ public class RequestWorker : IHostedService
             {
                 case "1":
                     await SendSimpleMessage(guitarPlayer1, guitarPlayer2);
-                    await StartDemo();
                     break;
                 case "2":
                     await SendTriggerMessage();
-                    await StartDemo();
                     break;
                 case "3":
                     await SendMessageRequest(guitarPlayer1, guitarPlayer2);
-                    await StartDemo();
                     break;
                 case "4":
                     await SendMessageRequestForAll();
-                    await StartDemo();
                     break;
                 case "5":
                     await SendMqttMessage();
-                    await StartDemo();
                     break;
                 case "6":
                     return;
@@ -208,9 +190,10 @@ public class RequestWorker : IHostedService
         Console.WriteLine($"**** {RequestType.GetAll} Request sent!");
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public override void Dispose()
     {
-        return Task.CompletedTask;
+        base.Dispose();
+        this.messagingManager.ResponseReceived -= MessagingManager_ResponseReceived;
     }
 }
 

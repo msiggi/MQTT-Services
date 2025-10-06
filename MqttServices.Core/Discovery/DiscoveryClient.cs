@@ -13,6 +13,7 @@ namespace MqttServices.Core.Discovery;
 public class DiscoveryClient : IDiscoveryClient
 {
     private readonly int discoveryPort;
+    private readonly int responseTimeoutSeconds;
     private readonly IConfiguration configuration;
     private readonly IMqttClientService mqttClientService;
     private readonly ILogger<DiscoveryClient> logger;
@@ -23,6 +24,7 @@ public class DiscoveryClient : IDiscoveryClient
         this.mqttClientService = mqttClientService;
         this.logger = logger;
         this.discoveryPort = clientOptions?.Value?.Discovery?.Port ?? 5005;
+        this.responseTimeoutSeconds = Math.Max(1, clientOptions?.Value?.Discovery?.ResponseTimeoutSeconds ?? 2);
     }
 
     public async Task SendBroadcastDiscoveryRequest()
@@ -35,17 +37,17 @@ public class DiscoveryClient : IDiscoveryClient
             var discoveryMsg = Encoding.UTF8.GetBytes("DISCOVER_MQTT_CONFIG");
             var broadcastEP = new IPEndPoint(IPAddress.Broadcast, discoveryPort);
 
-            logger.LogInformation("[Discovery] Sende Discovery-Broadcast auf Port {Port} …", discoveryPort);
+            logger.LogInformation("[Discovery] Sende Discovery-Broadcast auf Port {Port} … (Timeout: {Timeout}s)", discoveryPort, responseTimeoutSeconds);
             await udp.SendAsync(discoveryMsg, discoveryMsg.Length, broadcastEP);
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(responseTimeoutSeconds));
 
             var receiveTask = udp.ReceiveAsync();
             var completed = await Task.WhenAny(receiveTask, Task.Delay(Timeout.Infinite, cts.Token));
 
             if (completed != receiveTask)
             {
-                logger.LogInformation("[Discovery] Keine Discovery-Antwort erhalten (Timeout).");
+                logger.LogInformation("[Discovery] Keine Discovery-Antwort erhalten (Timeout nach {Timeout}s).", responseTimeoutSeconds);
                 return;
             }
 

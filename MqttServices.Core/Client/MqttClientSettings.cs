@@ -28,4 +28,8 @@ public class DiscoverySettings
 {
     public bool SearchForDiscoveryServer { get; set; } = false;
     public int Port { get; set; } = 5005;
+    /// <summary>
+    /// Timeout for discovery response in seconds.
+    /// </summary>
+    public int ResponseTimeoutSeconds { get; set; } = 2;
 }

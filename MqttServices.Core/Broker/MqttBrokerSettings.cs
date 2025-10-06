@@ -37,6 +37,11 @@ public class MqttBrokerSettings
     public DiscoverySettings Discovery { get; set; } = new();
 
     /// <summary>
+    /// If true, attempt to open firewall rules for broker ports on supported platforms.
+    /// </summary>
+    public bool TryOpenFirewall { get; set; } = false;
+
+    /// <summary>
     /// Checks whether the configuration is valid or not.
     /// </summary>
     /// <returns>A value indicating whether the configuration is valid or not.</returns>

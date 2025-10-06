@@ -11,7 +11,10 @@ public class MqttClientReconnectService : BackgroundService
     private readonly ILogger<MqttClientReconnectService> _logger;
     private readonly IDiscoveryClient _discoveryClient;
     private readonly MqttClientSettings _settings;
-    private bool _discoveryAttempted;
+
+    // Retry discovery periodically until connected
+    private DateTimeOffset _nextDiscoveryAttemptUtc = DateTimeOffset.MinValue;
+    private static readonly TimeSpan DiscoveryRetryInterval = TimeSpan.FromSeconds(30);
 
     public MqttClientReconnectService(
         IMqttClientService client,
@@ -23,21 +26,24 @@ public class MqttClientReconnectService : BackgroundService
         _logger = logger;
         _discoveryClient = discoveryClient;
         _settings = clientOptions.Value;
-        _discoveryAttempted = false;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _logger.LogInformation("MqttClientReconnectService started.");
+
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 if (!_client.IsConnected && !_client.IsConnecting)
                 {
-                    if (_settings.Discovery?.SearchForDiscoveryServer == true && !_discoveryAttempted)
+                    var discoveryEnabled = _settings.Discovery?.SearchForDiscoveryServer == true;
+                    var now = DateTimeOffset.UtcNow;
+
+                    if (discoveryEnabled && now >= _nextDiscoveryAttemptUtc)
                     {
-                        _discoveryAttempted = true; // ensure only once at startup
-                        _logger.LogInformation("Attempting MQTT discovery broadcast on UDP {Port} ...", _settings.Discovery.Port);
+                        _logger.LogInformation("Attempting MQTT discovery broadcast on UDP {Port} ...", _settings.Discovery!.Port);
                         try
                         {
                             await _discoveryClient.SendBroadcastDiscoveryRequest();
@@ -45,6 +51,16 @@ public class MqttClientReconnectService : BackgroundService
                         catch (Exception ex)
                         {
                             _logger.LogWarning(ex, "Discovery broadcast failed.");
+                        }
+
+                        // schedule next attempt
+                        _nextDiscoveryAttemptUtc = now.Add(DiscoveryRetryInterval);
+
+                        // If discovery triggered a reconnect/connect, skip direct connect in this iteration
+                        if (_client.IsConnecting || _client.IsConnected)
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+                            continue;
                         }
                     }
 
@@ -56,6 +72,7 @@ public class MqttClientReconnectService : BackgroundService
             {
                 _logger.LogWarning(ex, "MQTT reconnect attempt failed.");
             }
+
             await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
         }
     }

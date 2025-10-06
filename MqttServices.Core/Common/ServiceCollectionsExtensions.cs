@@ -60,6 +60,7 @@ public static class ServiceCollectionsExtensions
         services.Configure(setupAction);
         services.AddSingleton<IMqttClientService, MqttClientService>();
         services.AddSingleton<IDiscoveryClient, DiscoveryClient>();
+        // Backward compatibility: do not auto-register reconnect/discovery service here.
         return services;
     }
 
@@ -75,6 +76,7 @@ public static class ServiceCollectionsExtensions
             (IMessagingManager)ActivatorUtilities.CreateInstance(provider, typeof(MessagingManager)));
         services.AddSingleton<IDiscoveryClient, DiscoveryClient>();
 
+        // Messaging defaults to auto reconnect/discovery
         services.AddHostedService<MqttClientReconnectService>();
         return services;
     }
@@ -98,7 +100,19 @@ public static class ServiceCollectionsExtensions
         });
         services.AddSingleton<IMqttClientService, MqttClientService>();
         services.AddSingleton<IDiscoveryClient, DiscoveryClient>();
+        // Backward compatibility: do not auto-register reconnect/discovery service here.
 
+        return services;
+    }
+
+    /// <summary>
+    /// Optional: Adds the hosted reconnect + discovery background service.
+    /// Use this in apps that register only the MQTT client but want auto-connect/discovery.
+    /// </summary>
+    public static IServiceCollection AddMqttClientReconnectService(this IServiceCollection services)
+    {
+        if (services == null) throw new ArgumentNullException(nameof(services));
+        services.AddHostedService<MqttClientReconnectService>();
         return services;
     }
 }
