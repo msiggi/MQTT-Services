@@ -9,6 +9,7 @@ Powered by: https://github.com/dotnet/MQTTnet
 - Request/Response (Example)
 - Host your own MQTT Broker
 - Discovery (Client & Server)
+- Configuration reference (appsettings.json)
 - Samples
 - Contribution
 - Notes
@@ -94,6 +95,7 @@ messagingManager.ResponseReceived += (sender, e) =>
     {
         GuitarPlayer player = (GuitarPlayer)e.Value;
         Console.WriteLine($"**** Response received: {player.Name} has a {player.OwnedGuitars.FirstOrDefault().Color} {player.OwnedGuitars.FirstOrDefault().Brand} {player.OwnedGuitars.FirstOrDefault().Model} (Default Exchange Name)!");
+
         if (e.MessageId != Guid.Empty)
         {
             Console.WriteLine($"MessageId: {e.MessageId}. Use this to correlate response to request");
@@ -181,6 +183,27 @@ That's it! A simple MQTT broker is now running in your application. For example,
 ### Usage
 - The discovery server automatically responds to UDP broadcasts with the broker information.
 - If client found the server it gets automatically the broker info and connects to it.
+
+## Configuration reference (appsettings.json)
+
+| Parameter                      | Description                                                                                               | Default Value                    |
+|--------------------------------|-----------------------------------------------------------------------------------------------------------|----------------------------------|
+| `MqttClientSettings`          | Client-related settings                                                                                    |                                  |
+| `ApplicationKey`              | Must be unique for all communicating applications.                                                         | `(none)`                          |
+| `ServiceName`                 | Name of the service/application.                                                                         | `(none)`                          |
+| `BrokerHost`                  | Hostname or IP address of the MQTT broker.                                                               | `localhost`                      |
+| `BrokerPort`                  | Port number of the MQTT broker.                                                                           | `1883`                           |
+| `UserName`                    | Username for MQTT broker authentication.                                                                  | `(none)`                          |
+| `Password`                    | Password for MQTT broker authentication.                                                                  | `(none)`                          |
+|                                |                                                                                                           |                                  |
+| `MqttBrokerSettings`         | MQTT broker-related settings                                                                               |                                  |
+| `EnableBroker`                | Set to `true` to enable the integrated MQTT broker.                                                      | `false`                          |
+| `Port`                        | Port number of the MQTT broker will be listening on.                                                    | `1883`                           |
+| `TlsPort`                        | Port number of the MQTT broker using TLS.                                                    | `8883`                           |
+|`TlsVersion`                  | TLS version to use for secure connections. Supported values: `None`, `Tls`, `Tls11`, `Tls12`, `Tls13`. | `Tls12`                          |    
+| `Discovery.Enabled`            | Set to `true` to enable UDP discovery server.                                                             | `false`                          |
+| `Discovery.Port`               | Port number for the UDP discovery server.                                                                 | `5005`                           |
+| `Discovery.OpenFirewall`       | Set to `true` to automatically open the firewall for the discovery server port (Windows only).           | `false`                          |
 
 ## Samples
 The best overview can be found in the sample projects *SampleClientMessaging1* (Sender) and *SampleClientMessaging2* (Receiver and Responder) (Start configuration "Two Sample Clients" in the solution)
