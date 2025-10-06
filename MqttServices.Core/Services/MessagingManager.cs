@@ -2,6 +2,7 @@
 using MqttServices.Core.Client;
 using MqttServices.Core.Common;
 using System.Buffers;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
@@ -13,6 +14,8 @@ public class MessagingManager : IMessagingManager, IDisposable
     private readonly string exchangeTopicPrefix;
     private readonly IMqttClientService mqttClientService;
     private bool disposed = false;
+
+    private static readonly TimeSpan DefaultConnectWaitTimeout = TimeSpan.FromSeconds(5);
 
     private const string resonseTopicSuffix = "__Respnse";
     private Dictionary<string, dynamic> subscriptions = new Dictionary<string, dynamic>();
@@ -40,7 +43,7 @@ public class MessagingManager : IMessagingManager, IDisposable
             this.mqttClientService = mqttClientService;
             this.mqttClientService.ClientConnected += MqttClientService_ClientConnected;
             this.mqttClientService.MessageReceived += MqttClientService_MessageReceived;
-            this.mqttClientService.Connect();
+            // keine Verbindung im CTOR starten
         }
     }
 
@@ -103,6 +106,7 @@ public class MessagingManager : IMessagingManager, IDisposable
             }
         }
     }
+
     public Payload DeserializePayloadObject(byte[] bytes)
     {
         try
@@ -157,167 +161,140 @@ public class MessagingManager : IMessagingManager, IDisposable
         await mqttClientService.Subscribe(SubscribeMessageTopic);
     }
 
+    // NEU: liefert false statt Exception
+    private async Task<bool> EnsureConnectedAsync(TimeSpan timeout)
+    {
+        if (mqttClientService.IsConnected)
+            return true;
+
+        var sw = Stopwatch.StartNew();
+        while (!mqttClientService.IsConnected && sw.Elapsed < timeout)
+        {
+            await Task.Delay(250);
+        }
+
+        if (!mqttClientService.IsConnected)
+        {
+            logger.LogWarning("MQTT nicht verbunden (Timeout {Timeout}s).", (int)timeout.TotalSeconds);
+            return false;
+        }
+        return true;
+    }
+
     public async Task<Guid> SendMessageRequest<T>(T payload, string exchangeName)
     {
+        if (payload is null) throw new ArgumentNullException(nameof(payload));
+        if (!await EnsureConnectedAsync(DefaultConnectWaitTimeout)) return Guid.Empty;
+
         Guid guid = Guid.NewGuid();
-        if (mqttClientService.IsConnected)
-        {
-            // subscribe for Response:
-            string topic = GetResponseTopic(exchangeName);
-            await mqttClientService.Subscribe(topic);
-            await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, payload, guid));
-        }
-        else
-        {
-            Thread.Sleep(500);
-            await SendMessageRequest(payload, exchangeName);
-        }
+
+        string topic = GetResponseTopic(exchangeName);
+        await mqttClientService.Subscribe(topic);
+        await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, payload, guid));
         return guid;
     }
+
     public async Task<Guid> SendMessageRequest<T>(T payload)
     {
+        if (payload is null) throw new ArgumentNullException(nameof(payload));
+        if (!await EnsureConnectedAsync(DefaultConnectWaitTimeout)) return Guid.Empty;
+
         Guid guid = Guid.NewGuid();
-        if (mqttClientService.IsConnected && payload is not null)
-        {
-            // subscribe for Response:
-            string exchangeName = payload.GetType().Name;
-            string topic = GetResponseTopic(exchangeName);
-            await mqttClientService.Subscribe(topic);
-            await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, payload, guid));
-        }
-        else
-        {
-            Thread.Sleep(500);
-            await SendMessageRequest(payload);
-        }
+        string exchangeName = payload.GetType().Name;
+        string topic = GetResponseTopic(exchangeName);
+        await mqttClientService.Subscribe(topic);
+        await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, payload, guid));
         return guid;
     }
+
     public async Task<Guid> SendMessageRequest<T>(T payload, RequestType requestType)
     {
+        if (payload is null) throw new ArgumentNullException(nameof(payload));
+        if (!await EnsureConnectedAsync(DefaultConnectWaitTimeout)) return Guid.Empty;
+
         Guid guid = Guid.NewGuid();
-        if (mqttClientService.IsConnected && payload is not null)
-        {
-            // subscribe for Response:
-            string exchangeName = payload.GetType().Name;
-            string topic = GetResponseTopic(exchangeName);
-            await mqttClientService.Subscribe(topic);
-            await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, payload, guid, requestType));
-        }
-        else
-        {
-            Thread.Sleep(500);
-            await SendMessageRequest(payload, requestType);
-        }
+        string exchangeName = payload.GetType().Name;
+        string topic = GetResponseTopic(exchangeName);
+        await mqttClientService.Subscribe(topic);
+        await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, payload, guid, requestType));
         return guid;
     }
+
     public async Task<Guid> SendMessageRequest(string exchangeName, RequestType requestType)
     {
+        if (string.IsNullOrWhiteSpace(exchangeName)) throw new ArgumentNullException(nameof(exchangeName));
+        if (!await EnsureConnectedAsync(DefaultConnectWaitTimeout)) return Guid.Empty;
+
         Guid guid = Guid.NewGuid();
-        if (mqttClientService.IsConnected)
-        {
-            // subscribe for Response:
-            string topic = GetResponseTopic(exchangeName);
-            await mqttClientService.Subscribe(topic);
-            await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, null, guid, requestType));
-        }
-        else
-        {
-            Thread.Sleep(500);
-            await SendMessageRequest(exchangeName, requestType);
-        }
+        string topic = GetResponseTopic(exchangeName);
+        await mqttClientService.Subscribe(topic);
+        await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, null, guid, requestType));
         return guid;
     }
 
-    /// <summary>
-    /// To trigger something without response
-    /// </summary>
-    /// <param name="exchangeName"></param>
-    /// <returns></returns>
     public async Task<Guid> SendMessageRequest(string exchangeName)
     {
+        if (string.IsNullOrWhiteSpace(exchangeName)) throw new ArgumentNullException(nameof(exchangeName));
+        if (!await EnsureConnectedAsync(DefaultConnectWaitTimeout)) return Guid.Empty;
+
         Guid guid = Guid.NewGuid();
-        if (mqttClientService.IsConnected)
-        {
-            // subscribe for Response:
-            string topic = GetResponseTopic(exchangeName);
-            await mqttClientService.Subscribe(topic);
-            await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, null, guid));
-        }
-        else
-        {
-            Thread.Sleep(500);
-            await SendMessageRequest(exchangeName);
-        }
+        string topic = GetResponseTopic(exchangeName);
+        await mqttClientService.Subscribe(topic);
+        await mqttClientService.PublishMessage(SubscribeRequestTopic, new Payload(exchangeName, null, guid));
         return guid;
     }
+
     public async Task SendMessageResponse<T>(T payload, string exchangeName)
     {
-        if (mqttClientService.IsConnected)
-        {
-            string topic = GetResponseTopic(exchangeName);
+        if (string.IsNullOrWhiteSpace(exchangeName)) throw new ArgumentNullException(nameof(exchangeName));
+        if (!await EnsureConnectedAsync(DefaultConnectWaitTimeout)) return;
 
-            if (payload is Payload)
-            {
-                await mqttClientService.PublishMessage(topic, payload as Payload);
-            }
-            else
-            {
-                await mqttClientService.PublishMessage(topic, new Payload(exchangeName, payload));
-            }
+        string topic = GetResponseTopic(exchangeName);
+
+        if (payload is Payload p)
+        {
+            await mqttClientService.PublishMessage(topic, p);
         }
         else
         {
-            Thread.Sleep(500);
-            await SendMessageResponse(payload, exchangeName);
+            await mqttClientService.PublishMessage(topic, new Payload(exchangeName, payload));
         }
     }
+
     public async Task SendMessageResponse(Payload payload)
     {
-        if (mqttClientService.IsConnected && payload is not null)
-        {
-            string topic = GetResponseTopic(payload.ExchangeName);
-            await mqttClientService.PublishMessage(topic, payload);
-        }
-        else
-        {
-            Thread.Sleep(500);
-            await SendMessageResponse(payload);
-        }
+        if (payload is null) throw new ArgumentNullException(nameof(payload));
+        if (!await EnsureConnectedAsync(DefaultConnectWaitTimeout)) return;
+
+        string topic = GetResponseTopic(payload.ExchangeName);
+        await mqttClientService.PublishMessage(topic, payload);
     }
+
     public async Task SendMessage<T>(T payload, string exchangeName)
     {
-        if (mqttClientService.IsConnected)
-        {
-            await mqttClientService.PublishMessage(SubscribeMessageTopic, new Payload(exchangeName, payload));
-        }
-        else
-        {
-            Thread.Sleep(500);
-            await SendMessage(payload, exchangeName);
-        }
+        if (string.IsNullOrWhiteSpace(exchangeName)) throw new ArgumentNullException(nameof(exchangeName));
+        if (!await EnsureConnectedAsync(DefaultConnectWaitTimeout)) return;
+
+        await mqttClientService.PublishMessage(SubscribeMessageTopic, new Payload(exchangeName, payload));
     }
+
     public async Task SendMessage<T>(T payload)
     {
-        if (mqttClientService.IsConnected && payload is not null)
-        {
-            string exchangeName = payload.GetType().Name;
-            await mqttClientService.PublishMessage(SubscribeMessageTopic, new Payload(exchangeName, payload));
-        }
-        else
-        {
-            Thread.Sleep(500);
-            await SendMessage(payload);
-        }
+        if (payload is null) throw new ArgumentNullException(nameof(payload));
+        if (!await EnsureConnectedAsync(DefaultConnectWaitTimeout)) return;
+
+        string exchangeName = payload.GetType().Name;
+        await mqttClientService.PublishMessage(SubscribeMessageTopic, new Payload(exchangeName, payload));
     }
 
     public async Task PublishMqttMessage(string topic, object payload)
     {
-        if (!mqttClientService.IsConnected)
-        {
-            await mqttClientService.Connect();
-        }
+        if (string.IsNullOrWhiteSpace(topic)) throw new ArgumentNullException(nameof(topic));
+        if (!await EnsureConnectedAsync(DefaultConnectWaitTimeout)) return;
+
         await mqttClientService.PublishMessage(topic, payload);
     }
+
     private string GetResponseTopic(string exchangeName)
     {
         return string.Concat(exchangeTopicPrefix, exchangeName, resonseTopicSuffix);
@@ -342,6 +319,4 @@ public class MessagingManager : IMessagingManager, IDisposable
             disposed = true;
         }
     }
-
-    
 }

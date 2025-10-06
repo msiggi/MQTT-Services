@@ -15,10 +15,7 @@ public static class ServiceCollectionsExtensions
         services.Configure(setupAction);
         services.AddSingleton<IMqttBrokerService, MqttBrokerService>();
 
-        // Resolve the service to create an instance
-        var serviceProvider = services.BuildServiceProvider();
-        var brokerService = serviceProvider.GetRequiredService<IMqttBrokerService>();
-
+        // Removed: building a provider & resolving services during registration can block and causes duplicate containers.
         return services;
     }
 
@@ -64,13 +61,11 @@ public static class ServiceCollectionsExtensions
 
         services.Configure(setupAction);
         services.AddSingleton<IMqttClientService>(provider =>
-        {
-            return (IMqttClientService)ActivatorUtilities.CreateInstance(provider, typeof(MqttClientService));
-        });
+            (IMqttClientService)ActivatorUtilities.CreateInstance(provider, typeof(MqttClientService)));
         services.AddSingleton<IMessagingManager>(provider =>
-        {
-            return (IMessagingManager)ActivatorUtilities.CreateInstance(provider, typeof(MessagingManager));
-        });
+            (IMessagingManager)ActivatorUtilities.CreateInstance(provider, typeof(MessagingManager)));
+
+        services.AddHostedService<MqttClientReconnectService>();
         return services;
     }
 

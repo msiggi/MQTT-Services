@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MqttServices.CoreTests", "M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleBrokerUsingNuget", "Samples\SampleBrokerUsingNuget\SampleBrokerUsingNuget.csproj", "{19255A49-4BC5-4FA5-AE0A-F0A553635437}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleBlazorAppWithMqttClient", "SampleBlazorAppWithMqttClient\SampleBlazorAppWithMqttClient.csproj", "{93AFF5E7-3491-4F0B-97E8-2E1A972321CE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,6 +74,10 @@ Global
 		{19255A49-4BC5-4FA5-AE0A-F0A553635437}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19255A49-4BC5-4FA5-AE0A-F0A553635437}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19255A49-4BC5-4FA5-AE0A-F0A553635437}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93AFF5E7-3491-4F0B-97E8-2E1A972321CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93AFF5E7-3491-4F0B-97E8-2E1A972321CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93AFF5E7-3491-4F0B-97E8-2E1A972321CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93AFF5E7-3491-4F0B-97E8-2E1A972321CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -84,6 +90,7 @@ Global
 		{391EACF0-2C69-47C5-9D20-039557313F7C} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
 		{5BB30A00-0B60-4D81-A157-FFD1FCD5DCD4} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
 		{19255A49-4BC5-4FA5-AE0A-F0A553635437} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
+		{93AFF5E7-3491-4F0B-97E8-2E1A972321CE} = {5B72729E-E95A-4F4B-ACC4-663DA2DDD591}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0EB792C7-CF30-45FF-8D22-10701396F39F}
