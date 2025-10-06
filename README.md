@@ -141,15 +141,13 @@ Set broker connection parameters in `appsettings.json`:
 
 ```json
 "MqttBrokerSettings": {
-    "EnableBroker": true,
-    "Users": [
-      {
-        "UserName": "Testuser",
-        "Password": "SecRet"
-      }
-    ],
-    "TlsPort": 8883
+  "EnableBroker": true,
+  "Discovery": {
+    "Enabled": true,
+    "Port": 5005,
+    "OpenFirewall": false
   }
+}
 ```
 
 That's it! A simple MQTT broker is now running in your application. For example, use [MQTT Explorer](https://github.com/thomasnordquist/MQTT-Explorer) to test the connection to your broker.
@@ -161,30 +159,33 @@ That's it! A simple MQTT broker is now running in your application. For example,
 - Supports UDP-based broadcast for discovery
 
 ### Setup
-- Add the required NuGet packages:
-```
-Install-Package MQTT-Services
-```
 
-- Register the discovery service in `Startup.cs`/`Program.cs`:
-```csharp
-builder.Services.AddMqttDiscoveryService(opts => builder.Configuration.GetSection(nameof(MqttDiscoverySettings)).Bind(opts));
-```
-
-- Configure the discovery settings in `appsettings.json`:
+- Configure the discovery settings in `appsettings.json` for Server:
 ```json
-"MqttDiscoverySettings": {
-    "EnableDiscovery": true,
-    "BrokerPort": 8883
-  }
+    "Discovery": {
+      "Enabled": true,
+      "Port": 5005,
+      "OpenFirewall": true
+    }
+```
+
+- Configure the discovery settings in `appsettings.json` for Client:
+```json
+     "Discovery": {
+      "SearchForDiscoveryServer": true,
+      "Port": 5005,
+      "ResponseTimeoutSeconds": 5
+    }
 ```
 
 ### Usage
 - The discovery server automatically responds to UDP broadcasts with the broker information.
-- The discovery client can be used in your applications to automatically find and connect to brokers.
+- If client found the server it gets automatically the broker info and connects to it.
 
 ## Samples
 The best overview can be found in the sample projects *SampleClientMessaging1* (Sender) and *SampleClientMessaging2* (Receiver and Responder) (Start configuration "Two Sample Clients" in the solution)
+
+Additonally, there are samples for Broker inclunding Discovery Server in *SampleWebApiWithMqttBroker*.
 
 ## Contribution
 Contributions are welcome! If you would like to contribute to this project, please follow these steps:
