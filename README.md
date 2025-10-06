@@ -195,6 +195,9 @@ That's it! A simple MQTT broker is now running in your application. For example,
 | `BrokerPort`                  | Port number of the MQTT broker.                                                                           | `1883`                           |
 | `UserName`                    | Username for MQTT broker authentication.                                                                  | `(none)`                          |
 | `Password`                    | Password for MQTT broker authentication.                                                                  | `(none)`                          |
+| `Discovery.SearchForDiscoveryServer`| Set to `true` to enable searching for a discovery server. If found, `BrokerHost` and `BrokerPort` will be overwritten at runtime. | `false`                          |
+| `Discovery.Port`               | Port number for the UDP discovery client.                                                                 | `5005`                           |
+| `Discovery.ResponseTimeoutSeconds` | Timeout in seconds to wait for a response from the discovery server.                                      | `5`                              |
 |                                |                                                                                                           |                                  |
 | `MqttBrokerSettings`         | MQTT broker-related settings                                                                               |                                  |
 | `EnableBroker`                | Set to `true` to enable the integrated MQTT broker.                                                      | `false`                          |
