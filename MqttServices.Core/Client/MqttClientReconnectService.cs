@@ -26,11 +26,26 @@ public class MqttClientReconnectService : BackgroundService
         _logger = logger;
         _discoveryClient = discoveryClient;
         _settings = clientOptions.Value;
+
+        // Diagnostic: log construction so we can see when DI constructs the instance
+        _logger.LogInformation("MqttClientReconnectService constructed. Enabled={Enabled}", _settings?.Enabled);
+    }
+
+    public override async Task StartAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("MqttClientReconnectService.StartAsync() called by host.");
+        await base.StartAsync(cancellationToken);
+    }
+
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("MqttClientReconnectService.StopAsync() called by host.");
+        await base.StopAsync(cancellationToken);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("MqttClientReconnectService started.");
+        _logger.LogInformation("MqttClientReconnectService ExecuteAsync started.");
 
         while (!stoppingToken.IsCancellationRequested)
         {
