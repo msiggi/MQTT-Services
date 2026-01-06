@@ -334,7 +334,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
                 var pfxCertificate = new X509Certificate2(
                     certificate.Export(X509ContentType.Pfx),
                     (string)null!,
-                    X509KeyStorageFlags.UserKeySet | X509KeyStorageFlags.Exportable);
+                    X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
 
                 return pfxCertificate;
             }
