@@ -331,10 +331,13 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
 
             using (var certificate = certRequest.CreateSelfSigned(DateTimeOffset.Now.AddMinutes(-10), DateTimeOffset.Now.AddMinutes(10)))
             {
-                var pfxCertificate = new X509Certificate2(
+                // Use X509CertificateLoader (modern API) with EphemeralKeySet
+                // EphemeralKeySet keeps the private key in memory only, avoiding filesystem/store access
+                // This works in IIS without requiring special permissions
+                var pfxCertificate = X509CertificateLoader.LoadPkcs12(
                     certificate.Export(X509ContentType.Pfx),
-                    (string)null!,
-                    X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+                    password: null,
+                    keyStorageFlags: X509KeyStorageFlags.EphemeralKeySet | X509KeyStorageFlags.Exportable);
 
                 return pfxCertificate;
             }
