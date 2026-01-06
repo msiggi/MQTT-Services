@@ -154,6 +154,14 @@ Set broker connection parameters in `appsettings.json`:
 
 That's it! A simple MQTT broker is now running in your application. For example, use [MQTT Explorer](https://github.com/thomasnordquist/MQTT-Explorer) to test the connection to your broker.
 
+### IIS Hosting
+When hosting the MQTT broker in IIS, the application automatically uses the Windows Machine Certificate Store for TLS certificates. This ensures:
+- Compatibility with IIS Application Pool identities
+- No need for write permissions to the web application folder
+- Secure certificate storage following IIS best practices
+
+No additional configuration is required - the broker will work out of the box when hosted in IIS.
+
 ## Discovery (Client & Server)
 ### Benefits
 - Automatic detection of MQTT brokers in the local network
