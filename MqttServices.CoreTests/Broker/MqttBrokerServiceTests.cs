@@ -14,10 +14,10 @@ namespace MqttServices.Core.Broker.Tests
         [TestMethod()]
         public void CreateSelfSignedCertificate__WithMachineKeySet_Succeeds()
         {
-            // Arrange - Call the public unused method which has similar signature
-            // This tests that certificate creation with proper flags works
-            
-            // Act
+            // Arrange & Act
+            // This tests that certificate creation works correctly.
+            // Note: Testing the unused public method CreateSelfSignedCertificate__ 
+            // since the active CreateSelfSignedCertificate method is private.
             var certificate = MqttBrokerService.CreateSelfSignedCertificate__("localhost", "1.3.6.1.5.5.7.3.1");
 
             // Assert
