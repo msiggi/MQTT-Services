@@ -331,15 +331,12 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
 
             using (var certificate = certRequest.CreateSelfSigned(DateTimeOffset.Now.AddMinutes(-10), DateTimeOffset.Now.AddMinutes(10)))
             {
-                // Use X509CertificateLoader (modern API) with EphemeralKeySet
-                // EphemeralKeySet keeps the private key in memory only, avoiding filesystem/store access
-                // This works in IIS without requiring special permissions
-                var pfxCertificate = X509CertificateLoader.LoadPkcs12(
+                // Export to PFX and re-import to ensure the certificate works across platforms
+                // Use DefaultKeySet which allows both user and machine contexts depending on the process
+                return X509CertificateLoader.LoadPkcs12(
                     certificate.Export(X509ContentType.Pfx),
                     password: null,
-                    keyStorageFlags: X509KeyStorageFlags.EphemeralKeySet | X509KeyStorageFlags.Exportable);
-
-                return pfxCertificate;
+                    keyStorageFlags: X509KeyStorageFlags.DefaultKeySet | X509KeyStorageFlags.Exportable);
             }
         }
     }
