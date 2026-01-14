@@ -10,14 +10,14 @@ namespace SampleWorkerService_Client;
 public class WorkerHostedService : IHostedService, IDisposable
 {
     private readonly IMessagingManager messagingManager;
-    private readonly LifeBeatInfoItem lifeBeatInfo;
+    private readonly LifeBeatInfo lifeBeatInfo;
     private Timer? _timer;
     private int _messageCount = 0;
 
     public WorkerHostedService(IMessagingManager messagingManager)
     {
         this.messagingManager = messagingManager;
-        lifeBeatInfo = new LifeBeatInfoItem
+        lifeBeatInfo = new LifeBeatInfo
         {
             Name = System.Reflection.Assembly.GetEntryAssembly().GetName().Name,
             Version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString(),

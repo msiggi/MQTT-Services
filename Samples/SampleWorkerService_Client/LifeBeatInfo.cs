@@ -1,7 +1,7 @@
 ﻿
 namespace SampleWorkerService_Client
 {
-    internal class LifeBeatInfoItem
+    public class LifeBeatInfo
     {
         public string? Name { get; internal set; }
         public string Version { get; internal set; }

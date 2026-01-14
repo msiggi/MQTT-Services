@@ -10,6 +10,10 @@ IHost host = Host.CreateDefaultBuilder(args)
 
         //services.AddHostedService<Worker>();
         services.AddHostedService<WorkerHostedService>();
+
+        services.AddSingleton<ILifeBeatService, LifeBeatService>();
+        services.AddHostedService(provider => (LifeBeatService)provider.GetRequiredService<ILifeBeatService>());
+
     })
     .Build();
 
