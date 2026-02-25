@@ -17,6 +17,16 @@ public class ResponseWorker : IHostedService
         this.messagingManager.RequestReceived += MessagingManager_RequestReceived;
         this.messagingManager.RequestForGetAllReceived += MessagingManager_RequestAllReceived;
         this.messagingManager.MessageReceived += MessagingManager_MessageReceived;
+        this.messagingManager.StringReceived += MessagingManager_StringReceived;
+    }
+
+    private void MessagingManager_StringReceived(object? sender, StringPayload e)
+    {
+        if (e.ExchangeName == Configs.guitarPlayersSendExchangeName)
+        {
+            Console.WriteLine($"**** String Message Received: {e.StringValue}");
+            Console.WriteLine("Deserialize it to GuitarPlayer by your own!");
+        }
     }
 
     private async void MessagingManager_RequestAllReceived(object? sender, Payload e)
