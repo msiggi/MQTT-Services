@@ -6,6 +6,7 @@ public interface IMessagingManager
 {
     event EventHandler<Payload> MessageReceived;
     event EventHandler<Payload> RequestReceived;
+    event EventHandler<StringPayload> StringReceived;
     event EventHandler<Payload> RequestForGetOneReceived;
     event EventHandler<Payload> RequestForGetAllReceived;
     event EventHandler<Payload> RequestForUpsertReceived;
@@ -15,6 +16,7 @@ public interface IMessagingManager
     event EventHandler<Payload> ResponseReceived;
 
     Task SendMessage<T>(T payload, string exchangeName);
+    Task SendString(string payloadString, string exchangeName);
     Task<Guid> SendMessageRequest<T>(T payload, string exchangeName);
 
     /// <summary>

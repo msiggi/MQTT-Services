@@ -38,6 +38,7 @@ public class Payload
     public Payload()
     {
         RequestType = RequestType.Generic;
+        MessageId = Guid.NewGuid();
         ValueType = Value?.GetType().AssemblyQualifiedName;
     }
 

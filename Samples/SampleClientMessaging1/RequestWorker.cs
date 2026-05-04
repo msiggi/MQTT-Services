@@ -98,7 +98,8 @@ public class RequestWorker : BackgroundService
             Console.WriteLine("3. Send Message Request");
             Console.WriteLine("4. Send Message Request for all GuitarPlayers");
             Console.WriteLine("5. Send Raw MQTT-Message");
-            Console.WriteLine("6. Exit");
+            Console.WriteLine("6. Send String Message");
+            Console.WriteLine("7. Exit");
 
             var input = Console.ReadLine();
 
@@ -120,6 +121,9 @@ public class RequestWorker : BackgroundService
                     await SendMqttMessage();
                     break;
                 case "6":
+                    await SendSimpleMessageAsString(guitarPlayer1);
+                    break;
+                case "7":
                     return;
                 default:
                     Console.WriteLine("Invalid option. Please try again.");
@@ -154,6 +158,18 @@ public class RequestWorker : BackgroundService
         Console.WriteLine($"**** Message sent ({guitarPlayer1.Name})!");
         await messagingManager.SendMessage(guitarPlayer2);
         Console.WriteLine($"**** Message sent ({guitarPlayer2.Name})!");
+    }
+    private async Task SendSimpleMessageAsString(GuitarPlayer guitarPlayer1)
+    {
+        Console.WriteLine();
+        Console.WriteLine();
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Simple SendMessage with string-Data");
+        Console.ResetColor();
+
+        string jsonString = System.Text.Json.JsonSerializer.Serialize(guitarPlayer1);
+        await messagingManager.SendString(jsonString, Configs.guitarPlayersSendExchangeName);
+        Console.WriteLine($"**** Message sent!");
     }
 
     private async Task SendTriggerMessage()
