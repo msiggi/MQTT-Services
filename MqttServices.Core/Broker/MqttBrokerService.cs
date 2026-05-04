@@ -6,6 +6,7 @@ using MQTTnet.Diagnostics.Logger;
 using MQTTnet.Protocol;
 using MQTTnet.Server;
 using System.Net;
+using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -105,15 +106,45 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
         mqttServer.ValidatingConnectionAsync += this.ValidateConnectionAsync;
         mqttServer.InterceptingSubscriptionAsync += this.InterceptSubscriptionAsync;
         mqttServer.InterceptingPublishAsync += this.InterceptApplicationMessagePublishAsync;
-        try
+
+        const int maxRetries = 10;
+        const int retryDelayMs = 3000;
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
         {
-            await mqttServer.StartAsync();
-            logger?.LogInformation("MQTT Broker started!");
+            try
+            {
+                await mqttServer.StartAsync();
+                logger?.LogInformation("MQTT Broker started!");
+                return;
+            }
+            catch (Exception ex) when (IsPortInUse(ex))
+            {
+                if (attempt < maxRetries)
+                {
+                    logger?.LogWarning("MQTT-Server port already in use, retry {Attempt}/{MaxRetries} in {Delay}ms...", attempt, maxRetries, retryDelayMs);
+                    await Task.Delay(retryDelayMs);
+                }
+                else
+                {
+                    logger?.LogError(ex, "Error starting MQTT-Server after {MaxRetries} retries", maxRetries);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, "Error starting MQTT-Server");
+                return;
+            }
         }
-        catch (Exception ex)
-        {
-            logger?.LogError(ex, "Error starting MQTT-Server");
-        }
+    }
+
+    private static bool IsPortInUse(Exception ex)
+    {
+        if (ex is SocketException se)
+            return se.SocketErrorCode == SocketError.AddressAlreadyInUse;
+        if (ex.InnerException is SocketException inner)
+            return inner.SocketErrorCode == SocketError.AddressAlreadyInUse;
+        return false;
     }
 
     /// <summary>
@@ -344,7 +375,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
 
     void IDisposable.Dispose()
     {
-        mqttServer?.StopAsync();
+        mqttServer?.StopAsync().GetAwaiter().GetResult();
     }
 }
 
