@@ -22,6 +22,7 @@ public class MessagingManager : IMessagingManager, IDisposable
 
     public string SubscribeRequestTopic { get => string.Concat(exchangeTopicPrefix, "subscribe__Request"); }
     public string SubscribeMessageTopic { get => string.Concat(exchangeTopicPrefix, "subscribe__Message"); }
+    public string SubscribeStringTopic { get => string.Concat(exchangeTopicPrefix, "subscribe__String"); }
 
     public event EventHandler<Payload> RequestReceived;
     public event EventHandler<Payload> RequestForGetOneReceived;
@@ -30,9 +31,9 @@ public class MessagingManager : IMessagingManager, IDisposable
     public event EventHandler<Payload> RequestForUpdateReceived;
     public event EventHandler<Payload> RequestForInsertReceived;
     public event EventHandler<Payload> RequestForDeleteReceived;
-
     public event EventHandler<Payload> ResponseReceived;
     public event EventHandler<Payload> MessageReceived;
+    public event EventHandler<StringPayload> StringReceived;
 
     public MessagingManager(ILogger<MessagingManager> logger, IMqttClientService mqttClientService)
     {
@@ -43,7 +44,6 @@ public class MessagingManager : IMessagingManager, IDisposable
             this.mqttClientService = mqttClientService;
             this.mqttClientService.ClientConnected += MqttClientService_ClientConnected;
             this.mqttClientService.MessageReceived += MqttClientService_MessageReceived;
-            // keine Verbindung im CTOR starten
         }
     }
 
@@ -105,7 +105,19 @@ public class MessagingManager : IMessagingManager, IDisposable
                 MessageReceived?.Invoke(this, payloadMessageReceived);
             }
         }
+        if (e.ApplicationMessage.Topic == SubscribeStringTopic)
+        {
+            var jsonString = Encoding.UTF8.GetString(e.ApplicationMessage.Payload.ToArray());
+            StringPayload payload = JsonSerializer.Deserialize<StringPayload>(jsonString);
+
+            if (payload is not null)
+            {
+                StringReceived?.Invoke(this, payload);
+            }
+        }
     }
+
+
 
     public Payload DeserializePayloadObject(byte[] bytes)
     {
@@ -159,6 +171,7 @@ public class MessagingManager : IMessagingManager, IDisposable
         logger.LogInformation("MqttClientService MQTT-Client connected!");
         await mqttClientService.Subscribe(SubscribeRequestTopic);
         await mqttClientService.Subscribe(SubscribeMessageTopic);
+        await mqttClientService.Subscribe(SubscribeStringTopic);
     }
 
     // NEU: liefert false statt Exception
@@ -276,6 +289,15 @@ public class MessagingManager : IMessagingManager, IDisposable
         if (!await EnsureConnectedAsync(DefaultConnectWaitTimeout)) return;
 
         await mqttClientService.PublishMessage(SubscribeMessageTopic, new Payload(exchangeName, payload));
+    }
+    public async Task SendString(string payloadString, string exchangeName)
+    {
+        if (string.IsNullOrWhiteSpace(exchangeName)) throw new ArgumentNullException(nameof(exchangeName));
+        if (!await EnsureConnectedAsync(DefaultConnectWaitTimeout)) return;
+
+        StringPayload payload = new StringPayload { ExchangeName = exchangeName, StringValue = payloadString };
+
+        await mqttClientService.PublishMessage(SubscribeStringTopic, payload);
     }
 
     public async Task SendMessage<T>(T payload)
