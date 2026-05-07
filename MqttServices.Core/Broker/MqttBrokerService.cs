@@ -102,16 +102,18 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
                 .WithDefaultEndpointPort(this.mqttBrokerSettings.Port.Value);
         }
 
-        mqttServer = new MqttServerFactory(new ConsoleLogger()).CreateMqttServer(optionsBuilder.Build());
-        mqttServer.ValidatingConnectionAsync += this.ValidateConnectionAsync;
-        mqttServer.InterceptingSubscriptionAsync += this.InterceptSubscriptionAsync;
-        mqttServer.InterceptingPublishAsync += this.InterceptApplicationMessagePublishAsync;
+        var serverOptions = optionsBuilder.Build();
 
         const int maxRetries = 10;
         const int retryDelayMs = 3000;
 
         for (int attempt = 1; attempt <= maxRetries; attempt++)
         {
+            mqttServer = new MqttServerFactory(new ConsoleLogger()).CreateMqttServer(serverOptions);
+            mqttServer.ValidatingConnectionAsync += this.ValidateConnectionAsync;
+            mqttServer.InterceptingSubscriptionAsync += this.InterceptSubscriptionAsync;
+            mqttServer.InterceptingPublishAsync += this.InterceptApplicationMessagePublishAsync;
+
             try
             {
                 await mqttServer.StartAsync();
@@ -360,7 +362,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
 
             certRequest.CertificateExtensions.Add(sanBuilder.Build());
 
-            using (var certificate = certRequest.CreateSelfSigned(DateTimeOffset.Now.AddMinutes(-10), DateTimeOffset.Now.AddMinutes(10)))
+            using (var certificate = certRequest.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(10)))
             {
                 var pfxCertificate = new X509Certificate2(
                     certificate.Export(X509ContentType.Pfx),
