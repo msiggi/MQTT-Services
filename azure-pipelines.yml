@@ -35,15 +35,14 @@ steps:
       !**/*WorkerService*.csproj
     arguments: '--configuration $(BuildConfiguration)'
 
-- task: NuGetCommand@2
+- task: DotNetCoreCLI@2
   displayName: Pack
   inputs:
     command: 'pack'
     packagesToPack: '**/MqttServices.Core.csproj'
-    versioningScheme: 'off'
-    includeReferencedProjects: true
-    includeSymbols: false
     nobuild: true
+    includesymbols: false
+    outputDir: '$(Build.ArtifactStagingDirectory)'
             
 - task: NuGetCommand@2
   displayName: "nuget push nuget.org"
