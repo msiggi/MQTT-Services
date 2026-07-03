@@ -13,7 +13,7 @@
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageId>MQTT-Services</PackageId>
 		<Title>MQTT-Services</Title>
-		<Version>3.0.0-prerelease-V2</Version>
+		<Version>3.0.0-prerelease-V3</Version>
 		<Product>MQTT-Services</Product>
 		<AssemblyName>MQTT-Services</AssemblyName>
 		<PackageIcon>Logo2.png</PackageIcon>
@@ -22,12 +22,12 @@
 
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.7" />
-		<PackageReference Include="MQTTnet" Version="5.1.0.1559" />
-		<PackageReference Include="MQTTnet.Server" Version="5.1.0.1559" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.9" />
+		<PackageReference Include="MQTTnet" Version="5.2.0.1603" />
+		<PackageReference Include="MQTTnet.Server" Version="5.2.0.1603" />
 	</ItemGroup>
 
 
