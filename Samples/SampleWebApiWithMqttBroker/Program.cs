@@ -22,6 +22,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Serve static files (index.html)
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseAuthorization();
 app.MapControllers();
 

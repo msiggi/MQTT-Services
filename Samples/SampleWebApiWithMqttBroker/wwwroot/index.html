@@ -1,0 +1,187 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT Broker & Web API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: #10b981;
+            color: white;
+            border-radius: 50px;
+            font-weight: 600;
+            margin: 1.5rem 0;
+            font-size: 1.1rem;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .info {
+            text-align: left;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #f9fafb;
+            border-radius: 10px;
+        }
+
+        .info-item {
+            margin: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #667eea;
+            min-width: 120px;
+        }
+
+        .links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+            .btn-primary:hover {
+                background: #5568d3;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+            .btn-secondary:hover {
+                background: #4b5563;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(107, 114, 128, 0.4);
+            }
+
+        .footer {
+            margin-top: 2rem;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🚀</div>
+        <h1>MQTT Broker & Web API</h1>
+
+        <div class="status">
+            <span class="status-indicator"></span>
+            <span>Service Running</span>
+        </div>
+
+        <div class="info">
+            <div class="info-item">
+                <span class="info-label">📡 MQTT Broker:</span>
+                <span>Active</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">🌐 Web API:</span>
+                <span>Active</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">🔍 Discovery:</span>
+                <span id="discovery-status">Checking...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">⏰ Started:</span>
+                <span id="start-time"></span>
+            </div>
+        </div>
+
+        <div class="links">
+            <a href="/swagger" class="btn btn-primary">📖 API Documentation</a>
+            <a href="/weatherforecast" class="btn btn-secondary">🌤️ Weather API</a>
+        </div>
+
+        <div class="footer">
+            <p>MQTT-Services • Powered by MQTTnet</p>
+        </div>
+    </div>
+
+    <script>// Set start time
+        document.getElementById('start-time').textContent = new Date().toLocaleString();
+
+        // Check if discovery is enabled (you can make this dynamic via an API call)
+        document.getElementById('discovery-status').textContent = 'Enabled';</script>
+</body>
+</html>

@@ -364,12 +364,12 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
 
             using (var certificate = certRequest.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(10)))
             {
-                var pfxCertificate = new X509Certificate2(
+                // Export to PFX and re-import to ensure the certificate works across platforms
+                // Use DefaultKeySet which allows both user and machine contexts depending on the process
+                return X509CertificateLoader.LoadPkcs12(
                     certificate.Export(X509ContentType.Pfx),
-                    (string)null!,
-                    X509KeyStorageFlags.UserKeySet | X509KeyStorageFlags.Exportable);
-
-                return pfxCertificate;
+                    password: null,
+                    keyStorageFlags: X509KeyStorageFlags.DefaultKeySet | X509KeyStorageFlags.Exportable);
             }
         }
     }
