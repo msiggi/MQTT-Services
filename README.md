@@ -10,6 +10,7 @@ Powered by: https://github.com/dotnet/MQTTnet
 - Host your own MQTT Broker
 - Discovery (Client & Server)
 - Configuration reference (appsettings.json)
+- Logging
 - Samples
 - Contribution
 - Notes
@@ -207,6 +208,40 @@ That's it! A simple MQTT broker is now running in your application. For example,
 | `Discovery.Enabled`            | Set to `true` to enable UDP discovery server.                                                             | `false`                          |
 | `Discovery.Port`               | Port number for the UDP discovery server.                                                                 | `5005`                           |
 | `Discovery.OpenFirewall`       | Set to `true` to automatically open the firewall for the discovery server port (Windows only).           | `false`                          |
+
+## Logging
+All components log through the standard `Microsoft.Extensions.Logging` infrastructure, so they honour the
+`Logging` section of your `appsettings.json` and any provider you registered (Console, Serilog, NLog, ...).
+
+The logger categories follow the namespaces of the library:
+
+| Category                        | Content                                                                 |
+|---------------------------------|-------------------------------------------------------------------------|
+| `MqttServices.Core`             | Everything below (broker, client, discovery, messaging)                  |
+| `MqttServices.Core.Broker`      | Broker startup/shutdown, connection validation, subscriptions            |
+| `MqttServices.Core.Client`      | Client connect/reconnect                                                 |
+| `MqttServices.Core.Discovery`   | Discovery server and client                                              |
+| `MqttServices.Core.Services`    | Messaging manager (publish/subscribe, request/response)                  |
+| `MqttServices.Core.MqttNet`     | Internal diagnostics of the underlying MQTTnet library                    |
+
+`MqttServices.Core.MqttNet` is very verbose: MQTTnet reports every packet at its `Verbose` level, which is
+mapped to `Trace`. It is therefore silent under the usual `Information` default and only needs to be lowered
+explicitly when you want to debug the protocol itself.
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "MqttServices.Core": "Information",
+      "MqttServices.Core.MqttNet": "Warning"
+    }
+  }
+}
+```
+
+To see the raw MQTT traffic, set `"MqttServices.Core.MqttNet": "Trace"` (and make sure the provider itself
+is not filtering `Trace` away).
 
 ## Samples
 The best overview can be found in the sample projects *SampleClientMessaging1* (Sender) and *SampleClientMessaging2* (Receiver and Responder) (Start configuration "Two Sample Clients" in the solution)

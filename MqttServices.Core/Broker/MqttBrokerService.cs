@@ -23,6 +23,11 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
     private readonly ILogger<MqttBrokerService> logger;
 
     /// <summary>
+    /// The logger used for the internal MQTTnet diagnostics output.
+    /// </summary>
+    private readonly IMqttNetLogger mqttNetLogger;
+
+    /// <summary>
     /// Gets or sets the MQTT service configuration.
     /// </summary>
     public MqttBrokerSettings mqttBrokerSettings;
@@ -38,10 +43,12 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
     /// </summary>
     /// <param name="mqttServiceConfiguration">The MQTT service configuration.</param>
     /// <param name="serviceName">The service name.</param>
-    public MqttBrokerService(ILogger<MqttBrokerService> logger, IOptions<MqttBrokerSettings> mqttBrokerSettings)
+    public MqttBrokerService(ILogger<MqttBrokerService> logger, IOptions<MqttBrokerSettings> mqttBrokerSettings, ILoggerFactory? loggerFactory = null)
     {
         this.mqttBrokerSettings = mqttBrokerSettings.Value;
         this.logger = logger;
+        this.mqttNetLogger = new MqttNetLoggerAdapter(
+            loggerFactory?.CreateLogger(MqttNetLoggerAdapter.CategoryName) ?? logger);
         // Do not start the broker in the constructor. A hosted service will start it after the host is ready.
     }
 
@@ -109,7 +116,7 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
 
         for (int attempt = 1; attempt <= maxRetries; attempt++)
         {
-            mqttServer = new MqttServerFactory(new ConsoleLogger()).CreateMqttServer(serverOptions);
+            mqttServer = new MqttServerFactory(this.mqttNetLogger).CreateMqttServer(serverOptions);
             mqttServer.ValidatingConnectionAsync += this.ValidateConnectionAsync;
             mqttServer.InterceptingSubscriptionAsync += this.InterceptSubscriptionAsync;
             mqttServer.InterceptingPublishAsync += this.InterceptApplicationMessagePublishAsync;
@@ -378,51 +385,5 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
     void IDisposable.Dispose()
     {
         mqttServer?.StopAsync().GetAwaiter().GetResult();
-    }
-}
-
-class ConsoleLogger : IMqttNetLogger
-{
-    readonly object _consoleSyncRoot = new();
-
-    public bool IsEnabled => true;
-
-    public void Publish(MqttNetLogLevel logLevel, string source, string message, object[]? parameters, Exception? exception)
-    {
-        var foregroundColor = ConsoleColor.White;
-        switch (logLevel)
-        {
-            case MqttNetLogLevel.Verbose:
-                foregroundColor = ConsoleColor.White;
-                break;
-
-            case MqttNetLogLevel.Info:
-                foregroundColor = ConsoleColor.Green;
-                break;
-
-            case MqttNetLogLevel.Warning:
-                foregroundColor = ConsoleColor.DarkYellow;
-                break;
-
-            case MqttNetLogLevel.Error:
-                foregroundColor = ConsoleColor.Red;
-                break;
-        }
-
-        if (parameters?.Length > 0)
-        {
-            message = string.Format(message, parameters);
-        }
-
-        lock (_consoleSyncRoot)
-        {
-            Console.ForegroundColor = foregroundColor;
-            Console.WriteLine(message);
-
-            if (exception != null)
-            {
-                Console.WriteLine(exception);
-            }
-        }
     }
 }
