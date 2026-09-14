@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MqttServices.Core\MqttServices.Core.csproj" />
-    <ProjectReference Include="..\Samples\SampleCommon\SampleCommon.csproj" />
+    <ProjectReference Include="..\..\src\MqttServices.Core\MqttServices.Core.csproj" />
+    <ProjectReference Include="..\..\samples\SampleCommon\SampleCommon.csproj" />
   </ItemGroup>
 
   <ItemGroup>

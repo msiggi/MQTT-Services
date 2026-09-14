@@ -3,11 +3,11 @@
     "Name": "Broker & Client",
     "Projects": [
       {
-        "Path": "Samples\\SampleWorkerService_Client\\SampleWorkerService_Client.csproj",
+        "Path": "samples\\SampleWorkerService_Client\\SampleWorkerService_Client.csproj",
         "Action": "Start"
       },
       {
-        "Path": "Samples\\SampleBrokerUsingNuget\\SampleBrokerUsingNuget.csproj",
+        "Path": "samples\\SampleBrokerUsingNuget\\SampleBrokerUsingNuget.csproj",
         "Action": "Start"
       }
     ]
@@ -16,11 +16,11 @@
     "Name": "Two Sample Clients",
     "Projects": [
       {
-        "Path": "Samples\\SampleClientMessaging1\\SampleClientMessaging1.csproj",
+        "Path": "samples\\SampleClientMessaging1\\SampleClientMessaging1.csproj",
         "Action": "Start"
       },
       {
-        "Path": "Samples\\SampleClientMessaging2\\SampleClientMessaging2.csproj",
+        "Path": "samples\\SampleClientMessaging2\\SampleClientMessaging2.csproj",
         "Action": "Start"
       }
     ]

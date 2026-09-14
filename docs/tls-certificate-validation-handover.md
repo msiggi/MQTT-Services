@@ -1,6 +1,6 @@
 # Übergabe: Zertifikatsprüfung im MQTT-Client
 
-**Stand:** 2026-09-14 · **Betrifft:** `MqttServices.Core/Client/` · **Gefunden bei:** Argus-Hub-Deployment auf argus.siegelnet.de
+**Stand:** 2026-09-14 · **Betrifft:** `src/MqttServices.Core/Client/` · **Gefunden bei:** Argus-Hub-Deployment auf argus.siegelnet.de
 
 ## Worum es geht
 
@@ -15,7 +15,7 @@ Voreinstellung.
 
 ## Die Fundstellen
 
-**`MqttServices.Core/Client/MqttClientService.cs`, ca. Zeile 88–97** — der Verbindungsaufbau:
+**`src/MqttServices.Core/Client/MqttClientService.cs`, ca. Zeile 88–97** — der Verbindungsaufbau:
 
 ```csharp
 var mqttClientOptions = new MqttClientOptionsBuilder()
@@ -30,7 +30,7 @@ var mqttClientOptions = new MqttClientOptionsBuilder()
     .Build();
 ```
 
-**`MqttServices.Core/Client/MqttClientSettings.cs`** — hier kommen die neuen Optionen hin.
+**`src/MqttServices.Core/Client/MqttClientSettings.cs`** — hier kommen die neuen Optionen hin.
 Zwei vorhandene Properties als Kontext:
 
 - `TlsVersion` (Default `"1.2"`) wird über die Hilfs-Property `TlsVersion` in
@@ -40,7 +40,7 @@ Zwei vorhandene Properties als Kontext:
   `Common/ServiceCollectionsExtensions.cs:97`, im Verbindungsaufbau aber nie gelesen. TLS lässt
   sich also gar nicht abschalten. Entweder auswerten oder entfernen — so ist es irreführend.
 
-**`MqttServices.Core/Broker/MqttBrokerService.cs`, ca. Zeile 94** — der mitgelieferte Broker
+**`src/MqttServices.Core/Broker/MqttBrokerService.cs`, ca. Zeile 94** — der mitgelieferte Broker
 erzeugt ein **selbstsigniertes** Zertifikat auf `CN=localhost`. Das ist der Grund, warum eine
 harte Umstellung auf volle Prüfung jede LAN-Installation brechen würde: `localhost` passt
 nicht zum Hostnamen, mit dem ein Client von einer anderen Maschine aus verbindet.
