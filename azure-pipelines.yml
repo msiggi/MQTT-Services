@@ -6,7 +6,7 @@ pool:
 
 variables:
 #  project:  '**/MqttServices.Core.csproj'
-  solution: '**/*.sln'
+  solution: '**/*.slnx'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 

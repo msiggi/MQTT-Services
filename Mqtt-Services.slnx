@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="azure-pipelines.yml" />
+    <File Path="README.md" />
+    <File Path="src/MqttServices.Core/MqttServices.Core.nuspec" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/SampleBlazorAppWithMqttClient/SampleBlazorAppWithMqttClient.csproj" />
+    <Project Path="samples/SampleBrokerUsingNuget/SampleBrokerUsingNuget.csproj" />
+    <Project Path="samples/SampleClientMessaging1/SampleClientMessaging1.csproj" />
+    <Project Path="samples/SampleClientMessaging2/SampleClientMessaging2.csproj" />
+    <Project Path="samples/SampleCommon/SampleCommon.csproj" />
+    <Project Path="samples/SampleWebApiWithMqttBroker/SampleWebApiWithMqttBroker.csproj" />
+    <Project Path="samples/SampleWorkerService_BrokerAndClient/SampleWorkerService_BrokerAndClient.csproj" />
+    <Project Path="samples/SampleWorkerService_Client/SampleWorkerService_Client.csproj" />
+  </Folder>
+  <Project Path="src/MqttServices.Core/MqttServices.Core.csproj" />
+  <Project Path="tests/MqttServices.CoreTests/MqttServices.CoreTests.csproj" />
+</Solution>
