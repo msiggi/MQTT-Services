@@ -94,6 +94,20 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
         var certificate = CreateSelfSignedCertificate("localhost", "1.3.6.1.5.5.7.3.1");
         // Kopieren Sie das Zertifikat in den Maschinen-Speicher
 
+        // Clients that cannot validate this certificate through a chain — which is every client,
+        // because it is self-signed and issued for CN=localhost — pin it by this fingerprint.
+        logger?.LogInformation(
+            "MQTT broker TLS certificate: subject {Subject}, SHA-256 fingerprint {Thumbprint}. " +
+            "Clients connecting from another machine need this value in TrustedCertificateThumbprint.",
+            certificate.Subject,
+            certificate.GetCertHashString(HashAlgorithmName.SHA256));
+
+        // A fresh certificate is generated on every start, so the fingerprint changes with every
+        // restart of the broker and every pinned client has to be reconfigured.
+        logger?.LogWarning(
+            "The broker certificate is generated anew on every start. Its fingerprint changes " +
+            "with every restart, and pinned clients then have to be reconfigured.");
+
         var optionsBuilder = new MqttServerOptionsBuilder()
             //.WithDefaultEndpoint()
             //.WithDefaultEndpointPort(this.mqttBrokerSettings.Port)

@@ -21,6 +21,32 @@ public class MqttClientSettings
     public string Password { get; set; } = "";
     public string TlsVersion { get; set; } = "1.2";
     public bool EncryptWithTls { get; set; } = true;
+    /// <summary>
+    /// SHA-256 fingerprint of the one broker certificate to trust ("pinning"). Set this for a
+    /// broker with a self-signed certificate — including the broker shipped with this library,
+    /// whose certificate is issued for CN=localhost and therefore never matches the host name a
+    /// remote client connects to.
+    /// <para>
+    /// Pinning needs no certificate authority and is still safe against a man-in-the-middle,
+    /// because a substituted certificate has a different fingerprint. The value may be given
+    /// with colons, with spaces or as plain hex; separators are ignored.
+    /// </para>
+    /// <para>
+    /// The broker logs the fingerprint of its certificate on startup.
+    /// </para>
+    /// </summary>
+    public string TrustedCertificateThumbprint { get; set; } = "";
+    /// <summary>
+    /// Accepts any broker certificate without validation. This is the behaviour of versions
+    /// before certificate validation existed, kept as a deliberate escape hatch.
+    /// <para>
+    /// The connection stays encrypted, but it is no longer protected against a
+    /// man-in-the-middle: whoever sits in between presents their own certificate, the client
+    /// accepts it, and the broker credentials and all payloads are readable in clear text.
+    /// Prefer <see cref="TrustedCertificateThumbprint"/>.
+    /// </para>
+    /// </summary>
+    public bool AllowUntrustedCertificates { get; set; } = false;
     public DiscoverySettings Discovery { get; set; } = new();
 
 }

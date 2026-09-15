@@ -95,6 +95,8 @@ public static class ServiceCollectionsExtensions
             options.ServiceName = mqttClientSettings.ServiceName;
             options.TlsVersion = mqttClientSettings.TlsVersion;
             options.EncryptWithTls = mqttClientSettings.EncryptWithTls;
+            options.TrustedCertificateThumbprint = mqttClientSettings.TrustedCertificateThumbprint;
+            options.AllowUntrustedCertificates = mqttClientSettings.AllowUntrustedCertificates;
             options.ApplicationKey = mqttClientSettings.ApplicationKey;
             options.Discovery = mqttClientSettings.Discovery;
         });

@@ -12,6 +12,7 @@ public class MqttClientService : IDisposable, IMqttClientService
 {
     private readonly MqttClientSettings mqttClientSettings;
     private readonly ILogger<MqttClientService> logger;
+    private readonly MqttCertificateValidator certificateValidator;
     private MqttClientFactory mqttClientFactory;
     private IMqttClient mqttClient;
     public string ApplicationKey { get; set; }
@@ -41,6 +42,7 @@ public class MqttClientService : IDisposable, IMqttClientService
         this.mqttClientSettings = mqttClientSettings.Value;
         this.ApplicationKey = mqttClientSettings.Value.ApplicationKey;
         this.logger = logger;
+        this.certificateValidator = new MqttCertificateValidator(this.mqttClientSettings, logger);
 
         if (string.IsNullOrEmpty(this.mqttClientSettings.BrokerHost))
         {
@@ -89,7 +91,11 @@ public class MqttClientService : IDisposable, IMqttClientService
                     .WithTcpServer(mqttClientSettings.BrokerHost, mqttClientSettings.BrokerPort)
                     .WithTlsOptions(o =>
                     {
-                        o.WithCertificateValidationHandler(_ => true);
+                        // WithTlsOptions turns TLS on implicitly, so EncryptWithTls has to be
+                        // applied explicitly to stay able to switch it off.
+                        o.UseTls(mqttClientSettings.EncryptWithTls);
+                        o.WithCertificateValidationHandler(
+                            args => certificateValidator.IsAcceptable(args.Certificate, args.SslPolicyErrors));
                         o.WithSslProtocols(sslVersion);
                     })
                     .WithCredentials(mqttClientSettings.UserName, mqttClientSettings.Password)
@@ -103,6 +109,17 @@ public class MqttClientService : IDisposable, IMqttClientService
                     logger?.LogError($"MQTT-Client connection failed to {mqttClientSettings.BrokerHost}:{mqttClientSettings.BrokerPort}, Result-Code: {result.ResultCode}");
                 }
             }
+            catch (Exception ex) when (FindAuthenticationException(ex) is { } authenticationException)
+            {
+                // The certificate validator has already logged which of the three tiers rejected
+                // the certificate and why; this only names the TLS handshake as the stage that
+                // failed, which the bare Result-Code never did.
+                logger.LogError(
+                    authenticationException,
+                    "TLS handshake with MQTT broker {Host}:{Port} failed. See the preceding certificate message for the reason.",
+                    mqttClientSettings.BrokerHost,
+                    mqttClientSettings.BrokerPort);
+            }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error connecting to MQTT Broker");
@@ -114,6 +131,25 @@ public class MqttClientService : IDisposable, IMqttClientService
             }
         }
     }
+    /// <summary>
+    /// MQTTnet wraps the TLS failure in its own connect exception, so the interesting one sits
+    /// somewhere down the inner chain.
+    /// </summary>
+    private static AuthenticationException? FindAuthenticationException(Exception? exception)
+    {
+        while (exception is not null)
+        {
+            if (exception is AuthenticationException authenticationException)
+            {
+                return authenticationException;
+            }
+
+            exception = exception.InnerException;
+        }
+
+        return null;
+    }
+
     public async Task Reconnect(string brokerHost, int brokerPort)
     {
         if (mqttClient.IsConnected)

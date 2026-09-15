@@ -2,6 +2,22 @@
 
 **Stand:** 2026-09-14 · **Betrifft:** `src/MqttServices.Core/Client/` · **Gefunden bei:** Argus-Hub-Deployment auf argus.siegelnet.de
 
+> **Status: umgesetzt am 2026-09-15.** Die drei Stufen stehen in
+> `MqttCertificateValidator.cs`, die Benutzerdokumentation im README unter „TLS and certificate
+> validation". Dieses Dokument bleibt als Analyse stehen. Zwei Punkte daraus sind erledigt, zwei
+> offen:
+>
+> - **Erledigt:** `WithTlsOptions(...)` setzt `UseTls` in MQTTnet 5.2.0.1603 tatsächlich implizit
+>   auf `true` — nachgemessen, nicht geraten. `EncryptWithTls` wird jetzt über `o.UseTls(...)`
+>   ausgewertet und ist damit keine tote Property mehr.
+> - **Erledigt:** Der Handler bleibt bestehen statt wegzufallen (siehe „Umsetzungshinweise"). Nur
+>   so lassen sich die Fehlschläge mit einer brauchbaren Meldung loggen; das Standardverhalten von
+>   MQTTnet meldet lediglich, dass der Handshake scheiterte.
+> - **Offen:** Der mitgelieferte Broker erzeugt bei **jedem Start** ein neues Zertifikat. Der
+>   Fingerabdruck ändert sich damit bei jedem Neustart, und Stufe 2 ist für ihn nur innerhalb
+>   einer Broker-Laufzeit brauchbar. Broker-seitige Persistenz fehlt.
+> - **Offen:** `TlsVersion` steht weiterhin auf Default `"1.2"`.
+
 ## Worum es geht
 
 Der Client verschlüsselt jede Verbindung mit TLS, prüft das Zertifikat der Gegenstelle aber

@@ -9,6 +9,7 @@ Powered by: https://github.com/dotnet/MQTTnet
 - Request/Response (Example)
 - Host your own MQTT Broker
 - Discovery (Client & Server)
+- TLS and certificate validation
 - Configuration reference (appsettings.json)
 - Logging
 - Samples
@@ -185,6 +186,78 @@ That's it! A simple MQTT broker is now running in your application. For example,
 - The discovery server automatically responds to UDP broadcasts with the broker information.
 - If client found the server it gets automatically the broker info and connects to it.
 
+## TLS and certificate validation
+
+The client connects over TLS and validates the broker's certificate. Encryption alone only
+protects against passive eavesdropping: without validation, anyone who sits in between presents
+their own certificate, the client accepts it, and the broker credentials and all payloads are
+readable in clear text. Validation is what makes that attack fail.
+
+There are three tiers. Pick the one that matches your broker:
+
+| Configuration                          | Behaviour                                          | Use for                              |
+|----------------------------------------|----------------------------------------------------|--------------------------------------|
+| nothing set                            | full validation: chain, host name, validity period | a public broker with a CA certificate |
+| `TrustedCertificateThumbprint` set     | exactly that one certificate, nothing else         | a self-signed broker on the LAN       |
+| `AllowUntrustedCertificates: true`     | accepts any certificate                            | escape hatch, deliberately chosen     |
+
+### Full validation (default)
+
+Set nothing. The certificate has to be issued by a trusted authority, be valid, and be issued for
+the host name in `BrokerHost`.
+
+The most common stumbling block is the host name: if you reach a broker by IP address or by an
+mDNS name such as `raspberrypi.local`, validation fails even with a perfectly good certificate,
+because that name is not in the certificate. The client logs this case explicitly. Connect using
+the name the certificate was issued for, or pin the certificate.
+
+### Pinning a self-signed certificate
+
+Pinning needs no certificate authority and is still safe against a man-in-the-middle, because a
+substituted certificate has a different fingerprint. This is the right tier for the broker shipped
+with this library, whose certificate is issued for `CN=localhost` and therefore never matches the
+host name a client on another machine connects to.
+
+```jsonc
+"MqttClientSettings": {
+  "BrokerHost": "192.168.1.50",
+  "BrokerPort": 8883,
+  // SHA-256 fingerprint. Colons, spaces and casing are ignored.
+  "TrustedCertificateThumbprint": "72C062052124451BCDEB8B84543BA18A31B71836AE6B21A2AF13DE799547C29C"
+}
+```
+
+The integrated broker logs the fingerprint of its certificate on startup:
+
+```
+MQTT broker TLS certificate: subject CN=localhost, SHA-256 fingerprint 72C0620521...
+```
+
+For any other broker, read it with OpenSSL:
+
+```bash
+openssl s_client -connect your-broker:8883 </dev/null 2>/dev/null | openssl x509 -noout -fingerprint -sha256
+```
+
+> **The integrated broker generates a new certificate on every start.** Its fingerprint therefore
+> changes with every restart, and every pinned client has to be reconfigured. For a long-lived
+> installation, use a broker with a persistent certificate.
+
+### Escape hatch
+
+`AllowUntrustedCertificates: true` restores the behaviour of versions before validation existed.
+The connection stays encrypted but is not protected against a man-in-the-middle. The client logs a
+warning on every connection attempt. Prefer pinning.
+
+### Migrating from an earlier version
+
+Before this change the client accepted **every** broker certificate. If your broker has a
+certificate from a real certificate authority (Let's Encrypt and the like) and you connect using
+the host name it was issued for, everything keeps working and there is nothing to do.
+
+Otherwise — a self-signed broker, or one reached by IP address — the connection now fails, and the
+log says why. Read the fingerprint as shown above and put it into `TrustedCertificateThumbprint`.
+
 ## Configuration reference (appsettings.json)
 
 | Parameter                      | Description                                                                                               | Default Value                    |
@@ -196,6 +269,10 @@ That's it! A simple MQTT broker is now running in your application. For example,
 | `BrokerPort`                  | Port number of the MQTT broker.                                                                           | `1883`                           |
 | `UserName`                    | Username for MQTT broker authentication.                                                                  | `(none)`                          |
 | `Password`                    | Password for MQTT broker authentication.                                                                  | `(none)`                          |
+| `EncryptWithTls`              | Set to `false` to connect without TLS. Everything, credentials included, then travels in clear text.      | `true`                           |
+| `TlsVersion`                  | TLS version to use. Supported values: `1.0`, `1.1`, `1.2`, `1.3`. Anything else falls back to `1.2`.      | `1.2`                            |
+| `TrustedCertificateThumbprint`| SHA-256 fingerprint of the one broker certificate to trust. See [TLS and certificate validation](#tls-and-certificate-validation). | `(none)`            |
+| `AllowUntrustedCertificates`  | Set to `true` to accept any broker certificate. Encrypted, but not safe against a man-in-the-middle.       | `false`                          |
 | `Discovery.SearchForDiscoveryServer`| Set to `true` to enable searching for a discovery server. If found, `BrokerHost` and `BrokerPort` will be overwritten at runtime. | `false`                          |
 | `Discovery.Port`               | Port number for the UDP discovery client.                                                                 | `5005`                           |
 | `Discovery.ResponseTimeoutSeconds` | Timeout in seconds to wait for a response from the discovery server.                                      | `5`                              |
@@ -204,7 +281,7 @@ That's it! A simple MQTT broker is now running in your application. For example,
 | `EnableBroker`                | Set to `true` to enable the integrated MQTT broker.                                                      | `false`                          |
 | `Port`                        | Port number of the MQTT broker will be listening on.                                                    | `1883`                           |
 | `TlsPort`                        | Port number of the MQTT broker using TLS.                                                    | `8883`                           |
-|`TlsVersion`                  | TLS version to use for secure connections. Supported values: `None`, `Tls`, `Tls11`, `Tls12`, `Tls13`. | `Tls12`                          |    
+|`TlsVersion`                  | TLS version to use for secure connections. Supported values: `1.0`, `1.1`, `1.2`, `1.3`. Anything else falls back to `1.2`. | `1.2`                          |    
 | `Discovery.Enabled`            | Set to `true` to enable UDP discovery server.                                                             | `false`                          |
 | `Discovery.Port`               | Port number for the UDP discovery server.                                                                 | `5005`                           |
 | `Discovery.OpenFirewall`       | Set to `true` to automatically open the firewall for the discovery server port (Windows only).           | `false`                          |
