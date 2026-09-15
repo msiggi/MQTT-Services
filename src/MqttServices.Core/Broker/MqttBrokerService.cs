@@ -56,6 +56,9 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
     private SslProtocols TlsVersion =>
         TlsVersions.Parse(this.mqttBrokerSettings.TlsVersion, logger, "MqttBrokerSettings:TlsVersion");
 
+    /// <inheritdoc />
+    public string? CertificateThumbprint { get; private set; }
+
     public async Task StartBroker()
     {
         if (mqttBrokerSettings.EnableBroker)
@@ -80,22 +83,17 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
     /// </summary>
     private async Task StartMqttServer()
     {
-        var certificate = CreateSelfSignedCertificate("localhost", "1.3.6.1.5.5.7.3.1");
-        // Kopieren Sie das Zertifikat in den Maschinen-Speicher
+        var certificate = BrokerCertificateProvider.GetOrCreate(this.mqttBrokerSettings.Certificate, logger);
+        CertificateThumbprint = certificate.GetCertHashString(HashAlgorithmName.SHA256);
 
-        // Clients that cannot validate this certificate through a chain — which is every client,
-        // because it is self-signed and issued for CN=localhost — pin it by this fingerprint.
+        // A self-signed certificate cannot be validated through a chain, so clients have to pin it
+        // by this fingerprint.
         logger?.LogInformation(
             "MQTT broker TLS certificate: subject {Subject}, SHA-256 fingerprint {Thumbprint}. " +
-            "Clients connecting from another machine need this value in TrustedCertificateThumbprint.",
+            "Clients that cannot validate it through a certificate authority need this value in " +
+            "TrustedCertificateThumbprint.",
             certificate.Subject,
-            certificate.GetCertHashString(HashAlgorithmName.SHA256));
-
-        // A fresh certificate is generated on every start, so the fingerprint changes with every
-        // restart of the broker and every pinned client has to be reconfigured.
-        logger?.LogWarning(
-            "The broker certificate is generated anew on every start. Its fingerprint changes " +
-            "with every restart, and pinned clients then have to be reconfigured.");
+            CertificateThumbprint);
 
         var optionsBuilder = new MqttServerOptionsBuilder()
             //.WithDefaultEndpoint()
@@ -310,80 +308,6 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
                 args.CleanSession);
         }
     }
-
-    public static X509Certificate2 CreateSelfSignedCertificate__(string subjectName, string oid)
-    {
-        var sanBuilder = new SubjectAlternativeNameBuilder();
-        sanBuilder.AddIpAddress(IPAddress.Loopback);
-        sanBuilder.AddIpAddress(IPAddress.IPv6Loopback);
-        sanBuilder.AddDnsName("localhost");
-
-        using (var rsa = RSA.Create(2048))
-        {
-            var certRequest = new CertificateRequest(
-                $"CN={subjectName}",
-                rsa,
-                HashAlgorithmName.SHA256,
-                RSASignaturePadding.Pkcs1);
-
-            certRequest.CertificateExtensions.Add(
-                new X509KeyUsageExtension(
-                    X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.KeyAgreement,
-                    false));
-
-            certRequest.CertificateExtensions.Add(
-                new X509EnhancedKeyUsageExtension(
-                    new OidCollection { new Oid(oid) },
-                    false));
-
-            certRequest.CertificateExtensions.Add(sanBuilder.Build());
-
-            var certificate = certRequest.CreateSelfSigned(
-                DateTimeOffset.Now.AddDays(-1),
-                DateTimeOffset.Now.AddYears(1));
-
-            // Überprüfen, ob das Zertifikat bereits einen privaten Schlüssel hat
-            if (!certificate.HasPrivateKey)
-            {
-                return certificate.CopyWithPrivateKey(rsa);
-            }
-            else
-            {
-                return certificate;
-            }
-        }
-    }
-
-    static X509Certificate2 CreateSelfSignedCertificate(string subject, string oid)
-    {
-        var sanBuilder = new SubjectAlternativeNameBuilder();
-        sanBuilder.AddIpAddress(IPAddress.Loopback);
-        sanBuilder.AddIpAddress(IPAddress.IPv6Loopback);
-        sanBuilder.AddDnsName("localhost");
-
-        using (var rsa = RSA.Create())
-        {
-            var certRequest = new CertificateRequest($"CN={subject}", rsa, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
-
-            certRequest.CertificateExtensions.Add(
-                new X509KeyUsageExtension(X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature, false));
-
-            certRequest.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension(new OidCollection { new(oid) }, false));
-
-            certRequest.CertificateExtensions.Add(sanBuilder.Build());
-
-            using (var certificate = certRequest.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(10)))
-            {
-                var pfxCertificate = new X509Certificate2(
-                    certificate.Export(X509ContentType.Pfx),
-                    (string)null!,
-                    X509KeyStorageFlags.UserKeySet | X509KeyStorageFlags.Exportable);
-
-                return pfxCertificate;
-            }
-        }
-    }
-
 
     void IDisposable.Dispose()
     {

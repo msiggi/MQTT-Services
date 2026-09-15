@@ -239,9 +239,50 @@ For any other broker, read it with OpenSSL:
 openssl s_client -connect your-broker:8883 </dev/null 2>/dev/null | openssl x509 -noout -fingerprint -sha256
 ```
 
-> **The integrated broker generates a new certificate on every start.** Its fingerprint therefore
-> changes with every restart, and every pinned client has to be reconfigured. For a long-lived
-> installation, use a broker with a persistent certificate.
+> **By default the integrated broker generates a new certificate on every start**, so its
+> fingerprint changes with every restart and pinned clients stop connecting. Give it a
+> `Certificate.Path` — see below — before you pin it.
+
+### Keeping the integrated broker's certificate
+
+Point `MqttBrokerSettings.Certificate.Path` at a PFX file. The broker creates the certificate there
+on its first start and loads it on every following one, so the fingerprint stays the same and a
+pinned client survives restarts:
+
+```jsonc
+"MqttBrokerSettings": {
+  "EnableBroker": true,
+  "TlsPort": 8883,
+  "Certificate": {
+    "Path": "broker-certificate.pfx",
+    "Password": "keep-this-somewhere-safe",
+    // The name clients dial. Without it they get a name mismatch and can only pin.
+    "SubjectName": "broker.internal",
+    "HostNames": [ "192.168.1.50" ]
+  }
+}
+```
+
+The file holds a private key. On Linux and macOS the broker restricts it to its owner; on Windows
+the permissions of the containing directory apply. Without a `Password` the key is stored
+unprotected and the broker says so on startup.
+
+`SubjectName` and `HostNames` decide which names the certificate is valid for — `localhost` and
+the loopback addresses are always included. They do not remove the need to pin: a self-signed
+certificate has no chain to validate, whatever names it carries. What they do fix is the name
+mismatch, which matters if you later replace it with a certificate from a real authority.
+
+An expired stored certificate is replaced on the next start, which changes the fingerprint; that is
+why a generated one is valid for ten years by default. A file that cannot be read — wrong password,
+damaged — is **not** overwritten: the broker refuses to start instead, because silently generating a
+replacement would cut off every pinned client.
+
+The fingerprint is also available in code, for a host application that wants to show it rather than
+have operators read the log:
+
+```csharp
+var thumbprint = serviceProvider.GetRequiredService<IMqttBrokerService>().CertificateThumbprint;
+```
 
 ### TLS version
 
@@ -293,6 +334,11 @@ log says why. Read the fingerprint as shown above and put it into `TrustedCertif
 | `Port`                        | Port number of the MQTT broker will be listening on.                                                    | `1883`                           |
 | `TlsPort`                        | Port number of the MQTT broker using TLS.                                                    | `8883`                           |
 |`TlsVersion`                  | TLS version to accept: `1.0`, `1.1`, `1.2`, `1.3`. Empty or `auto` lets the operating system negotiate. | `auto`                          |    
+| `Certificate.Path`            | Path to a PFX file holding the broker certificate. Empty means generate one in memory on every start, which changes the fingerprint on every restart. | `(none)`   |
+| `Certificate.Password`        | Password protecting that PFX file. Empty stores the private key unprotected.                              | `(none)`                         |
+| `Certificate.SubjectName`     | Common name of a generated certificate.                                                                   | `localhost`                      |
+| `Certificate.HostNames`       | Further host names and IP addresses a generated certificate is valid for. `localhost` and the loopback addresses are always included. | `[]`      |
+| `Certificate.ValidityDays`    | How long a generated certificate stays valid.                                                             | `3650`                           |
 | `Discovery.Enabled`            | Set to `true` to enable UDP discovery server.                                                             | `false`                          |
 | `Discovery.Port`               | Port number for the UDP discovery server.                                                                 | `5005`                           |
 | `Discovery.OpenFirewall`       | Set to `true` to automatically open the firewall for the discovery server port (Windows only).           | `false`                          |

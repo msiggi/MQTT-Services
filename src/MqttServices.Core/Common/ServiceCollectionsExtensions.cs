@@ -34,6 +34,7 @@ public static class ServiceCollectionsExtensions
             options.Port = mqttBrokerSettings.Port;
             options.TlsPort = mqttBrokerSettings.TlsPort;
             options.TlsVersion = mqttBrokerSettings.TlsVersion;
+            options.Certificate = mqttBrokerSettings.Certificate;
             options.Discovery = mqttBrokerSettings.Discovery;
         });
         services.AddSingleton<IMqttBrokerService, MqttBrokerService>();

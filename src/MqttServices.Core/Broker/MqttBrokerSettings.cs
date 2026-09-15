@@ -41,6 +41,13 @@ public class MqttBrokerSettings
     /// </summary>
     public string TlsVersion { get; set; } = "";
 
+    /// <summary>
+    /// Where the broker's TLS certificate comes from. By default it is generated in memory on
+    /// every start; configure <see cref="BrokerCertificateSettings.Path"/> to keep it stable
+    /// across restarts, which is what clients pinning the certificate need.
+    /// </summary>
+    public BrokerCertificateSettings Certificate { get; set; } = new();
+
     public DiscoverySettings Discovery { get; set; } = new();
 
     /// <summary>

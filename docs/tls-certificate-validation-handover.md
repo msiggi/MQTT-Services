@@ -13,9 +13,10 @@
 > - **Erledigt:** Der Handler bleibt bestehen statt wegzufallen (siehe „Umsetzungshinweise"). Nur
 >   so lassen sich die Fehlschläge mit einer brauchbaren Meldung loggen; das Standardverhalten von
 >   MQTTnet meldet lediglich, dass der Handshake scheiterte.
-> - **Offen:** Der mitgelieferte Broker erzeugt bei **jedem Start** ein neues Zertifikat. Der
->   Fingerabdruck ändert sich damit bei jedem Neustart, und Stufe 2 ist für ihn nur innerhalb
->   einer Broker-Laufzeit brauchbar. Broker-seitige Persistenz fehlt.
+> - **Erledigt:** Der mitgelieferte Broker erzeugte bei jedem Start ein neues Zertifikat, womit
+>   Stufe 2 für ihn nur innerhalb einer Laufzeit brauchbar war. `MqttBrokerSettings.Certificate.Path`
+>   legt es jetzt als PFX ab und lädt es wieder; der Fingerabdruck überlebt den Neustart. Ohne Pfad
+>   bleibt das alte Verhalten. Siehe `Broker/BrokerCertificateProvider.cs`.
 > - **Erledigt, aber anders als vorgeschlagen:** Der Default von `TlsVersion` ist nicht `"1.3"`,
 >   sondern `""` bzw. `"auto"` — die Aushandlung übernimmt das Betriebssystem. Eine fest
 >   verdrahtete Version altert in beide Richtungen schlecht: sie sperrt ein neueres Protokoll aus,
