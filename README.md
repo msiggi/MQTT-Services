@@ -243,6 +243,17 @@ openssl s_client -connect your-broker:8883 </dev/null 2>/dev/null | openssl x509
 > changes with every restart, and every pinned client has to be reconfigured. For a long-lived
 > installation, use a broker with a persistent certificate.
 
+### TLS version
+
+`TlsVersion` defaults to `auto` on both the client and the broker, which leaves the choice to the
+operating system: it negotiates the highest version both sides support, and it applies the
+machine's own policy about which versions are still acceptable.
+
+Prefer that over naming a version. A fixed value ages badly in both directions — it locks out a
+newer protocol the machine already speaks, and it keeps an outdated one alive after the system has
+retired it. Set `1.0`, `1.1`, `1.2` or `1.3` only when something on the other side forces your
+hand. An unusable value is logged and falls back to `auto`; it used to become `1.2` silently.
+
 ### Escape hatch
 
 `AllowUntrustedCertificates: true` restores the behaviour of versions before validation existed.
@@ -270,7 +281,7 @@ log says why. Read the fingerprint as shown above and put it into `TrustedCertif
 | `UserName`                    | Username for MQTT broker authentication.                                                                  | `(none)`                          |
 | `Password`                    | Password for MQTT broker authentication.                                                                  | `(none)`                          |
 | `EncryptWithTls`              | Set to `false` to connect without TLS. Everything, credentials included, then travels in clear text.      | `true`                           |
-| `TlsVersion`                  | TLS version to use. Supported values: `1.0`, `1.1`, `1.2`, `1.3`. Anything else falls back to `1.2`.      | `1.2`                            |
+| `TlsVersion`                  | TLS version to use: `1.0`, `1.1`, `1.2`, `1.3`. Empty or `auto` lets the operating system negotiate.      | `auto`                           |
 | `TrustedCertificateThumbprint`| SHA-256 fingerprint of the one broker certificate to trust. See [TLS and certificate validation](#tls-and-certificate-validation). | `(none)`            |
 | `AllowUntrustedCertificates`  | Set to `true` to accept any broker certificate. Encrypted, but not safe against a man-in-the-middle.       | `false`                          |
 | `Discovery.SearchForDiscoveryServer`| Set to `true` to enable searching for a discovery server. If found, `BrokerHost` and `BrokerPort` will be overwritten at runtime. | `false`                          |
@@ -281,7 +292,7 @@ log says why. Read the fingerprint as shown above and put it into `TrustedCertif
 | `EnableBroker`                | Set to `true` to enable the integrated MQTT broker.                                                      | `false`                          |
 | `Port`                        | Port number of the MQTT broker will be listening on.                                                    | `1883`                           |
 | `TlsPort`                        | Port number of the MQTT broker using TLS.                                                    | `8883`                           |
-|`TlsVersion`                  | TLS version to use for secure connections. Supported values: `1.0`, `1.1`, `1.2`, `1.3`. Anything else falls back to `1.2`. | `1.2`                          |    
+|`TlsVersion`                  | TLS version to accept: `1.0`, `1.1`, `1.2`, `1.3`. Empty or `auto` lets the operating system negotiate. | `auto`                          |    
 | `Discovery.Enabled`            | Set to `true` to enable UDP discovery server.                                                             | `false`                          |
 | `Discovery.Port`               | Port number for the UDP discovery server.                                                                 | `5005`                           |
 | `Discovery.OpenFirewall`       | Set to `true` to automatically open the firewall for the discovery server port (Windows only).           | `false`                          |

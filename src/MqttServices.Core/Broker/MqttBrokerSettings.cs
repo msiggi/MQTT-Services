@@ -32,7 +32,14 @@ public class MqttBrokerSettings
     /// </summary>
     public int TlsPort { get; set; } = 8883;
 
-    public string TlsVersion { get; set; } = "1.2";
+    /// <summary>
+    /// TLS version to accept: <c>"1.0"</c>, <c>"1.1"</c>, <c>"1.2"</c> or <c>"1.3"</c>. Empty or
+    /// <c>"auto"</c> leaves the choice to the operating system, which negotiates the highest
+    /// version both sides support. That is the default, and the better one: a fixed version locks
+    /// out a newer protocol the machine already speaks and keeps an outdated one alive after the
+    /// system has retired it.
+    /// </summary>
+    public string TlsVersion { get; set; } = "";
 
     public DiscoverySettings Discovery { get; set; } = new();
 

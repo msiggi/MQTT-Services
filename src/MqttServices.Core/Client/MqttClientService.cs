@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQTTnet;
+using MqttServices.Core.Common;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
@@ -22,20 +23,8 @@ public class MqttClientService : IDisposable, IMqttClientService
     public bool IsConnected { get; set; }
     public bool IsConnecting { get; set; }
 
-    private SslProtocols TlsVersion
-    {
-        get
-        {
-            return this.mqttClientSettings.TlsVersion switch
-            {
-                "1.0" => SslProtocols.Tls,
-                "1.1" => SslProtocols.Tls11,
-                "1.2" => SslProtocols.Tls12,
-                "1.3" => SslProtocols.Tls13,
-                _ => SslProtocols.Tls12
-            };
-        }
-    }
+    private SslProtocols TlsVersion =>
+        TlsVersions.Parse(this.mqttClientSettings.TlsVersion, logger, "MqttClientSettings:TlsVersion");
     public MqttClientService(ILogger<MqttClientService> logger, IOptions<MqttClientSettings> mqttClientSettings)
     {
         IsConnected = false;

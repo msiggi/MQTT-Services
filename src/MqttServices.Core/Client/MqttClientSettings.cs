@@ -19,7 +19,14 @@ public class MqttClientSettings
     public int Timeout { get; set; } = 10000;
     public string UserName { get; set; } = "";
     public string Password { get; set; } = "";
-    public string TlsVersion { get; set; } = "1.2";
+    /// <summary>
+    /// TLS version to use: <c>"1.0"</c>, <c>"1.1"</c>, <c>"1.2"</c> or <c>"1.3"</c>. Empty or
+    /// <c>"auto"</c> leaves the choice to the operating system, which negotiates the highest
+    /// version both sides support. That is the default, and the better one: a fixed version locks
+    /// out a newer protocol the machine already speaks and keeps an outdated one alive after the
+    /// system has retired it.
+    /// </summary>
+    public string TlsVersion { get; set; } = "";
     public bool EncryptWithTls { get; set; } = true;
     /// <summary>
     /// SHA-256 fingerprint of the one broker certificate to trust ("pinning"). Set this for a

@@ -5,6 +5,7 @@ using MQTTnet.Diagnostics;
 using MQTTnet.Diagnostics.Logger;
 using MQTTnet.Protocol;
 using MQTTnet.Server;
+using MqttServices.Core.Common;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Authentication;
@@ -52,20 +53,8 @@ public class MqttBrokerService : IDisposable, IMqttBrokerService
         // Do not start the broker in the constructor. A hosted service will start it after the host is ready.
     }
 
-    private SslProtocols TlsVersion
-    {
-        get
-        {
-            return this.mqttBrokerSettings.TlsVersion switch
-            {
-                "1.0" => SslProtocols.Tls,
-                "1.1" => SslProtocols.Tls11,
-                "1.2" => SslProtocols.Tls12,
-                "1.3" => SslProtocols.Tls13,
-                _ => SslProtocols.Tls12
-            };
-        }
-    }
+    private SslProtocols TlsVersion =>
+        TlsVersions.Parse(this.mqttBrokerSettings.TlsVersion, logger, "MqttBrokerSettings:TlsVersion");
 
     public async Task StartBroker()
     {

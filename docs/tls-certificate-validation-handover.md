@@ -16,7 +16,12 @@
 > - **Offen:** Der mitgelieferte Broker erzeugt bei **jedem Start** ein neues Zertifikat. Der
 >   Fingerabdruck ändert sich damit bei jedem Neustart, und Stufe 2 ist für ihn nur innerhalb
 >   einer Broker-Laufzeit brauchbar. Broker-seitige Persistenz fehlt.
-> - **Offen:** `TlsVersion` steht weiterhin auf Default `"1.2"`.
+> - **Erledigt, aber anders als vorgeschlagen:** Der Default von `TlsVersion` ist nicht `"1.3"`,
+>   sondern `""` bzw. `"auto"` — die Aushandlung übernimmt das Betriebssystem. Eine fest
+>   verdrahtete Version altert in beide Richtungen schlecht: sie sperrt ein neueres Protokoll aus,
+>   das die Maschine schon kann, und hält ein überholtes am Leben, nachdem das System es
+>   ausgemustert hat. Die Mapping-Logik lag doppelt in Client und Broker und steht jetzt in
+>   `Common/TlsVersions.cs`; ein unbekannter Wert wird geloggt statt still zu `"1.2"` zu werden.
 
 ## Worum es geht
 
