@@ -3,6 +3,23 @@ Helper services to simplify communication between multiple applications using MQ
 
 Powered by: https://github.com/dotnet/MQTTnet
 
+> ### Upgrading from 3.x
+>
+> **The client now validates the broker's certificate.** Up to 3.x it accepted any certificate, so
+> the connection was encrypted but not protected against a man-in-the-middle.
+>
+> - Broker with a certificate from a **certificate authority**, reached by the host name it was
+>   issued for: nothing to do.
+> - **Self-signed** broker, or one reached by IP address: the connection now fails. Put the
+>   certificate's fingerprint into `MqttClientSettings.TrustedCertificateThumbprint` — the broker
+>   logs it on startup. See [TLS and certificate validation](#tls-and-certificate-validation).
+> - `AllowUntrustedCertificates: true` restores the old behaviour if you need a way out in a hurry.
+>
+> Also changed: `TlsVersion` now defaults to negotiating with the operating system instead of a
+> fixed `1.2`, and the integrated broker can keep its certificate across restarts via
+> `MqttBrokerSettings.Certificate.Path`. Full list in
+> [CHANGELOG.md](https://github.com/msiggi/MQTT-Services/blob/master/CHANGELOG.md).
+
 ## Table of Contents
 - Features
 - Quickstart: Messaging (Client)

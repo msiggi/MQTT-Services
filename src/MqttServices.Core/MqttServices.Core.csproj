@@ -13,10 +13,13 @@
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageId>MQTT-Services</PackageId>
 		<Title>MQTT-Services</Title>
-		<Version>3.0.1</Version>
+		<Version>4.0.0-beta.1</Version>
 		<Product>MQTT-Services</Product>
 		<AssemblyName>MQTT-Services</AssemblyName>
 		<PackageIcon>Logo2.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReleaseNotes>Breaking change: the MQTT client now validates the broker certificate. A self-signed broker needs MqttClientSettings:TrustedCertificateThumbprint; AllowUntrustedCertificates restores the old behaviour. See CHANGELOG.md.</PackageReleaseNotes>
 		<IncludeSymbols>True</IncludeSymbols>
 	</PropertyGroup>
 
@@ -32,6 +35,7 @@
 
 
 	<ItemGroup>
+	  <None Include="..\..\README.md" Pack="true" PackagePath="\" />
 	  <None Update="Logo2.png">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	    <Pack>True</Pack>
