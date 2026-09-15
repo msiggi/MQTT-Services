@@ -1,0 +1,61 @@
+name: Release
+
+# Creating a tag is the whole trigger. The tags here are bare version numbers
+# without a "v" prefix, matching the ones this repository already uses (3.0.0, 2.1.1).
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Take the release notes from CHANGELOG.md
+        id: notes
+        run: |
+          version="${GITHUB_REF_NAME}"
+
+          # Everything between this version's "## [x.y.z]" heading and the next "## " heading.
+          awk -v want="$version" '
+            /^## / {
+              inside = index($0, "[" want "]") > 0
+              next
+            }
+            inside { print }
+          ' CHANGELOG.md > notes.md
+
+          if [ ! -s notes.md ]; then
+            echo "::error::CHANGELOG.md has no section for $version. Add a '## [$version] - <date>' heading."
+            exit 1
+          fi
+
+          {
+            echo ""
+            echo "---"
+            echo ""
+            echo "Package: https://www.nuget.org/packages/MQTT-Services/$version"
+          } >> notes.md
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # A hyphen in the version marks a prerelease, so "Latest release" keeps
+          # pointing at the last stable one.
+          prerelease=""
+          case "${GITHUB_REF_NAME}" in
+            *-*) prerelease="--prerelease" ;;
+          esac
+
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --notes-file notes.md \
+            --verify-tag \
+            $prerelease
