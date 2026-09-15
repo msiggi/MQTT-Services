@@ -33,7 +33,9 @@ steps:
     projects: |
       **/*.csproj
       !**/*WorkerService*.csproj
-    arguments: '--configuration $(BuildConfiguration)'
+    # ContinuousIntegrationBuild makes the build deterministic and normalises the source paths
+    # SourceLink embeds. It has to be set here, because pack runs with nobuild.
+    arguments: '--configuration $(BuildConfiguration) -p:ContinuousIntegrationBuild=true'
 
 - task: DotNetCoreCLI@2
   displayName: Pack
@@ -41,7 +43,8 @@ steps:
     command: 'pack'
     packagesToPack: '**/MqttServices.Core.csproj'
     nobuild: true
-    includesymbols: false
+    # Produces the .snupkg next to the .nupkg; nuget push picks it up automatically.
+    includesymbols: true
     outputDir: '$(Build.ArtifactStagingDirectory)'
             
 - task: NuGetCommand@2

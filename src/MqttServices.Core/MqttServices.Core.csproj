@@ -10,7 +10,6 @@
 		<RepositoryUrl>https://github.com/msiggi/MQTT-Services</RepositoryUrl>
 		<PackageTags>MQTT</PackageTags>
 		<Authors>Marcel Siegel</Authors>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageId>MQTT-Services</PackageId>
 		<Title>MQTT-Services</Title>
 		<Version>4.0.0-beta.1</Version>
@@ -20,7 +19,11 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageReleaseNotes>Breaking change: the MQTT client now validates the broker certificate. A self-signed broker needs MqttClientSettings:TrustedCertificateThumbprint; AllowUntrustedCertificates restores the old behaviour. See CHANGELOG.md.</PackageReleaseNotes>
-		<IncludeSymbols>True</IncludeSymbols>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<!-- SourceLink: let consumers step into this library instead of reading bare stack traces. -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 	</PropertyGroup>
 
 
