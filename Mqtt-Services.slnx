@@ -19,6 +19,7 @@
     <File Path="tests/PackageSmokeTest/run.ps1" />
     <File Path="tests/PackageSmokeTest/smoketest.cs" />
   </Folder>
+  <Project Path="src/MqttServices.Broker.Service/MqttServices.Broker.Service.csproj" />
   <Project Path="src/MqttServices.Core/MqttServices.Core.csproj" />
   <Project Path="tests/MqttServices.CoreTests/MqttServices.CoreTests.csproj" />
 </Solution>

@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>MqttServices.Broker.Service</RootNamespace>
+    <!-- A deployable, not a package. The pipeline packs MqttServices.Core by path, but this
+         keeps a solution-wide "dotnet pack" from producing something nobody wants. -->
+    <IsPackable>false</IsPackable>
+    <Company>SiegelNet</Company>
+    <Authors>Marcel Siegel</Authors>
+    <Product>MQTT Broker Service</Product>
+    <Description>Standalone MQTT broker, hosted as a Windows service.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.11" />
+    <PackageReference Include="Serilog" Version="4.4.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Source reference, not the NuGet package: the broker is built against the state of the
+         library in this repository, so a breaking change shows up at build time. -->
+    <ProjectReference Include="..\MqttServices.Core\MqttServices.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Update="deploy\*.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
