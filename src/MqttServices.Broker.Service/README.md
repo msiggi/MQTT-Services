@@ -67,7 +67,16 @@ User secrets are loaded only in the Development environment, so the service neve
 the server. Environment variables work either way, with the prefix `MQTTBROKER_` or without one:
 `MQTTBROKER_MqttBrokerSettings__Certificate__Password`.
 
-No credential belongs in `appsettings.json` — that file is in the repository.
+No credential belongs in `appsettings.json` — that file is in the repository. It ships with an
+empty `Users` array on purpose: **configuration arrays are merged per index, not replaced**. An
+account defined there would survive every later source, unless that source happened to overwrite
+the very same index. The accounts are therefore defined once, in user secrets or in the
+production file, starting at index 0:
+
+```
+dotnet user-secrets set "MqttBrokerSettings:Users:0:UserName" "core-service"
+dotnet user-secrets set "MqttBrokerSettings:Users:0:Password" "..."
+```
 
 **Put every name clients actually dial into `HostNames`**, including IP addresses. Full
 certificate validation reads the subject alternative names; a name that is not in there fails

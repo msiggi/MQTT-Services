@@ -20,9 +20,12 @@ public static class StartupValidation
         if (settings.Users.Count == 0)
         {
             throw new InvalidOperationException(
-                "MqttBrokerSettings:Users is empty. The shipped appsettings.json holds " +
-                "placeholders only; put the real accounts in appsettings.Production.json in the " +
-                "data directory.");
+                "MqttBrokerSettings:Users is empty. Configure the accounts in user secrets " +
+                "during development, or in appsettings.Production.json in the data directory on " +
+                "a server. The shipped appsettings.json deliberately carries no account: " +
+                "configuration arrays are merged per index rather than replaced, so an entry " +
+                "there would survive every later source that does not overwrite that exact " +
+                "index.");
         }
 
         var placeholders = settings.Users
@@ -33,8 +36,12 @@ public static class StartupValidation
         if (placeholders.Count > 0)
         {
             throw new InvalidOperationException(
-                $"These broker accounts still carry a placeholder password: {string.Join(", ", placeholders)}. " +
-                "Set real passwords in appsettings.Production.json in the data directory.");
+                $"These broker accounts have no usable password: {string.Join(", ", placeholders)}. " +
+                "Configuration arrays are merged per index rather than replaced, so an account " +
+                "defined further up -- in appsettings.json, say -- stays in the list unless a " +
+                "later source overwrites that same index. Check which index each account sits " +
+                "on: MqttBrokerSettings:Users:0:UserName, MqttBrokerSettings:Users:1:UserName " +
+                "and so on.");
         }
     }
 }
