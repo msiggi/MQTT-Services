@@ -56,6 +56,19 @@ The shipped `appsettings.json` holds placeholders only. The service refuses to s
 still has an empty or `changeme` password, so a forgotten configuration fails loudly instead of
 running with a known one.
 
+### Where credentials come from
+
+| | |
+|---|---|
+| Development (F5) | user secrets — `dotnet user-secrets set "MqttBrokerSettings:Users:0:Password" "..."` |
+| Production | `appsettings.Production.json` in the data directory, or the environment |
+
+User secrets are loaded only in the Development environment, so the service never reads them on
+the server. Environment variables work either way, with the prefix `MQTTBROKER_` or without one:
+`MQTTBROKER_MqttBrokerSettings__Certificate__Password`.
+
+No credential belongs in `appsettings.json` — that file is in the repository.
+
 **Put every name clients actually dial into `HostNames`**, including IP addresses. Full
 certificate validation reads the subject alternative names; a name that is not in there fails
 even though the certificate is otherwise perfectly valid. Clients that cannot validate through a
