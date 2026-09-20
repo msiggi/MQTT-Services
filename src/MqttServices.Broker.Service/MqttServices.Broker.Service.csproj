@@ -12,6 +12,7 @@
     <Authors>Marcel Siegel</Authors>
     <Product>MQTT Broker Service</Product>
     <Description>Standalone MQTT broker, hosted as a Windows service.</Description>
+    <UserSecretsId>90b6f30a-dd8c-4a04-aee0-788f067df984</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
