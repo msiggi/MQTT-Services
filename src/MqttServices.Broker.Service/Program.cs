@@ -48,7 +48,7 @@ builder.Services.AddWindowsService(options => options.ServiceName = "MqttBroker"
 var configuredSettings = new MqttBrokerSettings();
 builder.Configuration.GetSection(nameof(MqttBrokerSettings)).Bind(configuredSettings);
 configuredSettings.Certificate.Path = DataDirectory.Anchor(configuredSettings.Certificate.Path, dataDirectory);
-StartupValidation.Validate(configuredSettings);
+StartupValidation.Validate(configuredSettings, builder.Environment);
 
 builder.Services.AddMqttBrokerService(settings =>
 {
@@ -67,7 +67,8 @@ var host = builder.Build();
 host.Services.GetRequiredService<ILoggerFactory>()
     .CreateLogger("Startup")
     .LogInformation(
-        "MQTT broker service starting. Data directory {DataDirectory}, TLS port {TlsPort}, certificate {CertificatePath}.",
+        "MQTT broker service starting. Environment {Environment}, data directory {DataDirectory}, TLS port {TlsPort}, certificate {CertificatePath}.",
+        builder.Environment.EnvironmentName,
         dataDirectory,
         configuredSettings.TlsPort,
         configuredSettings.Certificate.Path);

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Hosting;
 using MqttServices.Core.Broker;
 
 namespace MqttServices.Broker.Service;
@@ -7,7 +8,7 @@ namespace MqttServices.Broker.Service;
 /// </summary>
 public static class StartupValidation
 {
-    public static void Validate(MqttBrokerSettings settings)
+    public static void Validate(MqttBrokerSettings settings, IHostEnvironment environment)
     {
         if (!settings.EnableBroker)
         {
@@ -25,7 +26,7 @@ public static class StartupValidation
                 "a server. The shipped appsettings.json deliberately carries no account: " +
                 "configuration arrays are merged per index rather than replaced, so an entry " +
                 "there would survive every later source that does not overwrite that exact " +
-                "index.");
+                "index." + UserSecretsHint(environment));
         }
 
         var placeholders = settings.Users
@@ -41,7 +42,23 @@ public static class StartupValidation
                 "defined further up -- in appsettings.json, say -- stays in the list unless a " +
                 "later source overwrites that same index. Check which index each account sits " +
                 "on: MqttBrokerSettings:Users:0:UserName, MqttBrokerSettings:Users:1:UserName " +
-                "and so on.");
+                "and so on." + UserSecretsHint(environment));
         }
+    }
+
+    /// <summary>
+    /// User secrets are read in the Development environment and nowhere else, which is easy to
+    /// trip over when the accounts are in there and the environment is not set.
+    /// </summary>
+    private static string UserSecretsHint(IHostEnvironment environment)
+    {
+        if (environment.IsDevelopment())
+        {
+            return "";
+        }
+
+        return $" Note that the environment is '{environment.EnvironmentName}': user secrets are " +
+               "read in Development only, so accounts configured there are not being loaded. Set " +
+               "DOTNET_ENVIRONMENT=Development to use them.";
     }
 }

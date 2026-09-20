@@ -64,7 +64,9 @@ running with a known one.
 | Production | `appsettings.Production.json` in the data directory, or the environment |
 
 User secrets are loaded only in the Development environment, so the service never reads them on
-the server. Environment variables work either way, with the prefix `MQTTBROKER_` or without one:
+the server. That is also why the launch profile sets `DOTNET_ENVIRONMENT=Development`:
+without it the environment is Production even when debugging, and the accounts in user
+secrets are silently not loaded. The environment is in the first log line at startup. Environment variables work either way, with the prefix `MQTTBROKER_` or without one:
 `MQTTBROKER_MqttBrokerSettings__Certificate__Password`.
 
 No credential belongs in `appsettings.json` — that file is in the repository. It ships with an
