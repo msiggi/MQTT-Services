@@ -1,0 +1,64 @@
+# Builds the standalone MQTT broker service and publishes it as an artifact for the release that
+# deploys it to the server.
+#
+# Deliberately separate from azure-pipelines.yml: that one releases the NuGet package, and a fix
+# to the broker service should not force a package release to get onto the server.
+
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - src/MqttServices.Broker.Service/*
+      - src/MqttServices.Core/*
+      - azure-pipelines-broker.yml
+
+pr: none
+
+pool:
+  vmImage: windows-latest
+
+variables:
+  buildConfiguration: 'Release'
+  project: 'src/MqttServices.Broker.Service/MqttServices.Broker.Service.csproj'
+  artifactName: 'MqttBroker'
+
+steps:
+- task: UseDotNet@2
+  displayName: 'Use .NET 10 SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '10.0.x'
+    includePreviewVersions: false
+
+- task: DotNetCoreCLI@2
+  displayName: 'Restore'
+  inputs:
+    command: restore
+    projects: '$(project)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Test the library the broker is built on'
+  inputs:
+    command: test
+    projects: 'tests/MqttServices.CoreTests/MqttServices.CoreTests.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish'
+  inputs:
+    command: publish
+    # publishWebProjects defaults to true and would look for web projects only, finding none.
+    publishWebProjects: false
+    projects: '$(project)'
+    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(artifactName)'
+    # A zip would have to be unpacked again by the release, which copies plain files.
+    zipAfterPublish: false
+    modifyOutputPath: false
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish artifact'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(artifactName)'
+    ArtifactName: '$(artifactName)'

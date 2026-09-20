@@ -95,6 +95,31 @@ dotnet publish -c Release -o C:\Temp\MqttBrokerPublish
 The service is stopped for the copy — its own DLLs are locked while it runs — so clients
 reconnect. That is a few seconds, and it now only happens when the *broker* is deployed.
 
+## Deploying from Azure DevOps
+
+`azure-pipelines-broker.yml` in the repository root builds this project and publishes the folder
+as the `MqttBroker` artifact. It is separate from `azure-pipelines.yml` on purpose: that one
+releases the NuGet package, and a fix to this service should not need a package release to reach
+the server.
+
+The release is the same shape as the other services here — a deployment group job that stops the
+service, copies the artifact and starts it again:
+
+1. **Install-Or-Stop-Service** — service name `MqttBroker`
+2. **Copy Files** — to the installation directory
+3. **Start-Or-Install-Service** — service name `MqttBroker`
+
+There is no file transform step. The operational configuration lives in the data directory, next
+to the certificate whose password it carries, and it is read *after* the deployed
+`appsettings.json` — a transform into that file would be silently overridden. Use one or the
+other: either the file in the data directory, or a transform with secret pipeline variables and
+no file in the data directory.
+
+Run `deploy/install-service.ps1` once by hand before the first release. It sets up what a generic
+start-or-install step cannot know about: the directory ACL, the firewall rule and the recovery
+policy including the `failureflag` that Windows needs in order to react to the watchdog's clean
+exit.
+
 ## Service account
 
 Start with `LocalSystem` and change the account only once the broker is running. The certificate
