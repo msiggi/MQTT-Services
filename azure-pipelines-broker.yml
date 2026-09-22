@@ -7,7 +7,7 @@
 trigger:
   branches:
     include:
-      - master
+      - brokerrelease
   paths:
     include:
       - src/MqttServices.Broker.Service/*
