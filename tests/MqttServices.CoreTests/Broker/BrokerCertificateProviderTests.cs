@@ -155,6 +155,22 @@ namespace MqttServices.Core.Broker.Tests
         }
 
         [TestMethod()]
+        public void GeneratedCertificate_CanServeAsItsOwnTrustAnchor()
+        {
+            // Clients on OpenSSL 1.1 or BoringSSL (MQTT Explorer, older Node-RED) that load the
+            // certificate as their CA file reject it without these.
+            using var certificate = BrokerCertificateProvider.GetOrCreate(new BrokerCertificateSettings());
+
+            var keyUsage = certificate.Extensions.OfType<X509KeyUsageExtension>().Single();
+            Assert.IsTrue(keyUsage.KeyUsages.HasFlag(X509KeyUsageFlags.KeyCertSign));
+
+            var basicConstraints = certificate.Extensions.OfType<X509BasicConstraintsExtension>().Single();
+            Assert.IsTrue(basicConstraints.CertificateAuthority);
+            Assert.IsTrue(basicConstraints.HasPathLengthConstraint);
+            Assert.AreEqual(0, basicConstraints.PathLengthConstraint);
+        }
+
+        [TestMethod()]
         public void RespectsTheConfiguredValidity()
         {
             using var certificate = BrokerCertificateProvider.GetOrCreate(
