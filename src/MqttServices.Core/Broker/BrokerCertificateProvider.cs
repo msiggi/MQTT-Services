@@ -164,10 +164,27 @@ public static class BrokerCertificateProvider
             HashAlgorithmName.SHA256,
             RSASignaturePadding.Pkcs1);
 
+        // A client that trusts this certificate by loading it as its CA file uses it as its own
+        // issuer. OpenSSL 1.1 and BoringSSL (Node, Electron, Mosquitto, MQTT Explorer) accept a
+        // certificate as a self-signed trust anchor only with KeyCertSign and, per RFC 5280, the
+        // CA flag that goes with it; without them they report "unable to verify the first
+        // certificate" even with the certificate itself configured as trusted. Path length 0
+        // keeps it from vouching for any further CA.
+        certRequest.CertificateExtensions.Add(
+            new X509BasicConstraintsExtension(
+                certificateAuthority: true,
+                hasPathLengthConstraint: true,
+                pathLengthConstraint: 0,
+                critical: true));
+
         certRequest.CertificateExtensions.Add(
             new X509KeyUsageExtension(
-                X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature,
+                X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment |
+                X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.KeyCertSign,
                 false));
+
+        certRequest.CertificateExtensions.Add(
+            new X509SubjectKeyIdentifierExtension(certRequest.PublicKey, false));
 
         certRequest.CertificateExtensions.Add(
             new X509EnhancedKeyUsageExtension(new OidCollection { new(ServerAuthenticationOid) }, false));
