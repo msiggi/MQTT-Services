@@ -3,7 +3,7 @@
 All notable changes to this project are documented here. Versions follow
 [Semantic Versioning](https://semver.org/).
 
-## [4.0.0-beta.1] - 2026-09-15
+## [4.0.0] - 2026-09-29
 
 The MQTT client validates the broker's certificate from this version on. Up to 3.x it accepted any
 certificate the broker presented, which protects against passive eavesdropping only: a
@@ -65,11 +65,12 @@ and all payloads are readable in clear text.
 - The README documented `TlsVersion` values (`Tls12` and the like) that the code never accepted —
   it maps `"1.0"`–`"1.3"` — and did not list the client's TLS settings at all.
 
-### Notes for this beta
+### Notes
 
-Verified end to end against the integrated broker and against a public broker with a certificate
-from a real certificate authority. Please report anything that does not connect after following the
-upgrade notes above.
+First stable release of 4.x, identical in content to 4.0.0-beta.1. That beta was verified end to
+end against the integrated broker and against a public broker with a certificate from a real
+certificate authority. Please report anything that does not connect after following the upgrade
+notes above.
 
 ## [3.0.1]
 

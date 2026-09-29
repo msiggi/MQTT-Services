@@ -1,4 +1,4 @@
-#:package MQTT-Services@4.0.0-beta.1
+#:package MQTT-Services@4.0.0
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MqttServices.Core.Broker;
@@ -18,7 +18,7 @@ using System.Text;
 // is valid but not the expected one, which no external broker would produce on request.
 //
 //   dotnet run smoketest.cs
-//   ./run.ps1 -Version 4.0.0-beta.2      (to test a different version)
+//   ./run.ps1 -Version 4.0.1      (to test a different version)
 
 const int Port = 18990;
 const string User = "smoketest";

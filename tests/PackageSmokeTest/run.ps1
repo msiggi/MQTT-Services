@@ -10,7 +10,7 @@
 
 .EXAMPLE
     ./run.ps1
-    ./run.ps1 -Version 4.0.0-beta.2
+    ./run.ps1 -Version 4.0.1
 #>
 [CmdletBinding()]
 param(

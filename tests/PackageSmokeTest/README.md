@@ -5,7 +5,7 @@ would. Run it after a release, before telling anyone the version works.
 
 ```powershell
 ./run.ps1                        # the version pinned in smoketest.cs
-./run.ps1 -Version 4.0.0-beta.2  # any other published version
+./run.ps1 -Version 4.0.1  # any other published version
 ```
 
 Or directly, without the wrapper:
