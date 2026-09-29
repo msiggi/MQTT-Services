@@ -8,10 +8,12 @@ trigger:
   branches:
     include:
       - brokerrelease
+  # Without wildcards a path filter is a prefix match and so covers every subfolder; a trailing
+  # "/*" would only match files directly in the folder, not e.g. src/MqttServices.Core/Broker/.
   paths:
     include:
-      - src/MqttServices.Broker.Service/*
-      - src/MqttServices.Core/*
+      - src/MqttServices.Broker.Service
+      - src/MqttServices.Core
       - azure-pipelines-broker.yml
 
 pr: none
